@@ -1,0 +1,23 @@
+{
+  "slug": "RPJ",
+  "name": "RPJ",
+  "version": "1.0.0",
+  "license": "proprietary",
+  "brand": "RPJ",
+  "author": "",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "RPJLFO",
+      "name": "RPJLFO",
+      "description": "",
+      "tags": []
+    }  
+  ]
+}
