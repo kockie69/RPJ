@@ -135,17 +135,17 @@ void RPJLFO::process(const ProcessArgs &args) {
 			break;
 		case QUAD_MODE:
 			if (i==0)
-				pitch0 = freqParam;
+				pitch0 = freqParam*cvInput/5.f;
 			else {
 				oscillator[i].setPhase(oscillator[0].getPhase(), i * 0.25);
-				oscillator[i].setAmplitude(((freqParam+7)/14.f)*cvInput/5);
+				oscillator[i].setAmplitude(((freqParam+7)/14.f)*cvInput/5.f);
 			}
 			oscillator[i].setPitch(pitch0);
 			break;
 		case PHASE_MODE:
 			oscillator[i].setAmplitude(1);
 			if (i==0)
-				pitch0 = freqParam;
+				pitch0 = freqParam*cvInput/5.f;
 			else 
 				oscillator[i].setPhase(oscillator[0].getPhase(), ((-freqParam +7)/14)*cvInput/5);
 			oscillator[i].setPitch(pitch0);
