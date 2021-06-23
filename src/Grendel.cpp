@@ -1,5 +1,5 @@
 
-#include "RPJLFO.hpp"
+#include "Grendel.hpp"
 
 template <typename T>
 LFO<T>::LFO() {
@@ -270,4 +270,4 @@ struct RPJLFOModuleWidget : ModuleWidget {
 	}
 };
 
-Model * modelLFO = createModel<RPJLFO, RPJLFOModuleWidget>("RPJLFO");
+Model * modelLFO = createModel<RPJLFO, RPJLFOModuleWidget>("Grendel");
