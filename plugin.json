@@ -2,22 +2,22 @@
   "slug": "RPJ",
   "name": "RPJ",
   "version": "1.0.0",
-  "license": "proprietary",
+  "license": "GPL-3.0-or-later",
   "brand": "RPJ",
-  "author": "",
-  "authorEmail": "",
+  "author": "Robert Kock",
+  "authorEmail": "robert.kock@gmail.com",
   "authorUrl": "",
   "pluginUrl": "",
-  "manualUrl": "",
-  "sourceUrl": "",
+  "manualUrl": "https://github.com/kockie69/RPJ/man",
+  "sourceUrl": "https://github.com/kockie69/RPJ",
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "RPJLFO",
-      "name": "RPJLFO",
-      "description": "",
-      "tags": []
+      "slug": "Grendel",
+      "name": "Grendel",
+      "description": "Quadruple low frequency oscillator, inspired by XAOC Batumi",
+      "tags": ["LFO"]
     }  
   ]
 }
