@@ -25,3 +25,8 @@ In this mode the LFO's 2-4 are synced to LFO 1 with their frequencies occuring a
 ### RESET INPUT SIGNAL
 
 Each of the LFO's has a RESET input signal that can receive an incoming trigger impulse that resets the individual LFO to zero state (hard sync). 
+
+
+## Lady Nina
+
+To do

@@ -18,6 +18,12 @@
       "name": "Grendel",
       "description": "Quadruple low frequency oscillator, inspired by XAOC Batumi",
       "tags": ["LFO"]
-    }  
+    },
+    {
+      "slug": "LadyNina",
+      "name": "LadyNina",
+      "description": "",
+      "tags": ["VCF"]
+    } 
   ]
 }

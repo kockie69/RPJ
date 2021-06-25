@@ -113,9 +113,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.3825878"
-     inkscape:cx="120.93807"
-     inkscape:cy="270.61718"
+     inkscape:zoom="0.90754896"
+     inkscape:cx="108.96598"
+     inkscape:cy="284.79696"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -172,15 +172,15 @@
        id="rect3432"
        width="55.933559"
        height="128.50005"
-       x="-9.6928864"
-       y="71.280022" />
+       x="-10.065723"
+       y="71.088654" />
     <g
        id="text5024"
        style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.2246px;line-height:125%;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Medium';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.637626;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        transform="matrix(0.27602379,0,0,0.27602379,55.116149,100.6969)" />
     <g
        id="g1060"
-       transform="translate(0.38273604,0.19136822)">
+       transform="translate(-2.7922641,0.19136822)">
       <g
          id="g947"
          transform="matrix(0.0696778,0,0,0.06101971,9.8810525,186.54565)"
@@ -820,10 +820,6 @@
        style="stroke:#333333;stroke-width:0.19724"
        id="polyline5232-0-5" />
     <path
-       d="m 31.411212,112.53864 h 0.704521"
-       style="stroke:#333333;stroke-width:0.19724"
-       id="polyline5234-3-0" />
-    <path
        d="m 30.844884,114.65164 0.610133,0.35217"
        style="stroke:#333333;stroke-width:0.19724"
        id="polyline5236-02-7" />
@@ -840,52 +836,56 @@
        style="stroke:#333333;stroke-width:0.245913"
        id="polyline5222-0-4-5-6" />
     <path
-       d="m 35.697257,114.57874 -0.610133,0.35217"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 31.743835,112.53864 h 0.62077"
+       style="stroke:#333333;stroke-width:0.185146"
+       id="polyline5234-3-0" />
+    <path
+       d="m 35.675731,114.57874 -0.612191,0.35217"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5220-7-5-0" />
     <path
-       d="M 35.130929,112.46574 H 34.426408"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="M 35.107493,112.46574 H 34.400596"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5222-8-0-0" />
     <path
-       d="m 35.697257,110.35274 -0.610133,-0.35217"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="M 35.675731,110.35274 35.06354,110.00057"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5224-5-7-6" />
     <path
-       d="m 37.244494,108.80592 -0.352261,-0.60997"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 37.228184,108.80592 -0.353448,-0.60997"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5226-3-7-1" />
     <path
-       d="m 39.358058,108.23974 v -0.70433"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 39.348875,108.23974 v -0.70433"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5228-6-9-9" />
     <path
-       d="m 41.471622,108.80592 0.352261,-0.60997"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 41.469565,108.80592 0.353448,-0.60997"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5230-9-1-0" />
     <path
-       d="m 43.018859,110.35274 0.610133,-0.35217"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 43.022019,110.35274 0.61219,-0.35217"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5232-0-5-1" />
     <path
-       d="m 43.585187,112.46574 h 0.704521"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 43.590256,112.46574 h 0.706896"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5234-3-0-2" />
     <path
-       d="m 43.018859,114.57874 0.610133,0.35217"
-       style="stroke:#333333;stroke-width:0.19724"
+       d="m 43.022019,114.57874 0.61219,0.35217"
+       style="stroke:#333333;stroke-width:0.197573"
        id="polyline5236-02-7-8" />
     <path
-       d="m 36.993923,116.30811 h -1.09513"
-       style="stroke:#333333;stroke-width:0.245913"
+       d="M 36.976768,116.30811 H 35.877946"
+       style="stroke:#333333;stroke-width:0.246327"
        id="polyline5222-0-2-3-7" />
     <path
-       d="M 42.477083,116.81624 V 115.7211"
-       style="stroke:#333333;stroke-width:0.245913"
+       d="M 42.478416,116.81624 V 115.7211"
+       style="stroke:#333333;stroke-width:0.246327"
        id="polyline5222-0-3-4-2-3" />
     <path
-       d="m 43.028769,116.26706 h -1.09513"
-       style="stroke:#333333;stroke-width:0.245913"
+       d="M 43.031962,116.26706 H 41.93314"
+       style="stroke:#333333;stroke-width:0.246327"
        id="polyline5222-0-4-5-6-0" />
     <g
        aria-label="GRENDEL"

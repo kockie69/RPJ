@@ -2,6 +2,7 @@
 using namespace rack;
 extern Plugin *pluginInstance;
 extern Model *modelLFO;
+extern Model *modelVCF;
 
 struct ATextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;
