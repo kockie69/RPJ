@@ -3,8 +3,8 @@
 
 template <typename T>
 LFO<T>::LFO() {
-	phase = 0.d;
-	frequency = 1.d;
+	phase = 0;
+	frequency = 1;
 	pw = 0.5f;
 	amplitude=1.f;
 	resetState = T::mask();
