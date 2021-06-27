@@ -44,6 +44,8 @@ struct RPJMMSVFilter : Module {
 	private:
 		float hpf, bpf, lpf;
 		SVF<float> * filter;
+		float fc;
+		float dampCV;
 	public:
 		RPJMMSVFilter();
 		void process(const ProcessArgs &) override;

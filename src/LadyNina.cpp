@@ -46,10 +46,10 @@ RPJMMSVFilter::RPJMMSVFilter() {
 
 void RPJMMSVFilter::process(const ProcessArgs &args) {
 
-	float fc = args.sampleRate * params[PARAM_CUTOFF].getValue();
+	fc = args.sampleRate * params[PARAM_CUTOFF].getValue();
 
 	fc += pow(inputs[CUTOFF_IN].getVoltage() * params[ATT_CUTOFF].getValue(),10);
-	float dampCV =1.f;
+	dampCV =1.f;
 	if (inputs[DAMP_IN].isConnected())
 		dampCV=(inputs[DAMP_IN].getVoltage()/5.f) * params[ATT_DAMP].getValue();
  	filter->setCoeffs(fc, clamp(params[PARAM_DAMP].getValue() + dampCV,0.1f, 4.0f));
