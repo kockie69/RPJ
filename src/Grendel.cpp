@@ -105,13 +105,38 @@ template <typename T>
 void LFO<T>::process(float_4 sampleTime) {
 }
 
+
+
+std::string ModeQuantity::getDisplayValueString() {
+    value = static_cast<RPJLFO::ModeIds>(getValue());
+
+	switch (value) {
+		case RPJLFO::FREE_MODE: 
+			v = "Free";
+			break;
+		case RPJLFO::QUAD_MODE: 
+			v = "Quad";
+			break;
+		case RPJLFO::PHASE_MODE: 
+			v = "Phase";
+			break;
+		case RPJLFO::DIVIDE_MODE: 
+			v = "Divide";
+			break;
+		default:
+			break;
+	}
+	return v;
+}
+
+
 RPJLFO::RPJLFO() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(FREQ1_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1);
-	configParam(FREQ2_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1);
-	configParam(FREQ3_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1);
-	configParam(FREQ4_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1);
-	configParam(MODE_PARAM, 0.0, 3.0, 0.0);
+	configParam(FREQ1_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam(FREQ2_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam(FREQ3_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam(FREQ4_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam<ModeQuantity>(MODE_PARAM, 0.0, 3.0, 0.0, "Mode");
 	lightDivider.setDivision(16);
 }
 
@@ -213,12 +238,12 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
-			auto w = createParam<Knob16>(Vec(73,36), module, RPJLFO::MODE_PARAM);
+			auto w = createParam<Knob16>(Vec(73,35), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
 			k->snap = true;
-			k->minAngle = 0.25*M_PI;
-			k->maxAngle = 1.72*M_PI;
-			k->speed = 3.0;
+			k->minAngle = -0.75*M_PI;
+			k->maxAngle = 0.75*M_PI;
+			//k->speed = 3.0;
 			addParam(w);
 		}
 	
@@ -227,10 +252,10 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(140, 95), module, RPJLFO::FREQ4_LIGHT));
 	
-		addParam(createParam<RoundSmallBlackKnob>(Vec(26, 110), module, RPJLFO::FREQ1_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(62, 110), module, RPJLFO::FREQ2_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(97, 110), module, RPJLFO::FREQ3_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(133, 110), module, RPJLFO::FREQ4_PARAM));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(27, 110), module, RPJLFO::FREQ1_PARAM));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(63, 110), module, RPJLFO::FREQ2_PARAM));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(98, 110), module, RPJLFO::FREQ3_PARAM));
+		addParam(createParam<RoundSmallBlackKnob>(Vec(134, 110), module, RPJLFO::FREQ4_PARAM));
 
 		addInput(createInput<PJ301MPort>(Vec(26, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(62, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));

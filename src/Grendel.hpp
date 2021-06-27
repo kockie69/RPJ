@@ -129,3 +129,11 @@ struct BGKnob : RoundKnob {
  struct Knob16 : BGKnob {
 	Knob16();
 };
+
+struct ModeQuantity : public rack::engine::ParamQuantity {
+	public:
+    	std::string getDisplayValueString() override;
+	private:
+		int value;
+		std::string v;
+};
