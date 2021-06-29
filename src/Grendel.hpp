@@ -98,13 +98,15 @@ struct RPJLFO : Module {
 		};
 		void process(const ProcessArgs &) override;
 		RPJLFO();
+ 		ModeIds mode;
 	private:
-		ModeIds mode;
+		ModeIds prevMode;
 		dsp::ClockDivider lightDivider;
 		dsp::SchmittTrigger resetTrigger[4];
 		LFO<float_4> oscillator[4];
 		float freqParam;
-		float_4 pitch, pitch0, cvInput;
+		float_4 pitch, pitch0, cvInput, v;
+		ParamQuantity* parameter[4];
 };
 
  template <typename TBase = GrayModuleLightWidget>
@@ -131,6 +133,14 @@ struct BGKnob : RoundKnob {
 };
 
 struct ModeQuantity : public rack::engine::ParamQuantity {
+	public:
+    	std::string getDisplayValueString() override;
+	private:
+		int value;
+		std::string v;
+};
+
+struct FreqQuantity : public rack::engine::ParamQuantity {
 	public:
     	std::string getDisplayValueString() override;
 	private:
