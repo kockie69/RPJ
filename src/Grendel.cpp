@@ -105,7 +105,21 @@ template <typename T>
 void LFO<T>::process(float_4 sampleTime) {
 }
 
-
+std::string FreqQuantity::getDisplayValueString() {
+	if ( module == NULL) 
+		v = "";
+	else {
+		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::FREE_MODE)		
+			v = std::to_string(pow(2,getValue()));
+		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::QUAD_MODE)
+			v = std::to_string(getValue());
+		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::PHASE_MODE)
+			v = std::to_string(static_cast<int>(getValue()));
+		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::DIVIDE_MODE)
+			v = std::to_string(static_cast<int>(getValue()));
+	}
+	return v; 
+}
 
 std::string ModeQuantity::getDisplayValueString() {
     value = static_cast<RPJLFO::ModeIds>(getValue());
@@ -133,37 +147,90 @@ std::string ModeQuantity::getDisplayValueString() {
 RPJLFO::RPJLFO() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(FREQ1_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
-	configParam(FREQ2_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
-	configParam(FREQ3_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
-	configParam(FREQ4_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam<FreqQuantity>(FREQ2_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam<FreqQuantity>(FREQ3_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
+	configParam<FreqQuantity>(FREQ4_PARAM, -7.f, 7.f, 1.f, "Frequency", " Hz", 2, 1,0);
 	configParam<ModeQuantity>(MODE_PARAM, 0.0, 3.0, 0.0, "Mode");
 	lightDivider.setDivision(16);
+	parameter[0] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ1_PARAM]);
+	parameter[1] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ2_PARAM]);
+	parameter[2] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ3_PARAM]);
+	parameter[3] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ4_PARAM]);
+	prevMode = NUM_MODES;
+	parameter[0]->module = this;
 }
 
 void RPJLFO::process(const ProcessArgs &args) {                                                                
 
 	mode=static_cast<ModeIds>(params[MODE_PARAM].getValue());
-
+	
 	for (int i=0;i<4;i++) {
-		oscillator[i].setReset(inputs[RESET1_INPUT+i].getVoltage());
-
 		freqParam = params[FREQ1_PARAM+i].getValue();
 		if (inputs[FRQ_PH_DIV1_INPUT+i].isConnected())
 		   cvInput = simd::clamp(inputs[FRQ_PH_DIV1_INPUT+i].getVoltage(),0.f,5.f);
 		else cvInput=5.f;
+
+		if (prevMode != mode) {
+			if (i != 0 ) {
+				switch (mode) {
+					case FREE_MODE:
+						parameter[i]->unit=" Hz";
+						parameter[i]->label="Frequency";
+						parameter[i]->minValue=-7.f;
+						parameter[i]->maxValue=7.f;
+						parameter[i]->displayBase=2;
+						if (prevMode == QUAD_MODE)
+							parameter[i]->setValue(rescale(freqParam,0,1,-7,7));
+						break;
+					case QUAD_MODE:
+						parameter[i]->unit="";
+						parameter[i]->label="Attenuation";
+						parameter[i]->minValue=0;
+						parameter[i]->maxValue=1;
+						parameter[i]->displayBase=0;
+						if (prevMode == FREE_MODE)
+							parameter[i]->setValue(rescale(freqParam,-7,7,0,1));
+						else
+							parameter[i]->setValue(rescale(freqParam,0,360,0,1));
+						break;
+					case PHASE_MODE:
+						parameter[i]->unit=" Degrees";
+						parameter[i]->label="Phase";
+						parameter[i]->minValue=0;
+						parameter[i]->maxValue=360;
+						parameter[i]->displayBase=0;
+						if (prevMode == DIVIDE_MODE) 
+							parameter[i]->setValue(rescale(freqParam,2,32,0,360));
+						else
+							parameter[i]->setValue(rescale(freqParam,0,1,0,360));
+						break;
+					case DIVIDE_MODE:
+						parameter[i]->unit="";
+						parameter[i]->label="Ratio";
+						parameter[i]->minValue=2;
+						parameter[i]->maxValue=32;
+						parameter[i]->displayBase=0;
+						parameter[i]->setValue(rescale(freqParam,0,360,2,32));
+						break;
+					default:
+						break;
+				}
+			}
+		}
 		switch (mode) {
 		case FREE_MODE:
-			oscillator[i].setAmplitude(1);
-
-			pitch = freqParam;
-			oscillator[i].setPitch(pitch);
+			if (i != 0) {
+				oscillator[i].setAmplitude(1);
+				pitch = freqParam * cvInput/5.f;
+				oscillator[i].setPitch(pitch);
+			}
 			break;
 		case QUAD_MODE:
 			if (i==0)
 				pitch0 = freqParam*cvInput/5.f;
 			else {
 				oscillator[i].setPhase(oscillator[0].getPhase(), i * 0.25);
-				oscillator[i].setAmplitude(((freqParam+7)/14.f)*cvInput/5.f);
+				oscillator[i].setAmplitude(freqParam * cvInput/5.f);
 			}
 			oscillator[i].setPitch(pitch0);
 			break;
@@ -172,7 +239,7 @@ void RPJLFO::process(const ProcessArgs &args) {
 			if (i==0)
 				pitch0 = freqParam*cvInput/5.f;
 			else 
-				oscillator[i].setPhase(oscillator[0].getPhase(), ((-freqParam +7)/14)*cvInput/5);
+				oscillator[i].setPhase(oscillator[0].getPhase(), (-freqParam/360) * (cvInput/5));
 			oscillator[i].setPitch(pitch0);
 			break;
 		case DIVIDE_MODE:
@@ -182,8 +249,8 @@ void RPJLFO::process(const ProcessArgs &args) {
 				oscillator[0].setPitch(pitch0);
 			}
 			else {
-				float_4 v = simd::ifelse(cvInput,cvInput/5.f,1.f);
-				oscillator[i].setFrequency(oscillator[0].getFrequency() / ((freqParam+8) * 2 * v));
+				v = simd::ifelse(cvInput,cvInput/5.f,1.f);
+				oscillator[i].setFrequency(oscillator[0].getFrequency() / ((freqParam) * v));
 			}
 			break;
 		default:
@@ -191,6 +258,7 @@ void RPJLFO::process(const ProcessArgs &args) {
 		}
 		
 		oscillator[i].step(args.sampleTime);
+		oscillator[i].setReset(inputs[RESET1_INPUT+i].getVoltage());
 
 		if (outputs[SIN_OUTPUT1+i].isConnected())
 			outputs[SIN_OUTPUT1+i].setVoltageSimd(5.f * oscillator[i].getAmplitude() * oscillator[i].sin(),0);
@@ -212,13 +280,13 @@ void RPJLFO::process(const ProcessArgs &args) {
 			}
 		}
 	}
+	prevMode = mode;
 }
 
 BGKnob::BGKnob(int dim) {
 	setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob.svg")));
 	box.size = Vec(dim, dim);
 	shadow->blurRadius = 2.0;
-	// k->shadow->opacity = 0.15;
 	shadow->box.pos = Vec(0.0, 3.0);
 }
 
@@ -243,7 +311,6 @@ struct RPJLFOModuleWidget : ModuleWidget {
 			k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
-			//k->speed = 3.0;
 			addParam(w);
 		}
 	
