@@ -160,6 +160,36 @@ RPJLFO::RPJLFO() {
 	parameter[0]->module = this;
 }
 
+ModeValuePair RPJLFO::getModeValuePair(ModeIds m) {
+	switch (m) {
+		case FREE_MODE:
+			mvp.minValue=-7.f;
+			mvp.maxValue=7.f;
+			break;
+		case QUAD_MODE:
+			mvp.minValue=0.f;
+			mvp.maxValue=1.f;
+			break;
+		case PHASE_MODE:	
+			mvp.minValue=0.f;
+			mvp.maxValue=360.f;
+			break;
+		case DIVIDE_MODE:
+			mvp.minValue=2.f;
+			mvp.maxValue=32.f;
+			break;
+		default:
+			break;				
+	}
+	return mvp;
+}
+
+ModeValues RPJLFO::getModeValues(ModeIds p, ModeIds m) {
+	mv.prevModePair=getModeValuePair(p);
+	mv.modePair  =getModeValuePair(m);
+	return mv;
+}
+
 void RPJLFO::process(const ProcessArgs &args) {                                                                
 
 	mode=static_cast<ModeIds>(params[MODE_PARAM].getValue());
@@ -179,8 +209,6 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=-7.f;
 						parameter[i]->maxValue=7.f;
 						parameter[i]->displayBase=2;
-						if (prevMode == QUAD_MODE)
-							parameter[i]->setValue(rescale(freqParam,0,1,-7,7));
 						break;
 					case QUAD_MODE:
 						parameter[i]->unit="";
@@ -188,10 +216,6 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=1;
 						parameter[i]->displayBase=0;
-						if (prevMode == FREE_MODE)
-							parameter[i]->setValue(rescale(freqParam,-7,7,0,1));
-						else
-							parameter[i]->setValue(rescale(freqParam,0,360,0,1));
 						break;
 					case PHASE_MODE:
 						parameter[i]->unit=" Degrees";
@@ -199,10 +223,6 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=360;
 						parameter[i]->displayBase=0;
-						if (prevMode == DIVIDE_MODE) 
-							parameter[i]->setValue(rescale(freqParam,2,32,0,360));
-						else
-							parameter[i]->setValue(rescale(freqParam,0,1,0,360));
 						break;
 					case DIVIDE_MODE:
 						parameter[i]->unit="";
@@ -210,20 +230,18 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=2;
 						parameter[i]->maxValue=32;
 						parameter[i]->displayBase=0;
-						parameter[i]->setValue(rescale(freqParam,0,360,2,32));
 						break;
 					default:
 						break;
-				}
+				}	
+				parameter[i]->setValue(rescale(freqParam,getModeValues(prevMode,mode).prevModePair.minValue,getModeValues(prevMode,mode).prevModePair.maxValue,getModeValues(prevMode,mode).modePair.minValue,getModeValues(prevMode,mode).modePair.maxValue));
 			}
 		}
 		switch (mode) {
 		case FREE_MODE:
-			if (i != 0) {
 				oscillator[i].setAmplitude(1);
 				pitch = freqParam * cvInput/5.f;
 				oscillator[i].setPitch(pitch);
-			}
 			break;
 		case QUAD_MODE:
 			if (i==0)
