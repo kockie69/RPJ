@@ -109,14 +109,14 @@ std::string FreqQuantity::getDisplayValueString() {
 	if ( module == NULL) 
 		v = "";
 	else {
-		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::FREE_MODE)
+		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::FREE_MODE)		
 			v = std::to_string(pow(2,getValue()));
 		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::QUAD_MODE)
 			v = std::to_string(getValue());
 		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::PHASE_MODE)
-			v = std::to_string(getValue());
+			v = std::to_string(static_cast<int>(getValue()));
 		if ( module->params[RPJLFO::MODE_PARAM].getValue() == RPJLFO::DIVIDE_MODE)
-			v = std::to_string(getValue());
+			v = std::to_string(static_cast<int>(getValue()));
 	}
 	return v; 
 }
@@ -163,7 +163,6 @@ RPJLFO::RPJLFO() {
 void RPJLFO::process(const ProcessArgs &args) {                                                                
 
 	mode=static_cast<ModeIds>(params[MODE_PARAM].getValue());
-
 	
 	for (int i=0;i<4;i++) {
 		freqParam = params[FREQ1_PARAM+i].getValue();
@@ -179,7 +178,9 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->label="Frequency";
 						parameter[i]->minValue=-7.f;
 						parameter[i]->maxValue=7.f;
-						parameter[i]->displayBase=2;	
+						parameter[i]->displayBase=2;
+						if (prevMode == QUAD_MODE)
+							parameter[i]->setValue(rescale(freqParam,0,1,-7,7));
 						break;
 					case QUAD_MODE:
 						parameter[i]->unit="";
@@ -187,6 +188,10 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=1;
 						parameter[i]->displayBase=0;
+						if (prevMode == FREE_MODE)
+							parameter[i]->setValue(rescale(freqParam,-7,7,0,1));
+						else
+							parameter[i]->setValue(rescale(freqParam,0,360,0,1));
 						break;
 					case PHASE_MODE:
 						parameter[i]->unit=" Degrees";
@@ -194,6 +199,10 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=360;
 						parameter[i]->displayBase=0;
+						if (prevMode == DIVIDE_MODE) 
+							parameter[i]->setValue(rescale(freqParam,2,32,0,360));
+						else
+							parameter[i]->setValue(rescale(freqParam,0,1,0,360));
 						break;
 					case DIVIDE_MODE:
 						parameter[i]->unit="";
@@ -201,6 +210,7 @@ void RPJLFO::process(const ProcessArgs &args) {
 						parameter[i]->minValue=2;
 						parameter[i]->maxValue=32;
 						parameter[i]->displayBase=0;
+						parameter[i]->setValue(rescale(freqParam,0,360,2,32));
 						break;
 					default:
 						break;
@@ -209,9 +219,11 @@ void RPJLFO::process(const ProcessArgs &args) {
 		}
 		switch (mode) {
 		case FREE_MODE:
-			oscillator[i].setAmplitude(1);
-			pitch = freqParam * cvInput/5.f;
-			oscillator[i].setPitch(pitch);
+			if (i != 0) {
+				oscillator[i].setAmplitude(1);
+				pitch = freqParam * cvInput/5.f;
+				oscillator[i].setPitch(pitch);
+			}
 			break;
 		case QUAD_MODE:
 			if (i==0)
@@ -275,7 +287,6 @@ BGKnob::BGKnob(int dim) {
 	setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob.svg")));
 	box.size = Vec(dim, dim);
 	shadow->blurRadius = 2.0;
-	// k->shadow->opacity = 0.15;
 	shadow->box.pos = Vec(0.0, 3.0);
 }
 
@@ -300,7 +311,6 @@ struct RPJLFOModuleWidget : ModuleWidget {
 			k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
-			//k->speed = 3.0;
 			addParam(w);
 		}
 	
