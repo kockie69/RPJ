@@ -35,6 +35,15 @@ struct LFO {
 };
 
 
+
+struct ModeValuePair {
+	float minValue, maxValue;
+};
+
+struct ModeValues {
+	ModeValuePair prevModePair,modePair;
+};
+
 struct RPJLFO : Module {
 	public:
 		enum ParamIds {
@@ -98,6 +107,8 @@ struct RPJLFO : Module {
 		};
 		void process(const ProcessArgs &) override;
 		RPJLFO();
+		ModeValues getModeValues(ModeIds, ModeIds);
+		ModeValuePair getModeValuePair(ModeIds);
  		ModeIds mode;
 	private:
 		ModeIds prevMode;
@@ -107,6 +118,9 @@ struct RPJLFO : Module {
 		float freqParam;
 		float_4 pitch, pitch0, cvInput, v;
 		ParamQuantity* parameter[4];
+		ModeValues modeValues;
+		ModeValuePair mvp;
+		ModeValues mv;
 };
 
  template <typename TBase = GrayModuleLightWidget>
