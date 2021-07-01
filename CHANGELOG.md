@@ -8,12 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob 
 
-
 ## [1.0.2] - 2021-06-29
+### Added
 - Proper tooltips for the LFO knobs
-- Jumping LFO knobs when switching mode and changing knob
 - Set precision on tooltips
 
+### Changed
+- Fixed Jumping LFO knobs when switching mode and changing knob
+- Fixed weird values when initializing LFO knobs
+
 ## [1.0.1] - 2021-06-27
+### Added
 - Mode knob now standard and not inverse
 - The Mode knob now has proper tooltips
