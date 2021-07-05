@@ -1,7 +1,10 @@
 #include "rack.hpp"
+
 using namespace rack;
+
 extern Plugin *pluginInstance;
 extern Model *modelLFO;
+extern Model *modelLadyNina;
 
 struct ATextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;
