@@ -137,3 +137,14 @@ struct ATitle: TransparentWidget {
 
 };
 
+struct BGKnob : RoundKnob {
+	std::string _svgBase;
+
+	BGKnob(int dim);
+
+	void redraw();
+};
+
+struct Knob16 : BGKnob {
+	Knob16();
+};

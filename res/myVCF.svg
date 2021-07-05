@@ -86,7 +86,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="5.5089156"
      inkscape:cx="19.372068"
-     inkscape:cy="86.406135"
+     inkscape:cy="202.58145"
      inkscape:document-units="mm"
      inkscape:current-layer="g13383"
      showgrid="true"
@@ -129,7 +129,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -422,111 +422,6 @@
                    d="m -298.34063,-82.185387 h -2.97301 l -0.77133,-2.25409 h -4.13375 l -0.77133,2.25409 h -2.89812 l 4.11877,-11.150632 h 3.31 z m -4.44079,-4.298497 -1.37042,-3.998951 -1.37043,3.998951 z"
                    style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.3368px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.775704"
                    id="path1987" />
-              </g>
-              <g
-                 id="g2302"
-                 transform="translate(-0.46715256)">
-                <path
-                   d="m -367.36817,111.36688 -2.96975,1.61524"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5220-7-5-0" />
-                <path
-                   d="m -370.1247,101.67549 h -3.42915"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5222-8-0-0" />
-                <path
-                   d="m -367.36817,91.984115 -2.96975,-1.615242"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5224-5-7-6" />
-                <path
-                   d="m -359.83724,84.889563 -1.71458,-2.797652"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5226-3-7-1" />
-                <path
-                   d="M -349.54978,82.292756 V 79.062319"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5228-6-9-9" />
-                <path
-                   d="m -339.26232,84.889563 1.71457,-2.797652"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5230-9-1-0" />
-                <path
-                   d="m -331.73137,91.984115 2.96973,-1.615242"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5232-0-5-1" />
-                <path
-                   d="m -328.97486,101.67549 h 3.42915"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5234-3-0-2" />
-                <path
-                   d="m -331.73137,111.36688 2.96973,1.61524"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5236-02-7-8" />
-                <path
-                   d="m -361.05686,119.2987 h -5.33037"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-2-3-7" />
-                <path
-                   d="m -334.36839,121.62927 v -5.02291"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-3-4-2-3" />
-                <path
-                   d="m -331.68314,119.11042 h -5.33039"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-4-5-6-0" />
-              </g>
-              <g
-                 id="g2302-1"
-                 transform="translate(-0.74242341,-98.323245)"
-                 style="stroke-width:0.809245">
-                <path
-                   d="m -367.36817,111.36688 -2.96975,1.61524"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5220-7-5-0-4" />
-                <path
-                   d="m -370.1247,101.67549 h -3.42915"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5222-8-0-0-2" />
-                <path
-                   d="m -367.36817,91.984115 -2.96975,-1.615242"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5224-5-7-6-1" />
-                <path
-                   d="m -359.83724,84.889563 -1.71458,-2.797652"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5226-3-7-1-5" />
-                <path
-                   d="M -349.54978,82.292756 V 79.062319"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5228-6-9-9-7" />
-                <path
-                   d="m -339.26232,84.889563 1.71457,-2.797652"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5230-9-1-0-6" />
-                <path
-                   d="m -331.73137,91.984115 2.96973,-1.615242"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5232-0-5-1-7" />
-                <path
-                   d="m -328.97486,101.67549 h 3.42915"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5234-3-0-2-4" />
-                <path
-                   d="m -331.73137,111.36688 2.96973,1.61524"
-                   style="stroke:#333333;stroke-width:0.931936"
-                   id="polyline5236-02-7-8-2" />
-                <path
-                   d="m -361.05686,119.2987 h -5.33037"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-2-3-7-7" />
-                <path
-                   d="m -334.36839,121.62927 v -5.02291"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-3-4-2-3-7" />
-                <path
-                   d="m -331.68314,119.11042 h -5.33039"
-                   style="stroke:#333333;stroke-width:1.1619"
-                   id="polyline5222-0-4-5-6-0-8" />
               </g>
             </g>
           </g>
