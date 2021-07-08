@@ -916,27 +916,57 @@ double AudioFilter::processAudioSample(double xn)
 LadyNina::LadyNina() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
+	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "DRY");
 	configParam(PARAM_WET, -1.5f, 1.0f, 1.0f, "WET");
-	//biquad.module=this;
-    //algorithm=kDirect;
+	configParam(PARAM_UP, 0.0, 1.0, 0.0);
+	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 }
 
 void LadyNina::process(const ProcessArgs &args) {
 
- 	AudioFilterParameters afp;
-	afp.fc = params[PARAM_FC].getValue();
+	audioFilter.setSampleRate(args.sampleRate);
+ 	afp.fc = params[PARAM_FC].getValue();
 	afp.Q = params[PARAM_Q].getValue();
 	afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue();
 
+	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		if ((static_cast<int>(afp.algorithm)+1) == static_cast<int>(filterAlgorithm::numFilterAlgorithms))
+			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
+		else
+			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)+1);
+	}
+	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		if ((static_cast<int>(afp.algorithm)-1) < 0)
+			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
+		else 
+			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)-1);
+	}
+
+	afp.strAlgorithm = filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 	audioFilter.setParameters(afp);
 	float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 
 	outputs[OUTPUT_MAIN].setVoltage(out);
 }
+
+struct buttonPlusSmall : SvgSwitch  {
+	buttonPlusSmall() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
+	}
+};
+
+struct buttonMinSmall : SvgSwitch  {
+	buttonMinSmall() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
+	}
+};
 
 struct LadyNinaModuleWidget : ModuleWidget {
 	LadyNinaModuleWidget(LadyNina* module) {
@@ -954,37 +984,57 @@ struct LadyNinaModuleWidget : ModuleWidget {
 			title->setText("LadyNina");
 			addChild(title);
 		}
-
 		{
-			ATextLabel * title = new ATextLabel(Vec(1, 60));
+			AFilterNameDisplay * fnd = new AFilterNameDisplay(Vec(39,30));
+			fnd->module = module;
+			addChild(fnd);
+		}
+		{
+			ATextLabel * title = new ATextLabel(Vec(1, 50));
 			title->setText("CUTOFF");
 			addChild(title);
 		}
 		{
-			ATextLabel * title = new ATextLabel(Vec(30, 60));
+			ATextLabel * title = new ATextLabel(Vec(22, 90));
 			title->setText("RESONANCE");
 			addChild(title);
 		}
-
 		{
-			ATextLabel * title = new ATextLabel(Vec(13, 250));
+			ATextLabel * title = new ATextLabel(Vec(1, 140));
+			title->setText("BOOST/CUT");
+			addChild(title);
+		}
+		{
+			ATextLabel * title = new ATextLabel(Vec(58, 170));
+			title->setText("DRY");
+			addChild(title);
+		}
+		{
+			ATextLabel * title = new ATextLabel(Vec(5, 212));
+			title->setText("WET");
+			addChild(title);
+		}
+		{
+			ATextLabel * title = new ATextLabel(Vec(13, 270));
 			title->setText("IN");
 			addChild(title);
 		}
 		{
-			ATextLabel * title = new ATextLabel(Vec(55, 250));
+			ATextLabel * title = new ATextLabel(Vec(55, 290));
 			title->setText("OUT");
 			addChild(title);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 280), module, LadyNina::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 230), module, LadyNina::OUTPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 300), module, LadyNina::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, LadyNina::OUTPUT_MAIN));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 90), module, LadyNina::PARAM_FC));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 90), module, LadyNina::PARAM_Q));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 130), module, LadyNina::PARAM_BOOSTCUT_DB));	
-		addParam(createParam<RoundBlackKnob>(Vec(8, 170), module, LadyNina::PARAM_DRY));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 170), module, LadyNina::PARAM_WET));
+		addParam(createParam<buttonMinSmall>(Vec(5,45),module, LadyNina::PARAM_DOWN));
+		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, LadyNina::PARAM_UP));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, LadyNina::PARAM_FC));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 120), module, LadyNina::PARAM_Q));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 172), module, LadyNina::PARAM_BOOSTCUT_DB));	
+		addParam(createParam<RoundBlackKnob>(Vec(8, 245), module, LadyNina::PARAM_WET));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 205), module, LadyNina::PARAM_DRY));
 	}
 
 };
