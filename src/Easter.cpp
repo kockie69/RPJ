@@ -1,40 +1,41 @@
 #include "RPJ.hpp"
-#include "LadyNina.hpp"
+#include "Easter.hpp"
 
-
-LadyNina::LadyNina() {
+Easter::Easter() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
+	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "DRY");
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	afp.algorithm = filterAlgorithm::kResonA;
 }
 
-void LadyNina::process(const ProcessArgs &args) {
+void Easter::process(const ProcessArgs &args) {
 
 	audioFilter.setSampleRate(args.sampleRate);
-
- 	afp.fc = params[PARAM_FC].getValue();
-	afp.Q = params[PARAM_Q].getValue();
-	afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue();
+	
+	float cvfc = 1.f;
+	if (inputs[INPUT_CVFC].isConnected())
+		cvfc = inputs[INPUT_CVFC].getVoltage();
+	
+	float cvq = 1.f;
+	if (inputs[INPUT_CVQ].isConnected())
+		cvq = inputs[INPUT_CVQ].getVoltage();
+ 	
+	afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
+	afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
 	afp.dry = params[PARAM_DRY].getValue();
 	afp.wet = params[PARAM_WET].getValue();
-
-	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if ((static_cast<int>(afp.algorithm)+1) == static_cast<int>(filterAlgorithm::numFilterAlgorithms))
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
-		else
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)+1);
-	}
+	
+	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		afp.algorithm = filterAlgorithm::kResonB;	
 	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if ((static_cast<int>(afp.algorithm)-1) < 0)
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
-		else 
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)-1);
+	afp.algorithm = filterAlgorithm::kResonA;
 	}
 
 	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
@@ -61,8 +62,8 @@ struct buttonMinSmall : SvgSwitch  {
 	}
 };
 
-struct LadyNinaModuleWidget : ModuleWidget {
-	LadyNinaModuleWidget(LadyNina* module) {
+struct EasterModuleWidget : ModuleWidget {
+	EasterModuleWidget(Easter* module) {
 
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/myVCF.svg")));
@@ -74,7 +75,7 @@ struct LadyNinaModuleWidget : ModuleWidget {
 
 		{
 			ATitle * title = new ATitle(box.size.x);
-			title->setText("LADY NINA");
+			title->setText("EASTER");
 			addChild(title);
 		}
 		{
@@ -90,11 +91,6 @@ struct LadyNinaModuleWidget : ModuleWidget {
 		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(22, 90));
 			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 140));
-			tl->setText("BOOST/CUT");
 			addChild(tl);
 		}
 		{
@@ -118,18 +114,19 @@ struct LadyNinaModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, LadyNina::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, LadyNina::OUTPUT_MAIN));
-
-		addParam(createParam<buttonMinSmall>(Vec(5,45),module, LadyNina::PARAM_DOWN));
-		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, LadyNina::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, LadyNina::PARAM_FC));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 120), module, LadyNina::PARAM_Q));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 172), module, LadyNina::PARAM_BOOSTCUT_DB));	
-		addParam(createParam<RoundBlackKnob>(Vec(8, 245), module, LadyNina::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 205), module, LadyNina::PARAM_DRY));
+		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Easter::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Easter::OUTPUT_MAIN));
+		
+		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Easter::PARAM_DOWN));
+		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Easter::PARAM_UP));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Easter::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(43, 70), module, Easter::INPUT_CVFC));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 120), module, Easter::PARAM_Q));
+		addInput(createInput<PJ301MPort>(Vec(25, 130), module, Easter::INPUT_CVQ));	
+		addParam(createParam<RoundBlackKnob>(Vec(8, 245), module, Easter::PARAM_WET));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 205), module, Easter::PARAM_DRY));
 	}
 
 };
 
-Model * modelLadyNina = createModel<LadyNina, LadyNinaModuleWidget>("LadyNina");
+Model * modelEaster = createModel<Easter, EasterModuleWidget>("Easter");

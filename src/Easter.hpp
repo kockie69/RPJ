@@ -2,14 +2,16 @@
 #include "AudioFilter.hpp"
 
 using namespace rack;
-
-struct LadyNina : Module {
+		
+struct Easter : Module {
 
 	enum ParamIds {
 		PARAM_UP,
 		PARAM_DOWN,
 		PARAM_FC,
+		PARAM_CVFC,
 		PARAM_Q,
+		PARAM_CVQ,
 		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
@@ -18,6 +20,8 @@ struct LadyNina : Module {
 
 	enum InputIds {
 		INPUT_MAIN,
+		INPUT_CVFC,
+		INPUT_CVQ,
 		NUM_INPUTS,
 	};
 
@@ -30,7 +34,7 @@ struct LadyNina : Module {
 		NUM_LIGHTS,
 	};
 
-		LadyNina();
+		Easter();
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
@@ -40,7 +44,7 @@ struct LadyNina : Module {
 struct FilterNameDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
-	LadyNina* module;
+	Easter* module;
 	const int fh = 12; // font height
 
 
