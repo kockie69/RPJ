@@ -1,6 +1,6 @@
 # RPJ VCV plugins
 
-## Grendel
+## [Grendel](https://www.songfacts.com/facts/marillion/grendel)
 
 Grendel is highly inspired by the [Batumi from XAOC](http://xaocdevices.com/main/batumi/). It is a fully voltage controlled, quadruple digital LFO module with a couple of nice features. Each oscillator can be used independently or in one of the 3 other modes: quad, phase and divide. For each oscillator, there are sine, square, saw, ramp and triangle waveform outputs available. Voltage control is possible for each oscillator’s frequency, phase and reset.
 
@@ -25,3 +25,5 @@ In this mode the LFO's 2-4 are synced to LFO 1 with their frequencies occuring a
 ### RESET INPUT SIGNAL
 
 Each of the LFO's has a RESET input signal that can receive an incoming trigger impulse that resets the individual LFO to zero state (hard sync). 
+
+## Easter
