@@ -26,4 +26,14 @@ In this mode the LFO's 2-4 are synced to LFO 1 with their frequencies occuring a
 
 Each of the LFO's has a RESET input signal that can receive an incoming trigger impulse that resets the individual LFO to zero state (hard sync). 
 
-## Easter
+## [Easter](https://www.songfacts.com/facts/marillion/easter)
+
+Easter is a resonance filter module that delivers 2 different resonators. One is a standard type and the other is a Smith-Angell resonator. You can choose the filters by clicking the + and - small buttons.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Lavender](https://en.wikipedia.org/wiki/Lavender_(Marillion_song))
+
+Lavender is a module that implements both an LPF and an HPF.  
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
