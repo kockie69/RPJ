@@ -24,6 +24,18 @@
       "name": "LadyNina",
       "description": "Smith-Angell Resonator",
       "tags": ["VCF"]
-    }   
+    },
+    {
+      "slug": "Lavender",
+      "name": "Lavender",
+      "description": "Standard Resonator",
+      "tags": ["VCF"]
+    },
+    {
+      "slug": "Easter",
+      "name": "Easter",
+      "description": "Smith-Angell Resonator",
+      "tags": ["VCF"]
+    }
   ]
 }
