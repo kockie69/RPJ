@@ -22,19 +22,31 @@
     {
       "slug": "LadyNina",
       "name": "LadyNina",
-      "description": "Smith-Angell Resonator",
+      "description": "Collection of Filters",
       "tags": ["VCF"]
     },
     {
       "slug": "Lavender",
       "name": "Lavender",
-      "description": "Standard Resonator",
+      "description": "Module with 2nd order LPF, HPF, BPF and BSF",
       "tags": ["VCF"]
     },
     {
       "slug": "Easter",
       "name": "Easter",
-      "description": "Smith-Angell Resonator",
+      "description": "Module with 2 resonators",
+      "tags": ["VCF"]
+    },
+    {
+      "slug": "DryLand",
+      "name": "DryLand",
+      "description": "Module with 1st order LPF and HPF",
+      "tags": ["VCF"]
+    },
+    {
+      "slug": "TheWeb",
+      "name": "TheWeb",
+      "description": "Module with 2nd order Butterworth LPF, HPF, BPF and BSF",
       "tags": ["VCF"]
     }
   ]
