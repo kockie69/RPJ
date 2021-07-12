@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-struct Lavender : Module {
+struct TheWeb : Module {
 
 	enum ParamIds {
 		PARAM_UP,
@@ -37,7 +37,7 @@ struct Lavender : Module {
 		NUM_LIGHTS,
 	};
 
-		Lavender();
+		TheWeb();
 		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;

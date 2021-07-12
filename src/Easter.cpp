@@ -66,10 +66,10 @@ struct EasterModuleWidget : ModuleWidget {
 	EasterModuleWidget(Easter* module) {
 
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/myVCF.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Easter.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
@@ -89,17 +89,17 @@ struct EasterModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(22, 90));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
 			tl->setText("RESONANCE");
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 170));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 190));
 			tl->setText("DRY");
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 212));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 190));
 			tl->setText("WET");
 			addChild(tl);
 		}
@@ -120,11 +120,11 @@ struct EasterModuleWidget : ModuleWidget {
 		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Easter::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Easter::PARAM_UP));
 		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Easter::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(43, 70), module, Easter::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 120), module, Easter::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(25, 130), module, Easter::INPUT_CVQ));	
-		addParam(createParam<RoundBlackKnob>(Vec(8, 245), module, Easter::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 205), module, Easter::PARAM_DRY));
+		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Easter::INPUT_CVFC));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Easter::PARAM_Q));
+		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Easter::INPUT_CVQ));	
+		addParam(createParam<RoundBlackKnob>(Vec(8, 225), module, Easter::PARAM_WET));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 225), module, Easter::PARAM_DRY));
 	}
 
 };

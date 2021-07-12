@@ -34,6 +34,17 @@ The module is an implementation of the formula's and theory from the book [Desig
 
 ## [Lavender](https://en.wikipedia.org/wiki/Lavender_(Marillion_song))
 
-Lavender is a module that implements both an LPF and an HPF.  
+Lavender is a module that implements both a 2nd order LPF and HPF. It has a cv for controlling the Cutoff and Frequency and the Resonance. 
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [DryLand](https://www.marillion.com/music/lyric.htm?id=72)
+
+DryLand is a module that implements both a 1st order LPF and HPF. It has a cv for controlling the Cutoff Frequency.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Lady Nina](https://en.wikipedia.org/wiki/Lady_Nina)
+
+This module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle. Lady Nina contains 
+
