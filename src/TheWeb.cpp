@@ -1,8 +1,8 @@
 #include "RPJ.hpp"
-#include "Lavender.hpp"
+#include "TheWeb.hpp"
 
 
-Lavender::Lavender() {
+TheWeb::TheWeb() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
@@ -13,13 +13,13 @@ Lavender::Lavender() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
-	LPFafp.algorithm=filterAlgorithm::kLPF2;
-	HPFafp.algorithm=filterAlgorithm::kHPF2;
-	BPFafp.algorithm=filterAlgorithm::kBPF2;
-	BSFafp.algorithm=filterAlgorithm::kBSF2;
+	LPFafp.algorithm=filterAlgorithm::kButterLPF2;
+	HPFafp.algorithm=filterAlgorithm::kButterHPF2;
+	BPFafp.algorithm=filterAlgorithm::kButterBPF2;
+	BSFafp.algorithm=filterAlgorithm::kButterBSF2;
 }
 
-void Lavender::process(const ProcessArgs &args) {
+void TheWeb::process(const ProcessArgs &args) {
 
 	LPFaudioFilter.setSampleRate(args.sampleRate);
 	HPFaudioFilter.setSampleRate(args.sampleRate);
@@ -56,11 +56,11 @@ void Lavender::process(const ProcessArgs &args) {
 	outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
 }
 
-struct LavenderModuleWidget : ModuleWidget {
-	LavenderModuleWidget(Lavender* module) {
+struct TheWebModuleWidget : ModuleWidget {
+	TheWebModuleWidget(TheWeb* module) {
 
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Lavender.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/TheWeb.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
@@ -69,7 +69,7 @@ struct LavenderModuleWidget : ModuleWidget {
 
 		{
 			ATitle * title = new ATitle(box.size.x);
-			title->setText("LAVENDER");
+			title->setText("THEWEB");
 			addChild(title);
 		}
 		{
@@ -118,21 +118,21 @@ struct LavenderModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 240), module, Lavender::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, Lavender::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, Lavender::OUTPUT_HPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, Lavender::OUTPUT_BPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Lavender::OUTPUT_BSFMAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 240), module, TheWeb::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, TheWeb::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, TheWeb::OUTPUT_HPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, TheWeb::OUTPUT_BPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, TheWeb::OUTPUT_BSFMAIN));
 
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Lavender::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 62), module, Lavender::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, Lavender::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 117), module, Lavender::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, Lavender::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, Lavender::PARAM_DRY));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, TheWeb::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(55, 62), module, TheWeb::INPUT_CVFC));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, TheWeb::PARAM_Q));
+		addInput(createInput<PJ301MPort>(Vec(55, 117), module, TheWeb::INPUT_CVQ));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, TheWeb::PARAM_WET));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, TheWeb::PARAM_DRY));
 	}
 
 };
 
-Model * modelLavender = createModel<Lavender, LavenderModuleWidget>("Lavender");
+Model * modelTheWeb = createModel<TheWeb, TheWebModuleWidget>("TheWeb");

@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-struct Lavender : Module {
+struct DryLand : Module {
 
 	enum ParamIds {
 		PARAM_UP,
@@ -28,8 +28,6 @@ struct Lavender : Module {
 	enum OutputIds {
 		OUTPUT_LPFMAIN,
 		OUTPUT_HPFMAIN,
-		OUTPUT_BPFMAIN,
-		OUTPUT_BSFMAIN,
 		NUM_OUTPUTS,
 	};
 
@@ -37,11 +35,12 @@ struct Lavender : Module {
 		NUM_LIGHTS,
 	};
 
-		Lavender();
-		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
+		DryLand();
+		AudioFilter LPFaudioFilter;
+		AudioFilter HPFaudioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
-		AudioFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
+		AudioFilterParameters LPFafp,HPFafp;
 };
 
 
