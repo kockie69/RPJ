@@ -6,5 +6,7 @@ void init(Plugin *p) {
     p->addModel(modelLadyNina);
     p->addModel(modelLavender);
     p->addModel(modelEaster);
+    p->addModel(modelDryLand);
+    p->addModel(modelTheWeb);
 }
 

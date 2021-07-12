@@ -67,8 +67,8 @@ struct LadyNinaModuleWidget : ModuleWidget {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/myVCF.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x -15, 365)));
 
 		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 

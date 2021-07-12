@@ -3,7 +3,7 @@
 const double kSqrtTwo = pow(2.0, 0.5);
 
 enum class filterAlgorithm {
-	kLPF1P, kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kButterLPF2, kButterHPF2, kButterBPF2,
+	kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kButterLPF2, kButterHPF2, kButterBPF2,
 	kButterBSF2, kMMALPF2, kMMALPF2B, kLowShelf, kHiShelf, kNCQParaEQ, kCQParaEQ, kLWRLPF2, kLWRHPF2,
 	kAPF1, kAPF2, kResonA, kResonB, kMatchLP2A, kMatchLP2B, kMatchBP2A, kMatchBP2B,
 	kImpInvLP1, kImpInvLP2, numFilterAlgorithms
@@ -71,7 +71,7 @@ public:
 	/** --- helper for Harma filters (phaser) */
 //	double getS_value();
 
-std::string filterAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1P", "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
+std::string filterAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
 		"ButterLPF2", "ButterHPF2", "ButterBPF2", "ButterBSF2", "MMALPF2", "MMALPF2B", "LowShelf",
 		"HiShelf", "NCQParaEQ", "CQParaEQ", "LWRLPF2", "LWRHPF2", "APF1", "APF2", "ResonA", "ResonB",
 		"MatchLP2A", "MatchLP2B", "MatchBP2A", "MatchBP2B", "ImpInvLP1", "ImpInvLP2" };

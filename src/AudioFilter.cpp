@@ -310,28 +310,6 @@ bool AudioFilter::calculateFilterCoeffs()
 		// --- we updated
 		return true;
 	}
-	else if (algorithm == filterAlgorithm::kLPF1P)
-	{
-		// --- see book for formulae
-		double theta_c = 2.0*M_PI*fc / sampleRate;
-		double gamma = 2.0 - cos(theta_c);
-
-		double filter_b1 = pow((gamma*gamma - 1.0), 0.5) - gamma;
-		double filter_a0 = 1.0 + filter_b1;
-
-		// --- update coeffs
-		coeffArray[a0] = filter_a0;
-		coeffArray[a1] = 0.0;
-		coeffArray[a2] = 0.0;
-		coeffArray[b1] = filter_b1;
-		coeffArray[b2] = 0.0;
-
-		// --- update on calculator
-		biquad.setCoefficients(coeffArray);
-
-		// --- we updated
-		return true;
-	}
 	else if (algorithm == filterAlgorithm::kLPF1)
 	{
 		// --- see book for formulae

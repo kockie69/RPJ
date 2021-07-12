@@ -7,6 +7,8 @@ extern Model *modelLFO;
 extern Model *modelLadyNina;
 extern Model *modelLavender;
 extern Model *modelEaster;
+extern Model *modelDryLand;
+extern Model *modelTheWeb;
 
 struct RPJTextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;
@@ -84,15 +86,15 @@ struct ATitle: TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	char text[128];
-	int fh = 20;
+	int fh = 25;
 	float parentW = 0;
 
 	ATitle(float pW) {
 		parentW = pW;
-		box.pos = Vec(1 , 1);
+		box.pos = Vec(1 , 3);
 		box.size.y = fh;
 		setColor(0x00, 0x00, 0x00, 0xFF);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSans.ttf"));
+		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/Acme-Regular.ttf"));
 		setText(" ");
 	}
 
