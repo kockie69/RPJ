@@ -324,6 +324,11 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
+			ATitle * title = new ATitle(box.size.x);
+			title->setText("GRENDEL");
+			addChild(title);
+		}
+		{
 			auto w = createParam<Knob16>(Vec(73,35), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
 			k->snap = true;
