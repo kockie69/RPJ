@@ -21,39 +21,49 @@ TheWeb::TheWeb() {
 
 void TheWeb::process(const ProcessArgs &args) {
 
-	LPFaudioFilter.setSampleRate(args.sampleRate);
-	HPFaudioFilter.setSampleRate(args.sampleRate);
+	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected() || outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) {
 
-	float cvfc = 1.f;
-	if (inputs[INPUT_CVFC].isConnected())
-		cvfc = inputs[INPUT_CVFC].getVoltage();
+		LPFaudioFilter.setSampleRate(args.sampleRate);
+		HPFaudioFilter.setSampleRate(args.sampleRate);
+
+		float cvfc = 1.f;
+		if (inputs[INPUT_CVFC].isConnected())
+			cvfc = inputs[INPUT_CVFC].getVoltage();
 	
-	float cvq = 1.f;
-	if (inputs[INPUT_CVQ].isConnected())
-		cvq = inputs[INPUT_CVQ].getVoltage();
+		float cvq = 1.f;
+		if (inputs[INPUT_CVQ].isConnected())
+			cvq = inputs[INPUT_CVQ].getVoltage();
  	
- 	LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-	LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
-	LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
-	LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
-	
-	//LPFafp.algorithm = filterAlgorithm::kResonA;
+ 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
+		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+		LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
+		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
 
-	//afp.strAlgorithm = filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-	LPFaudioFilter.setParameters(LPFafp);
-	HPFaudioFilter.setParameters(HPFafp);
-	BPFaudioFilter.setParameters(BPFafp);
-	BSFaudioFilter.setParameters(BSFafp);
-
-	float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-	float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-	float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-	float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-
-	outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
-	outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-	outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
-	outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
+		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
+			LPFaudioFilter.setSampleRate(args.sampleRate);
+			LPFaudioFilter.setParameters(LPFafp);
+			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
+			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
+		}
+		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
+			HPFaudioFilter.setSampleRate(args.sampleRate);
+			HPFaudioFilter.setParameters(HPFafp);
+			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
+			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
+		}
+		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
+			BPFaudioFilter.setSampleRate(args.sampleRate);
+			BPFaudioFilter.setParameters(BPFafp);
+			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
+			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
+		}
+		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
+			BSFaudioFilter.setSampleRate(args.sampleRate);
+			BSFaudioFilter.setParameters(BSFafp);
+			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
+			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
+		}
+	}
 }
 
 struct TheWebModuleWidget : ModuleWidget {
@@ -69,7 +79,7 @@ struct TheWebModuleWidget : ModuleWidget {
 
 		{
 			ATitle * title = new ATitle(box.size.x);
-			title->setText("THEWEB");
+			title->setText("THE WEB");
 			addChild(title);
 		}
 		{
