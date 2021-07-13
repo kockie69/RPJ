@@ -4,7 +4,6 @@ using namespace rack;
 
 extern Plugin *pluginInstance;
 extern Model *modelLFO;
-extern Model *modelLadyNina;
 extern Model *modelLavender;
 extern Model *modelEaster;
 extern Model *modelDryLand;
