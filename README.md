@@ -61,7 +61,14 @@ Estonia is a 1st order High and Low shelving filter.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
-## [Lady Nina](https://en.wikipedia.org/wiki/Lady_Nina)
+## [Essence](https://www.marillion.com/music/lyric.htm?id=173)
 
-This module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle. Lady Nina contains 
+Essence, a new 2nd Order Parametric EQ Filter with a constant Q
 
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Brave](https://www.marillion.com/music/lyric.htm?id=91)
+
+Brave, a new 2nd Order Parametric EQ Filter with a Non constant Q
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
