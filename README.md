@@ -1,6 +1,6 @@
 # RPJ VCV plugins
 
-## Grendel
+## [Grendel](https://www.songfacts.com/facts/marillion/grendel)
 
 Grendel is highly inspired by the [Batumi from XAOC](http://xaocdevices.com/main/batumi/). It is a fully voltage controlled, quadruple digital LFO module with a couple of nice features. Each oscillator can be used independently or in one of the 3 other modes: quad, phase and divide. For each oscillator, there are sine, square, saw, ramp and triangle waveform outputs available. Voltage control is possible for each oscillator’s frequency, phase and reset.
 
@@ -25,3 +25,50 @@ In this mode the LFO's 2-4 are synced to LFO 1 with their frequencies occuring a
 ### RESET INPUT SIGNAL
 
 Each of the LFO's has a RESET input signal that can receive an incoming trigger impulse that resets the individual LFO to zero state (hard sync). 
+
+## [Easter](https://www.songfacts.com/facts/marillion/easter)
+
+Easter is a resonance filter module that delivers 2 different resonators. One is a standard type and the other is a Smith-Angell resonator. You can choose the filters by clicking the + and - small buttons.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Lavender](https://en.wikipedia.org/wiki/Lavender_(Marillion_song))
+
+Lavender is a module that implements both a 2nd order LPF and HPF. It has a cv for controlling the Cutoff and Frequency and the Resonance. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [DryLand](https://www.marillion.com/music/lyric.htm?id=72)
+
+DryLand is a module that implements both a 1st order LPF and HPF. It has a cv for controlling the Cutoff Frequency.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [The Web](https://www.marillion.com/music/lyric.htm?id=12)
+This module is a 2nd order Butterworth LPF, HPF, BPF and BSF.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Gazpacho](https://www.songfacts.com/facts/marillion/gazpacho)
+
+Gazpacho is a 2nd order Linkwitz-Riley LPF and HPF. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Estonia](https://www.marillion.com/music/lyric.htm?id=110)
+
+Estonia is a 1st order High and Low shelving filter.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Essence](https://www.marillion.com/music/lyric.htm?id=173)
+
+Essence, a new 2nd Order Parametric EQ Filter with a constant Q
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Brave](https://www.marillion.com/music/lyric.htm?id=91)
+
+Brave, a new 2nd Order Parametric EQ Filter with a Non constant Q
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.

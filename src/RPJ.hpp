@@ -1,15 +1,25 @@
 #include "rack.hpp"
+
 using namespace rack;
+
 extern Plugin *pluginInstance;
 extern Model *modelLFO;
+extern Model *modelLavender;
+extern Model *modelEaster;
+extern Model *modelDryLand;
+extern Model *modelTheWeb;
+extern Model *modelGazpacho;
+extern Model *modelEstonia;
+extern Model *modelBrave;
+extern Model *modelEssence;
 
-struct ATextLabel : TransparentWidget {
+struct RPJTextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	char text[128];
 	const int fh = 14;
 
-	ATextLabel(Vec pos) {
+	RPJTextLabel(Vec pos) {
 		box.pos = pos;
 		box.size.y = fh;
 		setColor(0x00, 0x00, 0x00, 0xFF);
@@ -17,7 +27,7 @@ struct ATextLabel : TransparentWidget {
 		setText(" ");
 	}
 
-	ATextLabel(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	RPJTextLabel(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 		box.pos = pos;
 		box.size.y = fh;
 		setColor(r, g, b, a);
@@ -73,24 +83,21 @@ struct ATextLabel : TransparentWidget {
 		drawBG(args);
 		drawTxt(args, text);
 	}
-
-
-
 };
 
 struct ATitle: TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	char text[128];
-	int fh = 20;
+	int fh = 25;
 	float parentW = 0;
 
 	ATitle(float pW) {
 		parentW = pW;
-		box.pos = Vec(1 , 1);
+		box.pos = Vec(1 , 3);
 		box.size.y = fh;
-		setColor(0x55, 0x99, 0xFF, 0xFF);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSans.ttf"));
+		setColor(0x00, 0x00, 0x00, 0xFF);
+		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/Acme-Regular.ttf"));
 		setText(" ");
 	}
 
