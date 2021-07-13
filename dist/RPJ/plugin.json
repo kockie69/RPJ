@@ -20,12 +20,6 @@
       "tags": ["LFO"]
     },
     {
-      "slug": "LadyNina",
-      "name": "LadyNina",
-      "description": "Collection of Filters",
-      "tags": ["VCF"]
-    },
-    {
       "slug": "Lavender",
       "name": "Lavender",
       "description": "Module with 2nd order LPF, HPF, BPF and BSF",
