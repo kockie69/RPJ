@@ -8,5 +8,9 @@ void init(Plugin *p) {
     p->addModel(modelEaster);
     p->addModel(modelDryLand);
     p->addModel(modelTheWeb);
+    p->addModel(modelGazpacho);    
+    p->addModel(modelEstonia);
+    p->addModel(modelBrave);  
+    p->addModel(modelEssence);
 }
 
