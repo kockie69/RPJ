@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob in Grendel
 
-## [1.0.3] - 2021-07-11
+## [1.0.3] - 2021-07-12
 ### Added
+- A new module with plenty of Filters LadyNina
 - A new filter module Lavender
 - A resonator module Easter
+- A new filter module DryLand
+- A new filter module TheWeb
+
+### Changed
+- Grendel font according to other modules
 
 ## [1.0.2] - 2021-06-29
 ### Added

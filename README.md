@@ -44,6 +44,23 @@ DryLand is a module that implements both a 1st order LPF and HPF. It has a cv fo
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
+## [The Web](https://www.marillion.com/music/lyric.htm?id=12)
+This module is a 2nd order Butterworth LPF, HPF, BPF and BSF.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Gazpacho](https://www.songfacts.com/facts/marillion/gazpacho)
+
+Gazpacho is a 2nd order Linkwitz-Riley LPF and HPF. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Estonia](https://www.marillion.com/music/lyric.htm?id=110)
+
+Estonia is a 1st order High and Low shelving filter.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
 ## [Lady Nina](https://en.wikipedia.org/wiki/Lady_Nina)
 
 This module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle. Lady Nina contains 

@@ -16,33 +16,34 @@ LadyNina::LadyNina() {
 
 void LadyNina::process(const ProcessArgs &args) {
 
-	audioFilter.setSampleRate(args.sampleRate);
+	if (outputs[OUTPUT_MAIN].isConnected()) {
+		audioFilter.setSampleRate(args.sampleRate);
 
- 	afp.fc = params[PARAM_FC].getValue();
-	afp.Q = params[PARAM_Q].getValue();
-	afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue();
-	afp.dry = params[PARAM_DRY].getValue();
-	afp.wet = params[PARAM_WET].getValue();
+ 		afp.fc = params[PARAM_FC].getValue();
+		afp.Q = params[PARAM_Q].getValue();
+		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue();
+		afp.dry = params[PARAM_DRY].getValue();
+		afp.wet = params[PARAM_WET].getValue();
 
-	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if ((static_cast<int>(afp.algorithm)+1) == static_cast<int>(filterAlgorithm::numFilterAlgorithms))
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
-		else
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)+1);
+		if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+			if ((static_cast<int>(afp.algorithm)+1) == static_cast<int>(filterAlgorithm::numFilterAlgorithms))
+				afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
+			else
+				afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)+1);
+		}
+		if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+			if ((static_cast<int>(afp.algorithm)-1) < 0)
+				afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
+			else 
+				afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)-1);
+		}
+
+		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
+		audioFilter.setParameters(afp);
+
+		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
+		outputs[OUTPUT_MAIN].setVoltage(out);
 	}
-	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if ((static_cast<int>(afp.algorithm)-1) < 0)
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm));
-		else 
-			afp.algorithm = static_cast<filterAlgorithm>(static_cast<int>(afp.algorithm)-1);
-	}
-
-	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-	audioFilter.setParameters(afp);
-
-	float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-
-	outputs[OUTPUT_MAIN].setVoltage(out);
 }
 
 struct buttonPlusSmall : SvgSwitch  {

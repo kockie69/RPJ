@@ -1,8 +1,8 @@
 #include "RPJ.hpp"
-#include "DryLand.hpp"
+#include "Gazpacho.hpp"
 
 
-DryLand::DryLand() {
+Gazpacho::Gazpacho() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
@@ -13,11 +13,11 @@ DryLand::DryLand() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
-	LPFafp.algorithm=filterAlgorithm::kLPF1;
-	HPFafp.algorithm=filterAlgorithm::kHPF1;
+	LPFafp.algorithm=filterAlgorithm::kLWRLPF2;
+	HPFafp.algorithm=filterAlgorithm::kLWRHPF2;
 }
 
-void DryLand::process(const ProcessArgs &args) {
+void Gazpacho::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
 		LPFaudioFilter.setSampleRate(args.sampleRate);
@@ -35,7 +35,7 @@ void DryLand::process(const ProcessArgs &args) {
 		LPFafp.Q = HPFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
-	
+
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
 			LPFaudioFilter.setParameters(LPFafp);
 			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
@@ -49,11 +49,11 @@ void DryLand::process(const ProcessArgs &args) {
 	}
 }
 
-struct DryLandModuleWidget : ModuleWidget {
-	DryLandModuleWidget(DryLand* module) {
+struct GazpachoModuleWidget : ModuleWidget {
+	GazpachoModuleWidget(Gazpacho* module) {
 
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DryLand.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Gazpacho.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
@@ -62,7 +62,7 @@ struct DryLandModuleWidget : ModuleWidget {
 
 		{
 			ATitle * title = new ATitle(box.size.x);
-			title->setText("DRY LAND");
+			title->setText("GAZPACHO");
 			addChild(title);
 		}
 		{
@@ -96,17 +96,17 @@ struct DryLandModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, DryLand::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, DryLand::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, DryLand::OUTPUT_HPFMAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Gazpacho::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, Gazpacho::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Gazpacho::OUTPUT_HPFMAIN));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, DryLand::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 62), module, DryLand::INPUT_CVFC));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Gazpacho::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(55, 62), module, Gazpacho::INPUT_CVFC));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, DryLand::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, DryLand::PARAM_DRY));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, Gazpacho::PARAM_WET));
+		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, Gazpacho::PARAM_DRY));
 	}
 
 };
 
-Model * modelDryLand = createModel<DryLand, DryLandModuleWidget>("DryLand");
+Model * modelGazpacho = createModel<Gazpacho, GazpachoModuleWidget>("Gazpacho");
