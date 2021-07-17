@@ -66,6 +66,12 @@
       "name": "Essence",
       "description": "Essence is a 2nd Order Parametric EQ Filter with a constant Q.",
       "tags": ["VCF"]
+    },
+    {
+      "slug": "SugarMice",
+      "name": "SugarMice",
+      "description": "WDF",
+      "tags": ["VCF"]
     }
   ]
 }
