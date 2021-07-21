@@ -1006,6 +1006,9 @@ public:
 	/** parameter setter for warping */
 	void setUsePostWarping(bool );
 
+	/** parameter setter for warping */
+	bool getUsePostWarping();
+
 	/** parameter setter for fc */
 	void setFilterFc(double );
 
@@ -1027,7 +1030,7 @@ struct WDFBesselBSF3
 {
 public:
 	WDFBesselBSF3(void);	/* C-TOR */
-	~WDFBesselBSF3(void);/* D-TOR */
+	~WDFBesselBSF3(void);	/* D-TOR */
 
 	/** reset members to initialized state */
 	virtual bool reset(double );

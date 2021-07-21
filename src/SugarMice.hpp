@@ -28,6 +28,12 @@ struct SugarMice : Module {
 		void process(const ProcessArgs &) override;
 		WDFTunableButterLPF3 wdfButterLPF3;
 		double sampleRate, fc;
+		bool warp;
 };
 
-
+/* Context Menu Item for changing the Jumper settings */
+struct nWarpSelectionMenuItem : MenuItem {
+	SugarMice *module;
+	bool Warp;
+	void onAction(const event::Action &) override;
+};

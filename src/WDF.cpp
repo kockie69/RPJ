@@ -1396,6 +1396,8 @@ void WDFTunableButterLPF3::createWDF()
 /** parameter setter for warping */
 void WDFTunableButterLPF3::setUsePostWarping(bool b) { useFrequencyWarping = b; }
 
+bool WDFTunableButterLPF3::getUsePostWarping() { return useFrequencyWarping; }
+
 /** parameter setter for fc */
 void WDFTunableButterLPF3::setFilterFc(double fc_Hz)
 {

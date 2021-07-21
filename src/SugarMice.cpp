@@ -7,15 +7,17 @@ SugarMice::SugarMice() {
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	sampleRate=0;
 	fc=0;
+	warp=false;
 }
 
 void SugarMice::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
-		if (params[PARAM_FC].getValue() != fc) {
+		if (params[PARAM_FC].getValue() != fc || wdfButterLPF3.getUsePostWarping() != warp) {
 			wdfButterLPF3.setFilterFc(params[PARAM_FC].getValue());
 //			wdfButterLPF3.reset(args.sampleRate);
 			fc = params[PARAM_FC].getValue();
+			warp = wdfButterLPF3.getUsePostWarping();
 		}
 		
 		if (args.sampleRate!=sampleRate) {
@@ -27,6 +29,14 @@ void SugarMice::process(const ProcessArgs &args) {
 		outputs[OUTPUT_MAIN].setVoltage(out);
 	}
 }
+
+
+/* Context Menu Item for changing the warping settings */
+void nWarpSelectionMenuItem::onAction(const event::Action &e) {
+	module->wdfButterLPF3.setUsePostWarping(Warp);
+}
+
+
 
 struct SugarMiceModuleWidget : ModuleWidget {
 	SugarMiceModuleWidget(SugarMice* module) {
@@ -65,6 +75,19 @@ struct SugarMiceModuleWidget : ModuleWidget {
 		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, SugarMice::PARAM_FC));
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		SugarMice *module = dynamic_cast<SugarMice*>(this->module);
+
+		menu->addChild(new MenuEntry);
+
+
+		nWarpSelectionMenuItem *nWarpItem = new nWarpSelectionMenuItem();
+		nWarpItem->text = "Enable Warping";
+		nWarpItem->module = module;
+		nWarpItem->Warp = !module->wdfButterLPF3.getUsePostWarping();
+		nWarpItem->rightText = CHECKMARK(!nWarpItem->Warp);
+		menu->addChild(nWarpItem);
+	}
 };
 
 Model * modelSugarMice = createModel<SugarMice, SugarMiceModuleWidget>("SugarMice");
