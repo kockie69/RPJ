@@ -11,5 +11,7 @@ void init(Plugin *p) {
     p->addModel(modelEstonia);
     p->addModel(modelBrave);  
     p->addModel(modelEssence);
+    p->addModel(modelSugarMice);
+    p->addModel(modelMontreal);
 }
 
