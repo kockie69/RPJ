@@ -72,6 +72,12 @@
       "name": "SugarMice",
       "description": "WDF",
       "tags": ["VCF"]
+    },
+    {
+      "slug": "Montreal",
+      "name": "Montreal",
+      "description": "WDF",
+      "tags": ["VCF"]
     }
   ]
 }

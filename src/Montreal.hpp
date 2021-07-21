@@ -3,10 +3,11 @@
 
 using namespace rack;
 
-struct SugarMice : Module {
+struct Montreal : Module {
 
 	enum ParamIds {
 		PARAM_FC,
+		PARAM_Q,
 		NUM_PARAMS,
 	};
 
@@ -16,7 +17,10 @@ struct SugarMice : Module {
 	};
 
 	enum OutputIds {
-		OUTPUT_MAIN,
+		OUTPUT_LPF,
+		OUTPUT_HPF,
+		OUTPUT_BPF,
+		OUTPUT_BSF,
 		NUM_OUTPUTS,
 	};
 
@@ -24,10 +28,14 @@ struct SugarMice : Module {
 		NUM_LIGHTS,
 	};
 
-		SugarMice();
+		Montreal();
 		void process(const ProcessArgs &) override;
-		WDFTunableButterLPF3 wdfButterLPF3;
-		double sampleRate, fc;
+		WDFIdealRLCLPF wdfIdealRLCLPF;
+		WDFIdealRLCHPF wdfIdealRLCHPF;
+		WDFIdealRLCBPF wdfIdealRLCBPF;
+		WDFIdealRLCBSF wdfIdealRLCBSF;
+		double sampleRate;
+		WDFParameters wdfp;
 };
 
 
