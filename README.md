@@ -72,3 +72,13 @@ The module is an implementation of the formula's and theory from the book [Desig
 Brave, a new 2nd Order Parametric EQ Filter with a Non constant Q
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Sugar Mice](https://en.wikipedia.org/wiki/Sugar_Mice)
+This module is a 3rd order Butterworth low-pass ladder filter. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Montreal](https://www.marillion.com/music/lyric.htm?id=822)
+Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
