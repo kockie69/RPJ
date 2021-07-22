@@ -72,6 +72,17 @@
       "name": "LadyNina",
       "description": "LadyNina is a 2nd order SFV (LPF, HPF, BPF, BSF)",
       "tags": ["VCF"]
+    },
+      "slug": "SugarMice",
+      "name": "SugarMice",
+      "description": "3rd order Butterworth low-pass ladder filter.",
+      "tags": ["VCF"]
+    },
+    {
+      "slug": "Montreal",
+      "name": "Montreal",
+      "description": "Ideal 2nd Order RLC Filters LPF, HPF, BPF and BSF",
+      "tags": ["VCF"]
     }
   ]
 }

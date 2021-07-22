@@ -91,3 +91,13 @@ Option to enable Non Linear Processing.
 #### [Match Analog Nyquist LPF]
 The LPF suffers from the zero-gain-at-Nyquist problem. This issue is addressed with a tweak to provide the correct gain at Nyquist: in this case, the gain at Nyquist exactly matches that of the analog equivalent, however, there is a small error in the peak magnitude at a combination of extremely high fc and Q values. Nevertheless the filters are stable.
 
+## [Sugar Mice](https://en.wikipedia.org/wiki/Sugar_Mice)
+This module is a 3rd order Butterworth low-pass ladder filter. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Montreal](https://www.marillion.com/music/lyric.htm?id=822)
+Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
