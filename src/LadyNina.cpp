@@ -196,4 +196,35 @@ struct LadyNinaModuleWidget : ModuleWidget {
 	}
 };
 
+json_t *LadyNina::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_GAIN_KEY, json_boolean(gain));
+	json_object_set_new(rootJ, JSON_NLP_KEY, json_boolean(nlp));
+	json_object_set_new(rootJ, JSON_OSCILLATOR_KEY, json_boolean(osc));
+	json_object_set_new(rootJ, JSON_MATCH_KEY, json_boolean(match));	
+	return rootJ;
+}
+
+void LadyNina::dataFromJson(json_t *rootJ) {
+	json_t *nGainJ = json_object_get(rootJ, JSON_GAIN_KEY);
+	if (nGainJ) {
+		gain = json_boolean_value(nGainJ);
+	}
+
+	json_t *nNlpJ = json_object_get(rootJ, JSON_NLP_KEY);
+	if (nNlpJ) {
+		nlp = json_boolean_value(nNlpJ);
+	}
+
+	json_t *nTOscillatorJ = json_object_get(rootJ, JSON_OSCILLATOR_KEY);
+	if (nTOscillatorJ) {
+		osc = json_boolean_value(nTOscillatorJ);
+	}
+
+	json_t *nMatchJ = json_object_get(rootJ, JSON_MATCH_KEY);
+	if (nMatchJ) {
+		match = json_boolean_value(nMatchJ);
+	}
+}
+
 Model * modelLadyNina = createModel<LadyNina, LadyNinaModuleWidget>("LadyNina");

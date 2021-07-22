@@ -3,6 +3,11 @@
 
 using namespace rack;
 
+const char *JSON_GAIN_KEY="Gain";
+const char *JSON_NLP_KEY="Nlp";
+const char *JSON_OSCILLATOR_KEY="Oscillator";
+const char *JSON_MATCH_KEY="Match";
+
 struct LadyNina : Module {
 
 	enum ParamIds {
@@ -35,6 +40,8 @@ struct LadyNina : Module {
 	};
 
 		LadyNina();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		ZVAFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
 		void process(const ProcessArgs &) override;
 		ZVAFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
