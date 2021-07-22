@@ -66,6 +66,12 @@
       "name": "Essence",
       "description": "Essence is a 2nd Order Parametric EQ Filter with a constant Q.",
       "tags": ["VCF"]
+    },
+    {
+      "slug": "LadyNina",
+      "name": "LadyNina",
+      "description": "LadyNina is a 2nd order SFV (LPF, HPF, BPF, BSF)",
+      "tags": ["VCF"]
     }
   ]
 }
