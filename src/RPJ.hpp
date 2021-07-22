@@ -12,6 +12,7 @@ extern Model *modelGazpacho;
 extern Model *modelEstonia;
 extern Model *modelBrave;
 extern Model *modelEssence;
+extern Model *modelLadyNina;
 extern Model *modelSugarMice;
 extern Model *modelMontreal;
 
