@@ -14,5 +14,6 @@ void init(Plugin *p) {
     p->addModel(modelLadyNina);
     p->addModel(modelSugarMice);
     p->addModel(modelMontreal);
+    p->addModel(modelBlindCurve);
 }
 

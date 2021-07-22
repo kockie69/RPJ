@@ -15,6 +15,7 @@ extern Model *modelEssence;
 extern Model *modelLadyNina;
 extern Model *modelSugarMice;
 extern Model *modelMontreal;
+extern Model *modelBlindCurve;
 
 struct RPJTextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;

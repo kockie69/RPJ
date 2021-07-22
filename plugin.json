@@ -84,6 +84,12 @@
       "name": "Montreal",
       "description": "Ideal 2nd Order RLC Filters LPF, HPF, BPF and BSF",
       "tags": ["VCF"]
+    },
+    {
+      "slug": "BlindCurve",
+      "name": "BlindCurve",
+      "description": "Envelope Follower",
+      "tags": [""]
     }
   ]
 }
