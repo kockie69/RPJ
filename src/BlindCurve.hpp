@@ -6,20 +6,16 @@ using namespace rack;
 struct BlindCurve : Module {
 
 	enum ParamIds {
-		PARAM_FC,
-		PARAM_CVFC,
-		PARAM_Q,
-		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
-		PARAM_CVB,
+		PARAM_REL,
+		PARAM_ATK,
+		PARAM_MODE,
+		PARAM_CLAMP,
+		PARAM_DB,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
-		INPUT_CVFC,
-		INPUT_CVQ,
-		INPUT_CVB,
 		NUM_INPUTS,
 	};
 
@@ -31,11 +27,30 @@ struct BlindCurve : Module {
 	enum LightsIds {
 		NUM_LIGHTS,
 	};
-
 		BlindCurve();
-		EnvelopeFollower envelopeFollower;
+		AudioDetector audioDetector;
 		void process(const ProcessArgs &) override;
-		EnvelopeFollowerParameters efp;
+		AudioDetectorParameters adp;
 };
 
+struct DetectModeQuantity : public rack::engine::ParamQuantity {
+	public:
+    	std::string getDisplayValueString() override;
 
+	private:
+		int value;
+		std::string v;
+};
+
+struct Toggle2P : SvgSwitch {
+	int pos;
+	int neg;
+
+	Toggle2P();
+	
+	// handle the manually entered values
+	void onChange(const event::Change &) override;
+	
+	// override the base randomizer as it sets switches to invalid values.
+	void randomize() override;
+};

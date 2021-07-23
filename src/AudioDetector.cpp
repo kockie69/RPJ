@@ -116,7 +116,7 @@ double AudioDetector::processAudioSample(double xn)
 	lastEnvelope = currEnvelope;
 
 	// --- if RMS, do the SQRT
-	if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_RMS)
+	if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_PEAK)
 		currEnvelope = pow(currEnvelope, 0.5);
 
 	// --- if not dB, we are done
@@ -149,9 +149,26 @@ void AudioDetector::setParameters(const AudioDetectorParameters& parameters)
 
 }
 
-void AudioDetector::setAttackTime(double attack_in_ms, bool forceCalc = false) {};
+void AudioDetector::setAttackTime(double attack_in_ms, bool forceCalc)
+{
+	if (!forceCalc && audioDetectorParameters.attackTime_mSec == attack_in_ms)
+		return;
 
-void AudioDetector::setReleaseTime(double release_in_ms, bool forceCalc = false) {};
+	audioDetectorParameters.attackTime_mSec = attack_in_ms;
+	attackTime = exp(TLD_AUDIO_ENVELOPE_ANALOG_TC / (attack_in_ms * sampleRate * 0.001));
+}
+
+
+
+void AudioDetector::setReleaseTime(double release_in_ms, bool forceCalc)
+{
+	if (!forceCalc && audioDetectorParameters.releaseTime_mSec == release_in_ms)
+		return;
+
+	audioDetectorParameters.releaseTime_mSec = release_in_ms;
+	releaseTime = exp(TLD_AUDIO_ENVELOPE_ANALOG_TC / (release_in_ms * sampleRate * 0.001));
+}
+
 
 /** set sample rate - our time constants depend on it */
 void AudioDetector::setSampleRate(double _sampleRate)

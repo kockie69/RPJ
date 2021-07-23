@@ -83,9 +83,9 @@ protected:
 	double lastEnvelope = 0.0;	///< output register
 
 	/** set our internal atack time coefficients based on times and sample rate */
-	void setAttackTime(double, bool);
+	void setAttackTime(double, bool = false);
 
 	/** set our internal release time coefficients based on times and sample rate */
-	void setReleaseTime(double, bool);
+	void setReleaseTime(double, bool = false);
 };
 
