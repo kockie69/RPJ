@@ -15,6 +15,7 @@ void init(Plugin *p) {
     p->addModel(modelSugarMice);
     p->addModel(modelMontreal);
     p->addModel(modelBlindCurve);
+	p->addModel(modelGaza);
 }
 
 RPJTextLabel::RPJTextLabel(Vec pos) {
