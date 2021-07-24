@@ -9,8 +9,6 @@ struct BlindCurve : Module {
 		PARAM_REL,
 		PARAM_ATK,
 		PARAM_MODE,
-		PARAM_CLAMP,
-		PARAM_DB,
 		NUM_PARAMS,
 	};
 
@@ -40,17 +38,4 @@ struct DetectModeQuantity : public rack::engine::ParamQuantity {
 	private:
 		int value;
 		std::string v;
-};
-
-struct Toggle2P : SvgSwitch {
-	int pos;
-	int neg;
-
-	Toggle2P();
-	
-	// handle the manually entered values
-	void onChange(const event::Change &) override;
-	
-	// override the base randomizer as it sets switches to invalid values.
-	void randomize() override;
 };

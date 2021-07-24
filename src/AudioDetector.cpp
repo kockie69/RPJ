@@ -116,7 +116,7 @@ double AudioDetector::processAudioSample(double xn)
 	lastEnvelope = currEnvelope;
 
 	// --- if RMS, do the SQRT
-	if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_PEAK)
+	if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_RMS)
 		currEnvelope = pow(currEnvelope, 0.5);
 
 	// --- if not dB, we are done
