@@ -12,77 +12,33 @@ extern Model *modelGazpacho;
 extern Model *modelEstonia;
 extern Model *modelBrave;
 extern Model *modelEssence;
+extern Model *modelLadyNina;
+extern Model *modelSugarMice;
+extern Model *modelMontreal;
+extern Model *modelBlindCurve;
+extern Model *modelGaza;
 
 struct RPJTextLabel : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	char text[128];
-	const int fh = 14;
+	int fh = 14;
 
-	RPJTextLabel(Vec pos) {
-		box.pos = pos;
-		box.size.y = fh;
-		setColor(0x00, 0x00, 0x00, 0xFF);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
-		setText(" ");
-	}
+	RPJTextLabel(Vec);
 
-	RPJTextLabel(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-		box.pos = pos;
-		box.size.y = fh;
-		setColor(r, g, b, a);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
-		setText(" ");
-	}
+	RPJTextLabel(Vec, int);
 
-	void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-		txtCol.r = r;
-		txtCol.g = g;
-		txtCol.b = b;
-		txtCol.a = a;
-	}
+	RPJTextLabel(Vec, unsigned char, unsigned char, unsigned char, unsigned char);
 
-	void setText(const char * txt) {
-		strncpy(text, txt, sizeof(text));
-		box.size.x = strlen(text) * 8;
-	}
+	void setColor(unsigned char, unsigned char, unsigned char, unsigned char);
 
-	void drawBG(const DrawArgs &args) {
-		Vec c = Vec(box.size.x/2, box.size.y);
-		const int whalf = box.size.x/2;
+	void setText(const char *);
 
-		// Draw rectangle
-		nvgFillColor(args.vg, nvgRGBA(0xF0, 0xF0, 0xF0, 0xFF));
-		{
-			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg, c.x -whalf, c.y +2);
-			nvgLineTo(args.vg, c.x +whalf, c.y +2);
-			nvgLineTo(args.vg, c.x +whalf, c.y+fh+2);
-			nvgLineTo(args.vg, c.x -whalf, c.y+fh+2);
-			nvgLineTo(args.vg, c.x -whalf, c.y +2);
-			nvgClosePath(args.vg);
-		}
-		nvgFill(args.vg);
-	}
+	void drawBG(const DrawArgs &);
 
-	void drawTxt(const DrawArgs &args, const char * txt) {
+	void drawTxt(const DrawArgs &, const char *);
 
-		Vec c = Vec(box.size.x/2, box.size.y);
-
-		nvgFontSize(args.vg, fh);
-		nvgFontFaceId(args.vg, font->handle);
-		nvgTextLetterSpacing(args.vg, -2);
-		nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
-		nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));
-
-		nvgText(args.vg, c.x, c.y+fh, txt, NULL);
-	}
-
-	void draw(const DrawArgs &args) override {
-		TransparentWidget::draw(args);
-		drawBG(args);
-		drawTxt(args, text);
-	}
+	void draw(const DrawArgs &) override;
 };
 
 struct ATitle: TransparentWidget {
