@@ -88,12 +88,6 @@
     {
       "slug": "BlindCurve",
       "name": "BlindCurve",
-      "description": "Audio Detector",
-      "tags": [""]
-    },
-    {
-      "slug": "Gaza",
-      "name": "Gaza",
       "description": "Envelope Follower",
       "tags": [""]
     }
