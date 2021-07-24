@@ -43,8 +43,8 @@ struct BlindCurveModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(-10, 17),10);
-			tl->setText("Audio Detector");
+			RPJTextLabel * tl = new RPJTextLabel(Vec(-22, 17),10);
+			tl->setText("Envelope Follower");
 			addChild(tl);
 		}	
 		{
