@@ -74,6 +74,11 @@ struct BraveModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(-20, 19),10);
+			tl->setText("2nd Order Filter");
+			addChild(tl);
+		}
+		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
 			tl->setText("CUTOFF");
 			addChild(tl);

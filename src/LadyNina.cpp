@@ -21,9 +21,6 @@ void LadyNina::process(const ProcessArgs &args) {
 		outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) &&
 		inputs[INPUT_MAIN].isConnected()) {
 
-		//LPFaudioFilter.setSampleRate(args.sampleRate);
-		//HPFaudioFilter.setSampleRate(args.sampleRate);
-
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
 			cvfc = inputs[INPUT_CVFC].getVoltage();
@@ -44,25 +41,21 @@ void LadyNina::process(const ProcessArgs &args) {
 		LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
 		LPFafp.matchAnalogNyquistLPF = match;
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			//LPFaudioFilter.setSampleRate(args.sampleRate);
 			LPFaudioFilter.setParameters(LPFafp);
 			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
 			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
 		}
 		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			//HPFaudioFilter.setSampleRate(args.sampleRate);
 			HPFaudioFilter.setParameters(HPFafp);
 			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
 		}
 		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
-			//BPFaudioFilter.setSampleRate(args.sampleRate);
 			BPFaudioFilter.setParameters(BPFafp);
 			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
 		}
 		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
-			//BSFaudioFilter.setSampleRate(args.sampleRate);
 			BSFaudioFilter.setParameters(BSFafp);
 			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);

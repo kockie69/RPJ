@@ -83,6 +83,11 @@ struct TheWebModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(-18, 19),10);
+			tl->setText("2nd Order Filter");
+			addChild(tl);
+		}
+		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
 			tl->setText("CUTOFF");
 			addChild(tl);

@@ -316,7 +316,7 @@ struct RPJLFOModuleWidget : ModuleWidget {
 	RPJLFOModuleWidget(RPJLFO* module) {
 
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/myLFO.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Grendel.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
@@ -329,7 +329,12 @@ struct RPJLFOModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 		{
-			auto w = createParam<Knob16>(Vec(73,35), module, RPJLFO::MODE_PARAM);
+			RPJTextLabel * tl = new RPJTextLabel(Vec(30, 19),10);
+			tl->setText("Quadruple LFO");
+			addChild(tl);
+		}
+		{
+			auto w = createParam<Knob16>(Vec(73,49), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
 			k->snap = true;
 			k->minAngle = -0.75*M_PI;

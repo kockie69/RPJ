@@ -19,10 +19,12 @@ void Easter::process(const ProcessArgs &args) {
 
 	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
 		afp.algorithm = filterAlgorithm::kResonB;	
-	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		afp.algorithm = filterAlgorithm::kResonA;
+	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
+	audioFilter.setParameters(afp);
 
-	if (outputs[OUTPUT_MAIN].isConnected()) {
+	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
 		audioFilter.setSampleRate(args.sampleRate);
 	
 		float cvfc = 1.f;
@@ -37,8 +39,6 @@ void Easter::process(const ProcessArgs &args) {
 		afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
-	
-		}
 
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 		audioFilter.setParameters(afp);
@@ -79,6 +79,11 @@ struct EasterModuleWidget : ModuleWidget {
 			ATitle * title = new ATitle(box.size.x);
 			title->setText("EASTER");
 			addChild(title);
+		} 
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(-18, 19),10);
+			tl->setText("Resonance Filter");
+			addChild(tl);
 		}
 		{
 			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
