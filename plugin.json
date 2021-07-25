@@ -96,6 +96,12 @@
       "name": "Gaza",
       "description": "Envelope Follower",
       "tags": [""]
+    },
+    {
+      "slug": "CircularRide",
+      "name": "CircularRide",
+      "description": "Delay",
+      "tags": [""]
     }
   ]
 }

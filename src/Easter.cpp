@@ -17,6 +17,11 @@ Easter::Easter() {
 
 void Easter::process(const ProcessArgs &args) {
 
+	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		afp.algorithm = filterAlgorithm::kResonB;	
+	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		afp.algorithm = filterAlgorithm::kResonA;
+
 	if (outputs[OUTPUT_MAIN].isConnected()) {
 		audioFilter.setSampleRate(args.sampleRate);
 	
@@ -33,10 +38,6 @@ void Easter::process(const ProcessArgs &args) {
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
 	
-		if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-			afp.algorithm = filterAlgorithm::kResonB;	
-		if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		afp.algorithm = filterAlgorithm::kResonA;
 		}
 
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
