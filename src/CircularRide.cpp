@@ -23,7 +23,9 @@ void CircularRide::process(const ProcessArgs &args) {
 		adp.algorithm = delayAlgorithm::kPingPong;	
 	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		adp.algorithm = delayAlgorithm::kNormal;
-
+	adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
+	audioDelay.setParameters(adp);
+	
 	if ((outputs[OUTPUT_LEFT].isConnected() || outputs[OUTPUT_RIGHT].isConnected()) && (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected())) {
 		adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
         adp.delayRatio_Pct = params[PARAM_RATIO].getValue();;
@@ -87,7 +89,7 @@ struct CircularRideModuleWidget : ModuleWidget {
 		}
 
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10);
+			RPJTextLabel * tl = new RPJTextLabel(Vec(10, 20),10);
 			tl->setText("Stereo Delay");
 			addChild(tl);
 		}	
