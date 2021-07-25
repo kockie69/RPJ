@@ -87,7 +87,6 @@ struct CircularRideModuleWidget : ModuleWidget {
 			ad->module = module;
 			addChild(ad);
 		}
-
 		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(10, 20),10);
 			tl->setText("Stereo Delay");
@@ -104,8 +103,18 @@ struct CircularRideModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
         {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 120));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 100));
 			tl->setText("RATIO");
+			addChild(tl);
+		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(20,160),10);
+			tl->setText("Left+Ratio");
+			addChild(tl);
+		}	
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(20, 200),10);
+			tl->setText("Left&Right");
 			addChild(tl);
 		}
 		{
@@ -128,6 +137,16 @@ struct CircularRideModuleWidget : ModuleWidget {
 			tl->setText("OUT");
 			addChild(tl);
 		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 278));
+			tl->setText("L");
+			addChild(tl);
+		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 310));
+			tl->setText("R");
+			addChild(tl);
+		}
 
 		addInput(createInput<PJ301MPort>(Vec(10, 290), module, CircularRide::INPUT_LEFT));
         addInput(createInput<PJ301MPort>(Vec(10, 320), module, CircularRide::INPUT_RIGHT));
@@ -136,13 +155,13 @@ struct CircularRideModuleWidget : ModuleWidget {
 		
         addParam(createParam<RoundBlackKnob>(Vec(8,90),module, CircularRide::PARAM_DELAY));
         addParam(createParam<RoundBlackKnob>(Vec(82,90),module, CircularRide::PARAM_FEEDBACK));
-        addParam(createParam<RoundBlackKnob>(Vec(45,150),module, CircularRide::PARAM_RATIO));
+        addParam(createParam<RoundBlackKnob>(Vec(45,130),module, CircularRide::PARAM_RATIO));
 
         addParam(createParam<buttonMinSmall>(Vec(20,55),module, CircularRide::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(91,55),module, CircularRide::PARAM_UP));
 		addParam(createParam<RoundBlackKnob>(Vec(8, 230), module, CircularRide::PARAM_DRY));
        	addParam(createParam<RoundBlackKnob>(Vec(82, 230), module, CircularRide::PARAM_WET));
-        addParam(createParam<Toggle2P>(Vec(42, 190), module, CircularRide::PARAM_TYPE)); 
+        addParam(createParam<Toggle2P>(Vec(42, 180), module, CircularRide::PARAM_TYPE)); 
 	}
 };
 

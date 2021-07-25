@@ -129,7 +129,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -208,7 +208,7 @@
               </g>
               <g
                  id="g1060"
-                 transform="matrix(3.6228762,0,0,3.6228762,-401.07265,-364.4339)">
+                 transform="matrix(3.6228762,0,0,3.6228762,-404.90687,-364.4339)">
                 <g
                    id="g947"
                    transform="matrix(0.0696778,0,0,0.06101971,9.8810525,186.54565)"
@@ -385,6 +385,14 @@
                   </g>
                 </g>
               </g>
+              <path
+                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -366.55932,268.8102 h 75.82628"
+                 id="path981" />
+              <path
+                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -366.04611,306.23727 h 75.82628"
+                 id="path981-2" />
             </g>
           </g>
         </g>
