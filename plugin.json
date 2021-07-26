@@ -89,19 +89,19 @@
       "slug": "BlindCurve",
       "name": "BlindCurve",
       "description": "Audio Detector",
-      "tags": [""]
+      "tags": ["Envelope Follower"]
     },
     {
       "slug": "Gaza",
       "name": "Gaza",
       "description": "Envelope Follower",
-      "tags": [""]
+      "tags": ["Envelope Follower"]
     },
     {
       "slug": "CircularRide",
       "name": "CircularRide",
-      "description": "Delay",
-      "tags": [""]
+      "description": "Stereo Delay",
+      "tags": ["Delay"]
     }
   ]
 }
