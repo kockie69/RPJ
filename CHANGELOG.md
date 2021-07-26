@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob in Grendel
 
+## [1.0.4] - 2021-07-26
+### Added
+- SugarMice, a 3rd order Butterworth low-pass ladder filter
+- LadyNina is a 2nd order State Variable Filter (LPF, HPF, BPF, BSF)
+- Another filter, Montreal, an Ideal 2nd Order RLC Filter LPF, HPF, BPF and BSF
+- BlindCurve, an Audio Detector
+- Gaza, an Envelope Follower
+- CircularRide, a Stereo Delay with at the moment 2 delay algorithms (more to come)
+
+### Changed
+- Added a small description for all my modules
+- The placing of fonts has improved
+
 ## [1.0.3] - 2021-07-13
 ### Added
 - A new filter module Lavender with 2nd order LPF, HPF, BPF and BSF

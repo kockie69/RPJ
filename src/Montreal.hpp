@@ -1,32 +1,28 @@
 #include "rack.hpp"
-#include "AudioFilter.hpp"
+#include "WDF.hpp"
 
 using namespace rack;
 
 const int MODULE_WIDTH=6;
-		
-struct Essence : Module {
+
+struct Montreal : Module {
 
 	enum ParamIds {
 		PARAM_FC,
-		PARAM_CVFC,
 		PARAM_Q,
-		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
-		PARAM_CVB,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
-		INPUT_CVFC,
-		INPUT_CVQ,
-		INPUT_CVB,
 		NUM_INPUTS,
 	};
 
 	enum OutputIds {
-		OUTPUT_MAIN,
+		OUTPUT_LPF,
+		OUTPUT_HPF,
+		OUTPUT_BPF,
+		OUTPUT_BSF,
 		NUM_OUTPUTS,
 	};
 
@@ -34,10 +30,14 @@ struct Essence : Module {
 		NUM_LIGHTS,
 	};
 
-		Essence();
-		AudioFilter audioFilter;
+		Montreal();
 		void process(const ProcessArgs &) override;
-		AudioFilterParameters afp;
+		WDFIdealRLCLPF wdfIdealRLCLPF;
+		WDFIdealRLCHPF wdfIdealRLCHPF;
+		WDFIdealRLCBPF wdfIdealRLCBPF;
+		WDFIdealRLCBSF wdfIdealRLCBSF;
+		double sampleRate;
+		WDFParameters wdfp;
 };
 
 

@@ -5,6 +5,8 @@
 
 using simd::float_4;
 
+const int MODULE_WIDTH=10;
+
 template <typename T>
 struct LFO {
 	private:

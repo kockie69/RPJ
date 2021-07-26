@@ -72,3 +72,58 @@ The module is an implementation of the formula's and theory from the book [Desig
 Brave, a new 2nd Order Parametric EQ Filter with a Non constant Q
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Lady Nina](https://en.wikipedia.org/wiki/Lady_Nina)
+
+This module is a 2nd Order State Variable VA Filter with some additional configuration options that can be accessed throught the menu.
+
+### [Menu Options:]
+
+#### [Enable Gain Compensation]
+For every dB increase in peak gain due to increased Q, we lower the filter  response by half that value in dB.
+
+#### [Enable NLP]
+Option to enable Non Linear Processing.
+
+#### [Enable Self Oscilation]
+
+
+#### [Match Analog Nyquist LPF]
+The LPF suffers from the zero-gain-at-Nyquist problem. This issue is addressed with a tweak to provide the correct gain at Nyquist: in this case, the gain at Nyquist exactly matches that of the analog equivalent, however, there is a small error in the peak magnitude at a combination of extremely high fc and Q values. Nevertheless the filters are stable.
+
+## [Sugar Mice](https://en.wikipedia.org/wiki/Sugar_Mice)
+This module is a 3rd order Butterworth low-pass ladder filter. 
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Montreal](https://www.marillion.com/music/lyric.htm?id=822)
+Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [LadyNina]
+a 2nd order State Variable Filter (LPF, HPF, BPF, BSF)
+
+This module has four settings that can be changed in the menu (right mouse click).
+
+-Enable Gain Compensation
+-Enable Non Linear Processing (NLP)
+-Enable Self Oscilation
+-Match Gain at Nyquist for LPF
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [BlindCurve]
+Blindcurve is a simple Envelope follower. Yoe can change the detection to Peak, Mean Square or Root Mean Square.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [Gaza]
+Gaza is a more advanced Envelope Follower.
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
+
+## [CircularRide]
+CircularRide, a Stereo Delay with at the moment 2 delay algorithms (more to come)
+
+The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.

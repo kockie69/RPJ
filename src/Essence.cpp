@@ -42,22 +42,6 @@ void Essence::process(const ProcessArgs &args) {
 	}
 }
 
-struct buttonPlusSmall : SvgSwitch  {
-	buttonPlusSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
-	}
-};
-
-struct buttonMinSmall : SvgSwitch  {
-	buttonMinSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
-	}
-};
-
 struct EssenceModuleWidget : ModuleWidget {
 	EssenceModuleWidget(Essence* module) {
 
@@ -67,12 +51,17 @@ struct EssenceModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
-		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("ESSENCE");
 			addChild(title);
+		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
+			tl->setText("Parametric EQ Filter");
+			addChild(tl);
 		}
 		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));

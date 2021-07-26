@@ -3,6 +3,8 @@
 
 using namespace rack;
 
+const int MODULE_WIDTH=6;
+
 struct TheWeb : Module {
 
 	enum ParamIds {
