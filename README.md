@@ -101,8 +101,8 @@ Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
-## [LadyNina]
-a 2nd order State Variable Filter (LPF, HPF, BPF, BSF)
+## [LadyNina](https://en.wikipedia.org/wiki/Lady_Nina)
+A 2nd order State Variable Filter (LPF, HPF, BPF, BSF)
 
 This module has four settings that can be changed in the menu (right mouse click).
 
@@ -113,17 +113,17 @@ This module has four settings that can be changed in the menu (right mouse click
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
-## [BlindCurve]
+## [BlindCurve](https://www.marillion.com/music/lyric.htm?id=35)
 Blindcurve is a simple Envelope follower. Yoe can change the detection to Peak, Mean Square or Root Mean Square.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
-## [Gaza]
+## [Gaza](https://www.marillion.com/music/lyric.htm?id=824)
 Gaza is a more advanced Envelope Follower.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
-## [CircularRide]
+## [CircularRide](https://www.marillion.com/music/lyric.htm?id=169)
 CircularRide, a Stereo Delay with at the moment 2 delay algorithms (more to come)
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
