@@ -92,12 +92,17 @@ struct LadyNinaModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
-		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("LADY NINA");
 			addChild(title);
+		} 
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
+			tl->setText("State Variable Filter");
+			addChild(tl);
 		}
 		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
@@ -120,12 +125,12 @@ struct LadyNinaModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 210));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(75, 210));
 			tl->setText("LPF");
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(75, 250));
 			tl->setText("HPF");
 			addChild(tl);
 		}
@@ -135,24 +140,24 @@ struct LadyNinaModuleWidget : ModuleWidget {
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(75, 290));
 			tl->setText("BSF");
 			addChild(tl);
 		}
 
 		addInput(createInput<PJ301MPort>(Vec(10, 240), module, LadyNina::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, LadyNina::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, LadyNina::OUTPUT_HPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(75, 240), module, LadyNina::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(75, 280), module, LadyNina::OUTPUT_HPFMAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, LadyNina::OUTPUT_BPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, LadyNina::OUTPUT_BSFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(75, 320), module, LadyNina::OUTPUT_BSFMAIN));
 
 
 		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, LadyNina::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 62), module, LadyNina::INPUT_CVFC));
+		addInput(createInput<PJ301MPort>(Vec(75, 62), module, LadyNina::INPUT_CVFC));
 		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, LadyNina::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 117), module, LadyNina::INPUT_CVQ));
+		addInput(createInput<PJ301MPort>(Vec(75, 117), module, LadyNina::INPUT_CVQ));
 		addParam(createParam<RoundBlackKnob>(Vec(8, 170), module, LadyNina::PARAM_BOOSTCUT_DB));
-		addInput(createInput<PJ301MPort>(Vec(55, 172), module, LadyNina::INPUT_CVBCDB));
+		addInput(createInput<PJ301MPort>(Vec(75, 172), module, LadyNina::INPUT_CVBCDB));
 	}
 
 	void appendContextMenu(Menu *menu) override {

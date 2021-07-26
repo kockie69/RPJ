@@ -15,7 +15,14 @@ Estonia::Estonia() {
 
 void Estonia::process(const ProcessArgs &args) {
 
-	if (outputs[OUTPUT_MAIN].isConnected()) {
+	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		afp.algorithm = filterAlgorithm::kHiShelf;	
+	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		afp.algorithm = filterAlgorithm::kLowShelf;
+	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
+	audioFilter.setParameters(afp);
+
+	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
 		audioFilter.setSampleRate(args.sampleRate);
 	
 		float cvfc = 1.f;
@@ -29,12 +36,6 @@ void Estonia::process(const ProcessArgs &args) {
 		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
 		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * rescale(cvb,-10,10,0,1);
 	
-		if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-			afp.algorithm = filterAlgorithm::kHiShelf;	
-		if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-			afp.algorithm = filterAlgorithm::kLowShelf;
-		}
-
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 		audioFilter.setParameters(afp);
 		
@@ -68,12 +69,17 @@ struct EstoniaModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
-		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("ESTONIA");
 			addChild(title);
+		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
+			tl->setText(" Shelving filter");
+			addChild(tl);
 		}
 		{
 			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
@@ -81,12 +87,12 @@ struct EstoniaModuleWidget : ModuleWidget {
 			addChild(fnd);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 70));
 			tl->setText("CUTOFF");
 			addChild(tl);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 130));
 			tl->setText("BOOST/CUT");
 			addChild(tl);
 		}
@@ -106,10 +112,10 @@ struct EstoniaModuleWidget : ModuleWidget {
 		
 		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Estonia::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Estonia::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Estonia::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Estonia::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Estonia::PARAM_BOOSTCUT_DB));
-		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Estonia::INPUT_CVB));	
+		addParam(createParam<RoundBlackKnob>(Vec(8, 100), module, Estonia::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(55, 102), module, Estonia::INPUT_CVFC));
+		addParam(createParam<RoundBlackKnob>(Vec(8, 160), module, Estonia::PARAM_BOOSTCUT_DB));
+		addInput(createInput<PJ301MPort>(Vec(55, 162), module, Estonia::INPUT_CVB));	
 	}
 
 };

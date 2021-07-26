@@ -3,6 +3,8 @@
 
 using namespace rack;
 
+const int MODULE_WIDTH=7;
+
 const char *JSON_GAIN_KEY="Gain";
 const char *JSON_NLP_KEY="Nlp";
 const char *JSON_OSCILLATOR_KEY="Oscillator";

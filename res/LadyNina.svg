@@ -8,9 +8,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="30.48mm"
+   width="35.560001mm"
    height="128.5mm"
-   viewBox="0 0 30.479999 128.50004"
+   viewBox="0 0 35.560001 128.50004"
    version="1.1"
    id="svg4541"
    sodipodi:docname="LadyNina.svg"
@@ -129,7 +129,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -159,12 +159,13 @@
                id="g13383"
                style="stroke-width:0.809245">
               <rect
-                 style="fill:#f0f0f0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.725645px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 style="fill:#f0f0f0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.783677px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
                  id="rect3432"
-                 width="111.2383"
+                 width="129.74158"
                  height="465.53973"
-                 x="-404.9314"
-                 y="-101.00451" />
+                 x="-405.03372"
+                 y="-93.358154"
+                 transform="matrix(0.99974733,0.02247849,0,1,0,0)" />
               <g
                  id="text5024"
                  style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.2246px;line-height:125%;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Medium';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.637626;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -386,16 +387,16 @@
                 </g>
               </g>
               <path
-                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="m -369.44857,56.049118 49.57872,0.48607"
+                 style="fill:none;stroke:#000000;stroke-width:1.09726px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -369.45555,56.051591 65.63285,0.481124"
                  id="path899" />
               <path
-                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="m -371.87891,-12.514724 49.57872,0.486067"
+                 style="fill:none;stroke:#000000;stroke-width:1.11277px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -371.8868,-12.511975 67.57894,0.480569"
                  id="path899-0" />
               <path
-                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="m -369.44858,123.96391 49.57872,0.48607"
+                 style="fill:none;stroke:#000000;stroke-width:1.10504px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -369.45601,123.96652 66.60589,0.48085"
                  id="path899-1" />
             </g>
           </g>

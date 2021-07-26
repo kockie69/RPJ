@@ -324,12 +324,12 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("GRENDEL");
 			addChild(title);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(30, 19),10);
+			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 19),10);
 			tl->setText("Quadruple LFO");
 			addChild(tl);
 		}

@@ -75,10 +75,10 @@ struct CircularRideModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
-		box.size = Vec(8*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("CIRCULARRIDE");
 			addChild(title);
 		}
@@ -88,7 +88,7 @@ struct CircularRideModuleWidget : ModuleWidget {
 			addChild(ad);
 		}
 		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(10, 20),10);
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
 			tl->setText("Stereo Delay");
 			addChild(tl);
 		}	

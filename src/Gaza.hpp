@@ -2,6 +2,8 @@
 #include "EnvelopeFollower.hpp"
 
 using namespace rack;
+
+const int MODULE_WIDTH=6;
 		
 struct Gaza : Module {
 

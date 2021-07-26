@@ -2,7 +2,9 @@
 #include "AudioDelay.hpp"
 
 using namespace rack;
-		
+
+const int MODULE_WIDTH=8;
+
 struct CircularRide : Module {
 
 	enum ParamIds {

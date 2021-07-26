@@ -58,12 +58,17 @@ struct GazpachoModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
-		box.size = Vec(6*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
+		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			ATitle * title = new ATitle(box.size.x);
+			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
 			title->setText("GAZPACHO");
 			addChild(title);
+		}
+		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
+			tl->setText("Linkwitz-Riley");
+			addChild(tl);
 		}
 		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
