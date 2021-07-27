@@ -34,6 +34,8 @@ The module is an implementation of the formula's and theory from the book [Desig
 
 ## [Lavender](https://en.wikipedia.org/wiki/Lavender_(Marillion_song))
 
+![image](https://user-images.githubusercontent.com/2545165/127217771-0e96e853-8075-444d-a466-317f0895b2ef.png)
+
 Lavender is a module that implements both a 2nd order LPF and HPF. It has a cv for controlling the Cutoff and Frequency and the Resonance. 
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
