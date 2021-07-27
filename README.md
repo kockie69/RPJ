@@ -53,11 +53,16 @@ DryLand is a module that implements both a 1st order LPF and HPF. It has a cv fo
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [The Web](https://www.marillion.com/music/lyric.htm?id=12)
+
+![image](https://user-images.githubusercontent.com/2545165/127219028-4e5a946b-6702-4a2c-8f6d-2d062c3052e8.png)
+
 This module is a 2nd order Butterworth LPF, HPF, BPF and BSF.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Gazpacho](https://www.songfacts.com/facts/marillion/gazpacho)
+
+![image](https://user-images.githubusercontent.com/2545165/127219112-12b4aaba-407f-4f19-8824-6dc62ebbc091.png)
 
 Gazpacho is a 2nd order Linkwitz-Riley LPF and HPF. 
 
@@ -65,11 +70,15 @@ The module is an implementation of the formula's and theory from the book [Desig
 
 ## [Estonia](https://www.marillion.com/music/lyric.htm?id=110)
 
+![image](https://user-images.githubusercontent.com/2545165/127219244-33ab71a0-a44e-4af0-9fde-6e1eee2b5c9f.png)
+
 Estonia is a 1st order High and Low shelving filter.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Essence](https://www.marillion.com/music/lyric.htm?id=173)
+
+![image](https://user-images.githubusercontent.com/2545165/127219358-aff97efc-2d02-429f-a674-fd4c83a067fe.png)
 
 Essence, a new 2nd Order Parametric EQ Filter with a constant Q
 
@@ -77,11 +86,15 @@ The module is an implementation of the formula's and theory from the book [Desig
 
 ## [Brave](https://www.marillion.com/music/lyric.htm?id=91)
 
+![image](https://user-images.githubusercontent.com/2545165/127219486-2280d8ea-07b0-4a5b-aef9-be3c22c9fe62.png)
+
 Brave, a new 2nd Order Parametric EQ Filter with a Non constant Q
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Lady Nina](https://en.wikipedia.org/wiki/Lady_Nina)
+
+![image](https://user-images.githubusercontent.com/2545165/127219589-584c9bae-919d-4f91-8bc9-f00cdbf51e9d.png)
 
 This module is a 2nd Order State Variable VA Filter with some additional configuration options that can be accessed throught the menu.
 
