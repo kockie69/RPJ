@@ -131,16 +131,25 @@ Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [BlindCurve](https://www.marillion.com/music/lyric.htm?id=35)
+
+![image](https://user-images.githubusercontent.com/2545165/127226172-818a9f00-7216-4f54-9726-a593f9e4b3d0.png)
+
 Blindcurve is a simple Envelope follower. Yoe can change the detection to Peak, Mean Square or Root Mean Square.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Gaza](https://www.marillion.com/music/lyric.htm?id=824)
+
+![image](https://user-images.githubusercontent.com/2545165/127226277-31c8fece-75c1-4c90-94f5-c05abd270871.png)
+
 Gaza is a more advanced Envelope Follower.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [CircularRide](https://www.marillion.com/music/lyric.htm?id=169)
+
+![image](https://user-images.githubusercontent.com/2545165/127226436-add589d3-5c43-41b2-a68e-8fa75c158e18.png)
+
 CircularRide, a Stereo Delay with at the moment 2 delay algorithms (more to come)
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
