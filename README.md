@@ -2,6 +2,8 @@
 
 ## [Grendel](https://www.songfacts.com/facts/marillion/grendel)
 
+![image](https://user-images.githubusercontent.com/2545165/127217988-c96fbf5f-4ab9-4919-becb-cefad05b025b.png)
+
 Grendel is highly inspired by the [Batumi from XAOC](http://xaocdevices.com/main/batumi/). It is a fully voltage controlled, quadruple digital LFO module with a couple of nice features. Each oscillator can be used independently or in one of the 3 other modes: quad, phase and divide. For each oscillator, there are sine, square, saw, ramp and triangle waveform outputs available. Voltage control is possible for each oscillator’s frequency, phase and reset.
 
 The four modes of Grendel can be selected by using the selector on the top. The colors of the 4 flashing leds will also indicate the selected mode, being red for FREE, green for QUAD, blue for PHASE and yellow for DIVIDE.
@@ -28,6 +30,8 @@ Each of the LFO's has a RESET input signal that can receive an incoming trigger 
 
 ## [Easter](https://www.songfacts.com/facts/marillion/easter)
 
+![image](https://user-images.githubusercontent.com/2545165/127218106-64fa59c8-dddb-4db1-857e-a5c44ad5f3d9.png)
+
 Easter is a resonance filter module that delivers 2 different resonators. One is a standard type and the other is a Smith-Angell resonator. You can choose the filters by clicking the + and - small buttons.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
@@ -41,6 +45,8 @@ Lavender is a module that implements both a 2nd order LPF and HPF. It has a cv f
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [DryLand](https://www.marillion.com/music/lyric.htm?id=72)
+
+![image](https://user-images.githubusercontent.com/2545165/127218199-ee2dbd8e-22ca-439a-b362-dd48daf559fa.png)
 
 DryLand is a module that implements both a 1st order LPF and HPF. It has a cv for controlling the Cutoff Frequency.
 
@@ -96,11 +102,17 @@ The LPF suffers from the zero-gain-at-Nyquist problem. This issue is addressed w
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Sugar Mice](https://en.wikipedia.org/wiki/Sugar_Mice)
+
+![image](https://user-images.githubusercontent.com/2545165/127218347-a59eaf0e-fb35-40e4-8e80-f284c821b8eb.png)
+
 This module is a 3rd order Butterworth low-pass ladder filter. 
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
 
 ## [Montreal](https://www.marillion.com/music/lyric.htm?id=822)
+
+![image](https://user-images.githubusercontent.com/2545165/127218426-1a3e075c-1cd7-4257-94a3-ce7779d6563f.png)
+
 Montreal offers Ideal 2nd Order LPF, HPF, BPF and BSF RLC Filters.
 
 The module is an implementation of the formula's and theory from the book [Designing Audio Effect Plugins in C++](https://www.amazon.co.uk/Designing-Software-Synthesizer-Plugins-Audio/dp/0367510464) from Will C. Pirkle.
