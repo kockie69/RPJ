@@ -55,6 +55,11 @@ struct SugarMiceModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
+			tl->setText("Ladder Filter");
+			addChild(tl);
+		}
+		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
 			tl->setText("CUTOFF");
 			addChild(tl);

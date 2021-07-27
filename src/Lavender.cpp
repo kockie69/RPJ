@@ -79,6 +79,11 @@ struct LavenderModuleWidget : ModuleWidget {
 			addChild(title);
 		}
 		{
+			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
+			tl->setText("2nd order LPF/HPF");
+			addChild(tl);
+		}
+		{
 			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
 			tl->setText("CUTOFF");
 			addChild(tl);
