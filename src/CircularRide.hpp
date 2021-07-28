@@ -4,6 +4,7 @@
 using namespace rack;
 
 const int MODULE_WIDTH=8;
+const char *JSON_DELAY_ALGORITHM_KEY="Algorithm";
 
 struct CircularRide : Module {
 
@@ -36,6 +37,8 @@ struct CircularRide : Module {
 		NUM_LIGHTS,
 	};
 		CircularRide();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioDelay audioDelay;
 		void process(const ProcessArgs &) override;
         dsp::SchmittTrigger upTrigger,downTrigger;

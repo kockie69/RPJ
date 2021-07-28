@@ -4,7 +4,7 @@
 using namespace rack;
 
 const int MODULE_WIDTH=6;
-		
+const char *JSON_RESONATOR_TYPE_KEY="Algorithm";		
 struct Easter : Module {
 
 	enum ParamIds {
@@ -37,6 +37,8 @@ struct Easter : Module {
 	};
 
 		Easter();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;

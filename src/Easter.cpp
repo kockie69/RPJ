@@ -136,4 +136,17 @@ struct EasterModuleWidget : ModuleWidget {
 
 };
 
+json_t *Easter::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_RESONATOR_TYPE_KEY, json_integer(static_cast<int>(afp.algorithm)));
+	return rootJ;
+}
+
+void Easter::dataFromJson(json_t *rootJ) {
+	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_RESONATOR_TYPE_KEY);
+	if (nAlgorithmJ) {
+		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+}
+
 Model * modelEaster = createModel<Easter, EasterModuleWidget>("Easter");

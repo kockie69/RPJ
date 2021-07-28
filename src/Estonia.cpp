@@ -120,4 +120,17 @@ struct EstoniaModuleWidget : ModuleWidget {
 
 };
 
+json_t *Estonia::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_FILTER_ALGORITHM_KEY, json_integer(static_cast<int>(afp.algorithm)));
+	return rootJ;
+}
+
+void Estonia::dataFromJson(json_t *rootJ) {
+	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_FILTER_ALGORITHM_KEY);
+	if (nAlgorithmJ) {
+		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+}
+
 Model * modelEstonia = createModel<Estonia, EstoniaModuleWidget>("Estonia");

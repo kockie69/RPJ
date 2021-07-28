@@ -283,5 +283,17 @@ void Toggle2P::randomize() {
 		paramQuantity->setValue(0.0f);
 }	
 
+json_t *CircularRide::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_DELAY_ALGORITHM_KEY, json_integer(static_cast<int>(adp.algorithm)));
+	return rootJ;
+}
+
+void CircularRide::dataFromJson(json_t *rootJ) {
+	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_DELAY_ALGORITHM_KEY);
+	if (nAlgorithmJ) {
+		adp.algorithm=static_cast<delayAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+}
 
 Model * modelCircularRide = createModel<CircularRide, CircularRideModuleWidget>("CircularRide");

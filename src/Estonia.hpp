@@ -4,6 +4,7 @@
 using namespace rack;
 
 const int MODULE_WIDTH=6;
+const char *JSON_FILTER_ALGORITHM_KEY="Algorithm";
 		
 struct Estonia : Module {
 
@@ -34,6 +35,8 @@ struct Estonia : Module {
 	};
 
 		Estonia();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
