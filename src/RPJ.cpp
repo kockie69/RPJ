@@ -17,6 +17,7 @@ void init(Plugin *p) {
     p->addModel(modelBlindCurve);
 	p->addModel(modelGaza);
 	p->addModel(modelCircularRide);
+	p->addModel(modelDrillingHoles);
 }
 
 RPJTextLabel::RPJTextLabel(Vec pos) {
