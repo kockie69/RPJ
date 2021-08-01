@@ -7,12 +7,11 @@ DryLand::DryLand() {
 
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
-	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "DRY");
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
-	configParam(PARAM_UP, 0.0, 1.0, 0.0);
-	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+
+	LPFaudioFilter.reset(14100);
+	HPFaudioFilter.reset(14100);
 	LPFafp.algorithm=filterAlgorithm::kLPF1;
 	HPFafp.algorithm=filterAlgorithm::kHPF1;
 }
@@ -25,14 +24,9 @@ void DryLand::process(const ProcessArgs &args) {
 
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-	
-		float cvq = 1.f;
-		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0f);
  	
- 		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		LPFafp.Q = HPFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+ 		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
 	

@@ -69,7 +69,7 @@ public:
 	double getG_value();
 
 	/** --- helper for Harma filters (phaser) */
-//	double getS_value();
+	double getS_value();
 
 std::string filterAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
 		"ButterLPF2", "ButterHPF2", "ButterBPF2", "ButterBSF2", "MMALPF2", "MMALPF2B", "LowShelf",

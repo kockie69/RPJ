@@ -8,13 +8,8 @@ const int MODULE_WIDTH=6;
 struct DryLand : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
 		PARAM_CVFC,
-		PARAM_Q,
-		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
 		NUM_PARAMS,
@@ -23,7 +18,6 @@ struct DryLand : Module {
 	enum InputIds {
 		INPUT_MAIN,
 		INPUT_CVFC,
-		INPUT_CVQ,
 		NUM_INPUTS,
 	};
 
@@ -41,7 +35,6 @@ struct DryLand : Module {
 		AudioFilter LPFaudioFilter;
 		AudioFilter HPFaudioFilter;
 		void process(const ProcessArgs &) override;
-		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp;
 };
 

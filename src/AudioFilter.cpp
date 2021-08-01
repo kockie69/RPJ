@@ -66,8 +66,8 @@ bool AudioFilter::calculateFilterCoeffs()
 	// --- set default pass-through
 	coeffArray[a0] = 1.0;
 
-	coeffArray[c0] = audioFilterParameters.dry;
-	coeffArray[d0] = audioFilterParameters.wet;
+	coeffArray[c0] = audioFilterParameters.wet;
+	coeffArray[d0] = audioFilterParameters.dry;
 
 	// --- grab these variables, to make calculations look more like the book
 	filterAlgorithm algorithm = audioFilterParameters.algorithm;
@@ -821,7 +821,7 @@ double AudioFilter::processAudioSample(double xn)
 	// --- let biquad do the grunt-work
 	//
 	// return (dry) + (processed): x(n)*d0 + y(n)*c0
-	return coeffArray[c0] * xn + coeffArray[d0] * biquad.processAudioSample(xn);
+	return coeffArray[d0] * xn + coeffArray[c0] * biquad.processAudioSample(xn);
 }
 
 
