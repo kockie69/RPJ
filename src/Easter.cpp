@@ -12,6 +12,7 @@ Easter::Easter() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	audioFilter.reset(44100);
 	afp.algorithm = filterAlgorithm::kResonA;
 }
 
@@ -29,14 +30,14 @@ void Easter::process(const ProcessArgs &args) {
 	
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() /10.0);
 	
 		float cvq = 1.f;
 		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
+			cvq = abs(inputs[INPUT_CVQ].getVoltage() / 10.0);
  	
-		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+		afp.fc = params[PARAM_FC].getValue() * cvfc;
+		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
 

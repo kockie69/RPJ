@@ -774,7 +774,7 @@ bool AudioFilter::calculateFilterCoeffs()
 		double BW = fc / Q;
 		double filter_b2 = exp(-2.0*M_PI*(BW / sampleRate));
 		double filter_b1 = ((-4.0*filter_b2) / (1.0 + filter_b2))*cos(theta_c);
-		double filter_a0 = (1.0 - filter_b2)*pow((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)), 0.5);
+		double filter_a0 = (1.0 - filter_b2)*sqrt((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)));
 
 		// --- update coeffs
 		coeffArray[a0] = filter_a0;
