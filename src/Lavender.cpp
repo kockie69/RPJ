@@ -13,6 +13,10 @@ Lavender::Lavender() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	LPFaudioFilter.reset(44100);
+	HPFaudioFilter.reset(44100);
+	BPFaudioFilter.reset(44100);
+	BSFaudioFilter.reset(44100);
 	LPFafp.algorithm=filterAlgorithm::kLPF2;
 	HPFafp.algorithm=filterAlgorithm::kHPF2;
 	BPFafp.algorithm=filterAlgorithm::kBPF2;

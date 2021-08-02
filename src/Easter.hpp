@@ -14,7 +14,6 @@ struct Easter : Module {
 		PARAM_CVFC,
 		PARAM_Q,
 		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
 		NUM_PARAMS,

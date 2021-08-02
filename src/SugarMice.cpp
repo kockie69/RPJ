@@ -15,7 +15,6 @@ void SugarMice::process(const ProcessArgs &args) {
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
 		if (params[PARAM_FC].getValue() != fc || wdfButterLPF3.getUsePostWarping() != warp) {
 			wdfButterLPF3.setFilterFc(params[PARAM_FC].getValue());
-//			wdfButterLPF3.reset(args.sampleRate);
 			fc = params[PARAM_FC].getValue();
 			warp = wdfButterLPF3.getUsePostWarping();
 		}
