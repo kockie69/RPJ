@@ -13,6 +13,8 @@ Gazpacho::Gazpacho() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	LPFaudioFilter.reset(44100);
+	HPFaudioFilter.reset(44100);
 	LPFafp.algorithm=filterAlgorithm::kLWRLPF2;
 	HPFafp.algorithm=filterAlgorithm::kLWRHPF2;
 }
@@ -25,14 +27,9 @@ void Gazpacho::process(const ProcessArgs &args) {
 
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-	
-		float cvq = 1.f;
-		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0);
  	
- 		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		LPFafp.Q = HPFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+ 		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
 
