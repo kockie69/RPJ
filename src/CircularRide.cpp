@@ -347,13 +347,23 @@ void Toggle2P::randomize() {
 json_t *CircularRide::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_DELAY_ALGORITHM_KEY, json_integer(static_cast<int>(adp.algorithm)));
+	json_object_set_new(rootJ, JSON_ENABLE_LPF_KEY, json_boolean(enableLPF));
+	json_object_set_new(rootJ, JSON_ENABLE_HPF_KEY, json_boolean(enableHPF));
 	return rootJ;
 }
 
 void CircularRide::dataFromJson(json_t *rootJ) {
 	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_DELAY_ALGORITHM_KEY);
+	json_t *nLPFJ = json_object_get(rootJ, JSON_ENABLE_LPF_KEY);
+	json_t *nHPFJ = json_object_get(rootJ, JSON_ENABLE_HPF_KEY);
 	if (nAlgorithmJ) {
 		adp.algorithm=static_cast<delayAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+	if (nLPFJ) {
+		enableLPF=json_boolean_value(nLPFJ);
+	}
+	if (nHPFJ) {
+		enableHPF=json_boolean_value(nHPFJ);
 	}
 }
 

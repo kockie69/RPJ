@@ -76,7 +76,8 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	// --- make sure we support this delay algorithm
 	if (parameters.algorithm != delayAlgorithm::kNormal &&
 		parameters.algorithm != delayAlgorithm::kPingPong &&
-		parameters.algorithm != delayAlgorithm::kLCRDelay)
+		parameters.algorithm != delayAlgorithm::kLCRDelay &&
+		parameters.algorithm != delayAlgorithm::kTapDelay)
 		return false;
 
 	// --- if only one output channel, revert to mono operation
@@ -92,6 +93,7 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	// --- pick up inputs
 	//
 	// --- LEFT channel
+	double outputL, outputR;
 	double xnL = inputFrame[0];
 
 	// --- RIGHT channel (duplicate left input if mono-in)
@@ -120,6 +122,12 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 		// --- write to RIGHT delay buffer with RIGHT channel info
 		delayBuffer_R.writeBuffer(dnR);
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputL = dryMix*xnL + wetMix*ynL;
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputR = dryMix*xnR + wetMix*ynR;
 	}
 	else if (parameters.algorithm == delayAlgorithm::kPingPong)
 	{
@@ -128,6 +136,12 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 		// --- write to RIGHT delay buffer with LEFT channel info
 		delayBuffer_R.writeBuffer(dnL);
+
+			// --- form mixture out = dry*xn + wet*yn
+		outputL = dryMix*xnL + wetMix*ynL;
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputR = dryMix*xnR + wetMix*ynR;
 	}
 	else if (parameters.algorithm == delayAlgorithm::kLCRDelay)
 	{
@@ -167,13 +181,26 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 		// --- write to RIGHT delay buffer with RIGHT channel info
 		delayBuffer_R.writeBuffer(xnR);
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputL = dryMix*xnL + wetMix*ynL + wetMix*ynC;
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputR = dryMix*xnR + wetMix*ynR + wetMix*ynC;
 	}
+	else if (parameters.algorithm == delayAlgorithm::kTapDelay) {
+				// --- write to LEFT delay buffer with LEFT channel info
+		delayBuffer_L.writeBuffer(dnL);
 
-	// --- form mixture out = dry*xn + wet*yn
-	double outputL = dryMix*xnL + wetMix*ynL + wetMix*ynC;
+		// --- write to RIGHT delay buffer with RIGHT channel info
+		delayBuffer_R.writeBuffer(dnR);
 
-	// --- form mixture out = dry*xn + wet*yn
-	double outputR = dryMix*xnR + wetMix*ynR + wetMix*ynC;
+		// --- form mixture out = dry*xn + wet*yn
+		outputL = dryMix*xnL + wetMix*ynL + delayBuffer_L.readBuffer(delayInSamples_L * 0.75) + delayBuffer_L.readBuffer(delayInSamples_L * 0.5) + delayBuffer_L.readBuffer(delayInSamples_L * 0.25);
+
+		// --- form mixture out = dry*xn + wet*yn
+		outputR = dryMix*xnR + wetMix*ynR + delayBuffer_R.readBuffer(delayInSamples_R * 0.75) + delayBuffer_R.readBuffer(delayInSamples_R * 0.5) + delayBuffer_R.readBuffer(delayInSamples_R * 0.25);
+	}
 
 	// --- set left channel
 	outputFrame[0] = (float)outputL;

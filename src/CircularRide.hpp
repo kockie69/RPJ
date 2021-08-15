@@ -6,6 +6,8 @@ const int MODULE_WIDTH=11;
 using namespace rack;
 
 const char *JSON_DELAY_ALGORITHM_KEY="Algorithm";
+const char *JSON_ENABLE_LPF_KEY="LPF";
+const char *JSON_ENABLE_HPF_KEY="HPF";
 
 struct CircularRide : Module {
 

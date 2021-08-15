@@ -42,7 +42,7 @@ private:
 
 enum class delayUpdateType { kLeftAndRight, kLeftPlusRatio };
 
-enum class delayAlgorithm { kNormal, kPingPong, kLCRDelay, numDelayAlgorithms };
+enum class delayAlgorithm { kNormal, kPingPong, kLCRDelay, kTapDelay, numDelayAlgorithms };
 
 struct AudioDelayParameters
 {
@@ -108,7 +108,7 @@ public:
 	/** creation function */
 	void createDelayBuffers(double , double );
 
-	std::string delayAlgorithmTxt[static_cast<int>(delayAlgorithm::numDelayAlgorithms)] = { "Normal", "PingPong", "LCRDelay"};
+	std::string delayAlgorithmTxt[static_cast<int>(delayAlgorithm::numDelayAlgorithms)] = { "Normal", "PingPong", "LCRDelay", "TapDelay"};
 
 private:
 	AudioDelayParameters parameters; ///< object parameters
