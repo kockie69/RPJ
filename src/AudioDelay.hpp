@@ -1,19 +1,6 @@
 #include "rack.hpp"
+#include "AudioFilter.hpp"
 
-/**
-\class CircularBuffer
-\ingroup FX-Objects
-\brief
-The CircularBuffer object implements a simple circular buffer. It uses a wrap mask to wrap the read or write index quickly.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
-/** A simple cyclic buffer: NOTE - this is NOT an IAudioSignalProcessor or IAudioSignalGenerator
-	S must be a power of 2.
-*/
 template <typename T>
 class CircularBuffer
 {
@@ -53,49 +40,10 @@ private:
 	bool interpolate = true;			///< interpolation (default is ON)
 };
 
-/**
-\enum delayUpdateType
-\ingroup Constants-Enums
-\brief
-Use this strongly typed enum to easily set the delay update type; this varies depending on the designer's choice
-of GUI controls. See the book reference for more details.
-
-- enum class delayUpdateType { kLeftAndRight, kLeftPlusRatio };
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 enum class delayUpdateType { kLeftAndRight, kLeftPlusRatio };
 
-/**
-\enum delayAlgorithm
-\ingroup Constants-Enums
-\brief
-Use this strongly typed enum to easily set the delay algorithm
+enum class delayAlgorithm { kNormal, kPingPong, kLCRDelay, numDelayAlgorithms };
 
-- enum class delayAlgorithm { kNormal, kPingPong };
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
-enum class delayAlgorithm { kNormal, kPingPong, numDelayAlgorithms };
-
-
-/**
-\struct AudioDelayParameters
-\ingroup FX-Objects
-\brief
-Custom parameter structure for the AudioDelay object.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 struct AudioDelayParameters
 {
 	AudioDelayParameters();
@@ -111,8 +59,12 @@ struct AudioDelayParameters
 
 	delayUpdateType updateType = delayUpdateType::kLeftAndRight;///< update algorithm
 	double leftDelay_mSec = 0.0;	///< left delay time
+	double centreDelay_mSec = 0.0;	///< left delay time
 	double rightDelay_mSec = 0.0;	///< right delay time
 	double delayRatio_Pct = 100.0;	///< dela ratio: right length = (delayRatio)*(left length)
+
+	double lpfFc, hpfFc = 100.0;
+	bool useLPF, useHPF = true;
 };
 
 struct AudioDelay
@@ -156,7 +108,7 @@ public:
 	/** creation function */
 	void createDelayBuffers(double , double );
 
-	std::string delayAlgorithmTxt[static_cast<int>(delayAlgorithm::numDelayAlgorithms)] = { "Normal", "PingPong"};
+	std::string delayAlgorithmTxt[static_cast<int>(delayAlgorithm::numDelayAlgorithms)] = { "Normal", "PingPong", "LCRDelay"};
 
 private:
 	AudioDelayParameters parameters; ///< object parameters
@@ -164,15 +116,22 @@ private:
 	double sampleRate = 0.0;		///< current sample rate
 	double samplesPerMSec = 0.0;	///< samples per millisecond, for easy access calculation
 	double delayInSamples_L = 0.0;	///< double includes fractional part
+	double delayInSamples_C = 0.0;	///< double includes fractional part
 	double delayInSamples_R = 0.0;	///< double includes fractional part
 	double bufferLength_mSec = 0.0;	///< buffer length in mSec
 	unsigned int bufferLength = 0;	///< buffer length in samples
 	double wetMix = 0.707; ///< wet output default = -3dB
 	double dryMix = 0.707; ///< dry output default = -3dB
+	bool enableLPF, enableHPF = true;
 
 	// --- delay buffer of doubles
 	CircularBuffer<double> delayBuffer_L;	///< LEFT delay buffer of doubles
+	CircularBuffer<double> delayBuffer_C;	///< LEFT delay buffer of doubles
 	CircularBuffer<double> delayBuffer_R;	///< RIGHT delay buffer of doubles
+
+	AudioFilter LPFaudioFilter;
+	AudioFilter HPFaudioFilter;
+	AudioFilterParameters LPFafp,HPFafp;
 };
 
 

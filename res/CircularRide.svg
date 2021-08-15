@@ -8,9 +8,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="40.639999mm"
+   width="55.880001mm"
    height="128.5mm"
-   viewBox="0 0 40.639999 128.50004"
+   viewBox="0 0 55.880001 128.50004"
    version="1.1"
    id="svg4541"
    sodipodi:docname="CircularRide.svg"
@@ -86,7 +86,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.9720632"
      inkscape:cx="19.372068"
-     inkscape:cy="315.28413"
+     inkscape:cy="314.26996"
      inkscape:document-units="mm"
      inkscape:current-layer="g13383"
      showgrid="true"
@@ -129,7 +129,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -159,9 +159,9 @@
                id="g13383"
                style="stroke-width:0.809245">
               <rect
-                 style="fill:#f0f0f0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.837512px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 style="fill:#f0f0f0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.978173px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
                  id="rect3432"
-                 width="148.17931"
+                 width="202.13261"
                  height="465.53973"
                  x="-404.9314"
                  y="-101.00451" />
@@ -393,6 +393,18 @@
                  style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
                  d="m -366.04611,306.23727 h 75.82628"
                  id="path981-2" />
+              <path
+                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -395.21006,52.592337 123.94679,-0.486063"
+                 id="path912" />
+              <path
+                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -270.29113,43.357085 -0.48606,8.749189"
+                 id="path914" />
+              <path
+                 style="fill:none;stroke:#000000;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                 d="m -395.69613,42.871022 v 9.235252"
+                 id="path916" />
             </g>
           </g>
         </g>

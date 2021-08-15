@@ -1,15 +1,18 @@
 #include "rack.hpp"
 #include "AudioDelay.hpp"
 
+const int MODULE_WIDTH=11;
+
 using namespace rack;
 
-const int MODULE_WIDTH=8;
 const char *JSON_DELAY_ALGORITHM_KEY="Algorithm";
 
 struct CircularRide : Module {
 
 	enum ParamIds {
-        PARAM_DELAY,
+        PARAM_DELAYL,
+		PARAM_DELAYC,
+		PARAM_DELAYR,
         PARAM_FEEDBACK,
         PARAM_RATIO,
 		PARAM_DRY,
@@ -18,6 +21,8 @@ struct CircularRide : Module {
 		PARAM_ALGORITHM,
         PARAM_UP,
         PARAM_TYPE,
+		PARAM_LPFFC,
+		PARAM_HPFFC,
 		NUM_PARAMS,
 	};
 
@@ -39,10 +44,13 @@ struct CircularRide : Module {
 		CircularRide();
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
-		AudioDelay audioDelay;
 		void process(const ProcessArgs &) override;
+
         dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioDelayParameters adp;
+		AudioDelay audioDelay;
+		bool enableLPF = true;
+		bool enableHPF = true;
 };
 
 struct DetectAlgorithmQuantity : public rack::engine::ParamQuantity {
@@ -84,4 +92,18 @@ struct Toggle2P : SvgSwitch {
 
 	// override the base randomizer as it sets switches to invalid values.
 	void randomize() override;
+};
+
+/* Context Menu Item for changing the LPF setting */
+struct nLPFMenuItem : MenuItem {
+	CircularRide *module;
+	bool EnableLPF;
+	void onAction(const event::Action &) override;
+};
+
+/* Context Menu Item for changing the HPF setting */
+struct nHPFMenuItem : MenuItem {
+	CircularRide *module;
+	bool EnableHPF;
+	void onAction(const event::Action &) override;
 };

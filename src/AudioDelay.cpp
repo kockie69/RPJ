@@ -1,17 +1,5 @@
 #include "AudioDelay.hpp"
 
-/**
-@doLinearInterpolation
-\ingroup FX-Functions
-
-@brief performs linear interpolation of fractional x distance between two adjacent (x,y) points;
-returns interpolated value
-
-\param y1 - the y coordinate of the first point
-\param y2 - the 2 coordinate of the second point
-\param x - the interpolation location as a fractional distance between x1 and x2 (which are not needed)
-\return the interpolated value or y2 if the interpolation is outside the x interval
-*/
 inline double doLinearInterpolation(double y1, double y2, double fractional_X)
 {
 	// --- check invalid condition
@@ -21,24 +9,19 @@ inline double doLinearInterpolation(double y1, double y2, double fractional_X)
 	return fractional_X*y2 + (1.0 - fractional_X)*y1;
 }
 
-
-/**
-@boundValue
-\ingroup FX-Functions
-
-@brief  Bound a value to min and max limits
-
-\param value - value to bound
-\param minValue - lower bound limit
-\param maxValue - upper bound limit
-*/
 inline void boundValue(double& value, double minValue, double maxValue)
 {
 	value = fmin(value, maxValue);
 	value = fmax(value, minValue);
 }
 
-AudioDelay::AudioDelay() {}		/* C-TOR */
+AudioDelay::AudioDelay() {
+	LPFaudioFilter.reset(14100);
+	HPFaudioFilter.reset(14100);
+	LPFafp.algorithm=filterAlgorithm::kLPF1;
+	HPFafp.algorithm=filterAlgorithm::kHPF1;
+} /* C-TOR */
+
 AudioDelay::~AudioDelay() {}	/* D-TOR */
 
 
@@ -60,11 +43,6 @@ bool AudioDelay::reset(double _sampleRate)
 	return true;
 }
 
-/** process MONO audio delay */
-/**
-\param xn input
-\return the processed sample
-*/
 double AudioDelay::processAudioSample(double xn)
 {
 	// --- read delay
@@ -97,7 +75,8 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 	// --- make sure we support this delay algorithm
 	if (parameters.algorithm != delayAlgorithm::kNormal &&
-		parameters.algorithm != delayAlgorithm::kPingPong)
+		parameters.algorithm != delayAlgorithm::kPingPong &&
+		parameters.algorithm != delayAlgorithm::kLCRDelay)
 		return false;
 
 	// --- if only one output channel, revert to mono operation
@@ -120,6 +99,9 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 	// --- read delay LEFT
 	double ynL = delayBuffer_L.readBuffer(delayInSamples_L);
+
+	// --- read delay LEFT
+	double ynC = delayBuffer_C.readBuffer(delayInSamples_C);
 
 	// --- read delay RIGHT
 	double ynR = delayBuffer_R.readBuffer(delayInSamples_R);
@@ -147,12 +129,51 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 		// --- write to RIGHT delay buffer with LEFT channel info
 		delayBuffer_R.writeBuffer(dnL);
 	}
+	else if (parameters.algorithm == delayAlgorithm::kLCRDelay)
+	{
+		// --- create input for delay buffer with Left and Right channel info
+		
+		// TO DO: Check if LPF and HPF are enabled in the menu
+		// if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
+		LPFaudioFilter.setSampleRate(sampleRate);
+		HPFaudioFilter.setSampleRate(sampleRate);
+ 	
+ 		LPFafp.fc = parameters.lpfFc;
+		HPFafp.fc = parameters.hpfFc;
+		LPFafp.dry = HPFafp.dry = 0;
+		LPFafp.wet = HPFafp.wet = 1;
+
+		// Check if LPF is enabled
+		float LPFOut = (parameters.feedback_Pct / 100.0) * ynC; 
+		if (parameters.useLPF) {
+			LPFaudioFilter.setParameters(LPFafp);
+			LPFOut = LPFaudioFilter.processAudioSample(LPFOut);
+		}
+
+		// Check if HPF is enabled 
+		float HPFOut = LPFOut;
+		if (parameters.useHPF) {
+			HPFaudioFilter.setParameters(HPFafp);
+			HPFOut = HPFaudioFilter.processAudioSample(HPFOut);
+		}
+
+		double dnC = xnL + xnR + HPFOut;
+
+		// --- write to LEFT delay buffer with LEFT channel info
+		delayBuffer_L.writeBuffer(xnL);
+
+		// --- write to CENTRE delay buffer with RIGHT channel info
+		delayBuffer_C.writeBuffer(dnC);
+
+		// --- write to RIGHT delay buffer with RIGHT channel info
+		delayBuffer_R.writeBuffer(xnR);
+	}
 
 	// --- form mixture out = dry*xn + wet*yn
-	double outputL = dryMix*xnL + wetMix*ynL;
+	double outputL = dryMix*xnL + wetMix*ynL + wetMix*ynC;
 
 	// --- form mixture out = dry*xn + wet*yn
-	double outputR = dryMix*xnR + wetMix*ynR;
+	double outputR = dryMix*xnR + wetMix*ynR + wetMix*ynC;
 
 	// --- set left channel
 	outputFrame[0] = (float)outputL;
@@ -190,10 +211,12 @@ void AudioDelay::setParameters(AudioDelayParameters _parameters)
 		// --- set left and right delay times
 		// --- calculate total delay time in samples + fraction
 		double newDelayInSamples_L = parameters.leftDelay_mSec*(samplesPerMSec);
+		double newDelayInSamples_C = parameters.centreDelay_mSec*(samplesPerMSec);
 		double newDelayInSamples_R = parameters.rightDelay_mSec*(samplesPerMSec);
 
 		// --- new delay time with fraction
 		delayInSamples_L = newDelayInSamples_L;
+		delayInSamples_C = newDelayInSamples_C;
 		delayInSamples_R = newDelayInSamples_R;
 	}
 	else if (parameters.updateType == delayUpdateType::kLeftPlusRatio)
@@ -207,6 +230,7 @@ void AudioDelay::setParameters(AudioDelayParameters _parameters)
 
 		// --- new delay time with fraction
 		delayInSamples_L = newDelayInSamples;
+		delayInSamples_C = delayInSamples_L*(delayRatio/2.0);
 		delayInSamples_R = delayInSamples_L*delayRatio;
 	}
 }
@@ -224,37 +248,12 @@ void AudioDelay::createDelayBuffers(double _sampleRate, double _bufferLength_mSe
 
 																			   // --- create new buffer
 	delayBuffer_L.createCircularBuffer(bufferLength);
+	delayBuffer_C.createCircularBuffer(bufferLength);
 	delayBuffer_R.createCircularBuffer(bufferLength);
 }
 
-/**
-\struct AudioDelayParameters
-\ingroup FX-Objects
-\brief
-Custom parameter structure for the AudioDelay object.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
-
 AudioDelayParameters::AudioDelayParameters() {}
 
-/**
-\class CircularBuffer
-\ingroup FX-Objects
-\brief
-The CircularBuffer object implements a simple circular buffer. It uses a wrap mask to wrap the read or write index quickly.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
-/** A simple cyclic buffer: NOTE - this is NOT an IAudioSignalProcessor or IAudioSignalGenerator
-	S must be a power of 2.
-*/
 template <typename T>
 CircularBuffer<T>::CircularBuffer() {}		/* C-TOR */
 
