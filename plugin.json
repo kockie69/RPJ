@@ -108,6 +108,12 @@
       "name": "DrillingHoles",
       "description": "Normalizer",
       "tags": ["Utility"]
+    },
+    {
+      "slug": "TuxOn",
+      "name": "TuxOn",
+      "description": "Audio player",
+      "tags": ["Utility"]
     }
   ]
 }

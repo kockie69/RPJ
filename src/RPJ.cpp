@@ -18,6 +18,7 @@ void init(Plugin *p) {
 	p->addModel(modelGaza);
 	p->addModel(modelCircularRide);
 	p->addModel(modelDrillingHoles);
+	p->addModel(modelTuxOn);
 }
 
 RPJTextLabel::RPJTextLabel(Vec pos) {
