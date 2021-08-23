@@ -1,20 +1,11 @@
 #include "rack.hpp"
 #include <thread>
 #include <osdialog.h>
-#define DR_WAV_IMPLEMENTATION
-#include "dr_wav.h"
+#include "Audio.hpp"
 
 using namespace rack;
-using namespace std;
 
 const int MODULE_WIDTH=6;
-
-enum PanningType {SIMPLEPAN, CONSTPOWER };
-
-struct PanPos {
-	double left;
-	double right;
-};
 
 struct TuxOn : Module {
 
@@ -41,23 +32,12 @@ struct TuxOn : Module {
 		NUM_LIGHTS,
 	};
 
-		TuxOn();
-		void loadSample(std::string);
-		void process(const ProcessArgs &) override;
-		PanPos panning(PanningType, double);
-
-		char * fileName = NULL;
-		unsigned int channels;
-		unsigned int sampleRate;
-		drwav_uint64 totalPCMFrameCount;
-		dsp::SchmittTrigger startTrigger,stopTrigger;
-		bool start=false,stop=false,loading=false,fileLoaded=false,play=false;
-		vector<vector<float>> playBuffer;
-		float * pSampleData;
-		float samplePos;
-		float peak;
-		float scaleFac;
-		PanningType panningType;
+	TuxOn();
+	void process(const ProcessArgs &) override;
+	char * fileName = NULL;
+	dsp::SchmittTrigger startTrigger,stopTrigger;
+	AudioParameters adp;
+	Audio audio;
 };
 
 struct nSelectFileMenuItem : ui::MenuItem {
