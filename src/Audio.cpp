@@ -26,6 +26,7 @@ void Audio::setParameters(const AudioParameters& params) {
 	repeat = params.repeat;
 	beginRatio = params.startRatio;
 	endRatio = params.endRatio;
+	speed = params.speed;
 }
 
 bool Audio::loadSample(char *path) {
@@ -82,11 +83,11 @@ void Audio::processAudioSample() {
 
 		// if we are going up and beginPos has moved forward, change samplePos
 		if (up && samplePos < totalPCMFrameCount * beginRatio/1024)
-			samplePos = totalPCMFrameCount * beginRatio/1024;
+			samplePos = (totalPCMFrameCount * beginRatio/1024);
 
 		// if we are going down and endPos has moved backwards, change samplePos
 		if (!up && samplePos > totalPCMFrameCount * beginRatio/1024)
-			samplePos = totalPCMFrameCount * beginRatio/1024;
+			samplePos = (totalPCMFrameCount * beginRatio/1024);
 
 		if (channels == 1) {
 			left = panning(panningType, panningValue).left * scaleFac * (playBuffer[0][floor(samplePos)]);
@@ -97,9 +98,9 @@ void Audio::processAudioSample() {
 			right = scaleFac * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
        	}
 		if (up)
-			samplePos=samplePos+(sampleRate/rackSampleRate);
+			samplePos=samplePos+(sampleRate/rackSampleRate)+speed;
 		else
-			samplePos=samplePos-(sampleRate/rackSampleRate);
+			samplePos=samplePos-(sampleRate/rackSampleRate)-speed;
 	}
 	else {
 		if (up && play) {

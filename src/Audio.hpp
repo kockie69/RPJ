@@ -1,5 +1,7 @@
 #include "rack.hpp"
 #include "dr_wav.h"
+#include "dr_flac.h"
+#include "dr_mp3.h"
 
 using namespace std;
 
@@ -17,12 +19,16 @@ struct AudioParameters {
     float panningValue;  
     float rackSampleRate;
     bool stop;
+    bool play;
+    float startRatio,endRatio;
+    bool repeat;
+    float speed;
 };
 
 struct Audio {
     Audio();
     void setParameters(const AudioParameters& );
-  	void loadSample(char *);
+  	bool loadSample(char *);
     PanPos panning(PanningType, double);
     void processAudioSample();
     vector<vector<float>> playBuffer;
@@ -34,11 +40,15 @@ struct Audio {
     unsigned int channels;
 	unsigned int sampleRate;
 	drwav_uint64 totalPCMFrameCount;
+    drmp3_config mp3config;
     char * fileName;
     bool start=false,stop=false,loading=false,fileLoaded=false,play=false;
     float left,right;
     float dB;
+    float speed;
     float panningValue; 
     float rackSampleRate;
+    float beginRatio, endRatio;
+    bool up,repeat;
 };
 

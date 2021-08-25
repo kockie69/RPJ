@@ -15,6 +15,10 @@ struct TuxOn : Module {
 		PARAM_DB,
 		PARAM_PANTYPE,
 		PARAM_PANNING,
+		PARAM_STARTPOS,
+		PARAM_ENDPOS,
+		PARAM_REPEAT,
+		PARAM_SPEED,
 		NUM_PARAMS,
 	};
 
@@ -42,12 +46,11 @@ struct TuxOn : Module {
 
 struct nSelectFileMenuItem : ui::MenuItem {
 	TuxOn *module;
-
-	void onAction(const event::Action& e) override {
-		static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav";
-		osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
-		
-		char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
-		module->fileName = PathC;
-	}
+	void onAction(const event::Action&) override; 
 };
+
+struct TuxOnModuleWidget : ModuleWidget {
+	TuxOnModuleWidget(TuxOn*);
+	void appendContextMenu(Menu *) override;
+};
+
