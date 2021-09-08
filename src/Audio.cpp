@@ -11,7 +11,6 @@ Audio::Audio() {
 	samplePos=0;
 	peak=0;
 	panningType=CONSTPOWER;
-	scaleFac = 1;
 	repeat = true;
 }
 
@@ -20,8 +19,9 @@ void Audio::setParameters(const AudioParameters& params) {
 	panningType = params.panningType;
     panningValue = params.panningValue;  
     rackSampleRate = params.rackSampleRate;
+	pause = params.pause;
 	stop = params.stop;
-	if (!play)
+	if (!play) // Play is a trigger, so only get trigger when I am playing otherwise I will stop
 		play = params.play;
 	repeat = params.repeat;
 	beginRatio = params.startRatio;
@@ -66,21 +66,22 @@ bool Audio::loadSample(char *path) {
 
 void Audio::processAudioSample() {
 	
-	if (stop)
-		play=false;
-
 	// Determine if we are going up or down
-	//float beginPos = totalPCMFrameCount*(beginRatio/1024);
-	//float endPos = totalPCMFrameCount*(endRatio/1024);
 	up = (endRatio >= beginRatio);
+
+	if (pause || stop) {
+		if (stop) {
+			if (up)
+				samplePos = totalPCMFrameCount * (beginRatio/1024);
+			else
+				samplePos = totalPCMFrameCount * (beginRatio/1024);
+		}
+		play=false;
+	}
 	
 	// First check if samplePos is still within begin and end bounderies, otherwise return to start
     if ((!loading) && (play) && (((up) && (floor(samplePos) <= (totalPCMFrameCount * endRatio/1024))) || ((!up) && (floor(samplePos) >= totalPCMFrameCount * endRatio/1024)))) {
   
-		if (peak>0) {
-	    	scaleFac = (float)(pow(10.0,dB/peak)*20); 
-    	}
-
 		// if we are going up and beginPos has moved forward, change samplePos
 		if (up && samplePos < totalPCMFrameCount * beginRatio/1024)
 			samplePos = (totalPCMFrameCount * beginRatio/1024);
@@ -90,12 +91,12 @@ void Audio::processAudioSample() {
 			samplePos = (totalPCMFrameCount * beginRatio/1024);
 
 		if (channels == 1) {
-			left = panning(panningType, panningValue).left * scaleFac * (playBuffer[0][floor(samplePos)]);
-			right = panning(panningType, panningValue).right * scaleFac * (playBuffer[0][floor(samplePos)]);
+			left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
+			right = panning(panningType, panningValue).right * dB * (playBuffer[0][floor(samplePos)]);
 		}
 		else if (channels ==2) {
-			left = scaleFac * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
-			right = scaleFac * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
+			left = dB * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
+			right = dB * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
        	}
 		if (up)
 			samplePos=samplePos+(sampleRate/rackSampleRate)+speed;
