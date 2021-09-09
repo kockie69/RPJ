@@ -23,6 +23,8 @@ void Audio::setParameters(const AudioParameters& params) {
 	stop = params.stop;
 	if (!play) // Play is a trigger, so only get trigger when I am playing otherwise I will stop
 		play = params.play;
+	forward = params.forward;
+	backward = params.backward;
 	repeat = params.repeat;
 	beginRatio = params.startRatio;
 	endRatio = params.endRatio;
@@ -79,6 +81,12 @@ void Audio::processAudioSample() {
 		play=false;
 	}
 	
+	if (forward)
+		samplePos++;
+
+	if (backward)
+		samplePos--;
+
 	// First check if samplePos is still within begin and end bounderies, otherwise return to start
     if ((!loading) && (play) && (((up) && (floor(samplePos) <= (totalPCMFrameCount * endRatio/1024))) || ((!up) && (floor(samplePos) >= totalPCMFrameCount * endRatio/1024)))) {
   

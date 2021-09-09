@@ -21,6 +21,8 @@ struct AudioParameters {
     bool pause;
     bool play;
     bool stop;
+    bool forward;
+    bool backward;
     float startRatio,endRatio;
     bool repeat;
     float speed;
@@ -43,7 +45,7 @@ struct Audio {
 	drwav_uint64 totalPCMFrameCount;
     drmp3_config mp3config;
     char * fileName;
-    bool start=false,pause=false,loading=false,fileLoaded=false,play=false,stop=false;
+    bool start=false,pause=false,loading=false,fileLoaded=false,play=false,stop=false,forward=false,backward=false;
     float left,right;
     float dB;
     float speed;

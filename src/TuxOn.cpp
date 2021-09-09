@@ -9,9 +9,11 @@
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(PARAM_START, 0.f, 1.f, 1.f);
-	configParam(PARAM_PAUSE, 0.f, 1.f, 1.f);
+	configParam(PARAM_START, 0.f, 1.f, 0.f);
+	configParam(PARAM_PAUSE, 0.f, 1.f, 0.f);
 	configParam(PARAM_STOP, 0.f, 1.f, 0.f);
+	configParam(PARAM_FWD, 0.f, 1.f, 1.f);
+	configParam(PARAM_BWD, 0.f, 1.f, 1.f);
 	float maxTGFader = std::pow(2.0f, 1.0f / 3.0f);
 	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "", " dB", -10, 60.0f);
 
@@ -23,6 +25,7 @@ TuxOn::TuxOn() {
 	adp.dB=1;
 	adp.pause=false;
 	adp.play=false;
+	adp.stop=false;
 	adp.repeat=true;
 	vuMeters.reset();
 	vuColorThemeLocal=0;
@@ -39,8 +42,10 @@ void TuxOn::process(const ProcessArgs &args) {
 	adp.speed = params[PARAM_SPEED].getValue();
 	adp.startRatio = params[PARAM_STARTPOS].getValue();
 	adp.endRatio = params[PARAM_ENDPOS].getValue();
+	adp.forward = params[PARAM_FWD].getValue();
+	adp.backward = params[PARAM_BWD].getValue();
 
-	if (startTrigger.process(rescale(params[PARAM_START].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+	if (startTrigger.process(rescale(params[PARAM_START].getValue(), 1.f, 0.1f, 1.f, 0.f))) {
 			
 		if (fileName != NULL) {
 			if (!audio.fileLoaded) {
@@ -57,33 +62,34 @@ void TuxOn::process(const ProcessArgs &args) {
 			}
 			else { 
 				adp.play=true;
-				params[PARAM_START].setValue(0.f);
-				params[PARAM_STOP].setValue(1.f);
-				params[PARAM_PAUSE].setValue(1.f);
+				params[PARAM_START].setValue(1.f);
+				params[PARAM_STOP].setValue(0.f);
+				params[PARAM_PAUSE].setValue(0.f);
 			}
 		}
 	}
 
-	if (pauseTrigger.process(rescale(params[PARAM_PAUSE].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if (audio.play) 
+	if (pauseTrigger.process(rescale(params[PARAM_PAUSE].getValue(), 1.f, 0.1f, 1.f, 0.f))) {
+		if (audio.play) {
 			adp.pause=true;
+			params[PARAM_START].setValue(0.f);				
+		}
 		else
-			params[PARAM_PAUSE].setValue(1.f);
-	}
-
-	if (stopTrigger.process(rescale(params[PARAM_STOP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		if (audio.play) 
-			adp.stop=true;
-		else
-			params[PARAM_STOP].setValue(1.f);
-	}
-
-	if (!audio.play && !adp.play) {
-		params[PARAM_START].setValue(1.f);
-		if (audio.pause)
 			params[PARAM_PAUSE].setValue(0.f);
-		if (audio.stop)
+	}
+
+	if (stopTrigger.process(rescale(params[PARAM_STOP].getValue(), 1.f, 0.1f, 1.f, 0.f))) {
+		if (audio.play) { 
+			adp.stop=true;
+			params[PARAM_START].setValue(0.f);
+		}
+		else
 			params[PARAM_STOP].setValue(0.f);
+	}
+
+	 
+	if (!audio.play && !adp.play) {
+		params[PARAM_START].setValue(0.f);
 	}
 
 	audio.setParameters(adp);
@@ -217,26 +223,43 @@ void nSelectPantypeMenuItem::onAction(const event::Action& e) {
 struct PlayButton : SvgSwitch  {
 	PlayButton() {
 		momentary=false;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Play_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Play_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Play_On.svg")));
 	}
 };
 
 struct PauseButton : SvgSwitch  {
 	PauseButton() {
 		momentary=false;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_On.svg")));
 	}
 };
 
 struct StopButton : SvgSwitch  {
 	StopButton() {
 		momentary=false;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_On.svg")));
 	}
 };
+
+struct FwdButton : SvgSwitch  {
+	FwdButton() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_On.svg")));
+	}
+};
+
+struct BwdButton : SvgSwitch  {
+	BwdButton() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Bwd_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Bwd_On.svg")));
+	}
+};
+
 
 TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 
@@ -260,8 +283,10 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	}
 
 	addParam(createParam<PlayButton>(Vec(10, 85), module, TuxOn::PARAM_START));
-	addParam(createParam<PauseButton>(Vec(55, 85), module, TuxOn::PARAM_PAUSE));
-	addParam(createParam<StopButton>(Vec(148, 85), module, TuxOn::PARAM_STOP));
+	addParam(createParam<PauseButton>(Vec(45, 85), module, TuxOn::PARAM_PAUSE));
+	addParam(createParam<StopButton>(Vec(150, 85), module, TuxOn::PARAM_STOP));
+	addParam(createParam<FwdButton>(Vec(80, 85), module, TuxOn::PARAM_FWD));
+	addParam(createParam<BwdButton>(Vec(115, 85), module, TuxOn::PARAM_BWD));
 
 	addParam(createParam<RoundBlackKnob>(Vec(10, 233), module, TuxOn::PARAM_STARTPOS));
 	addParam(createParam<RoundBlackKnob>(Vec(55, 233), module, TuxOn::PARAM_ENDPOS));
