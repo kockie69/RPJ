@@ -36,6 +36,7 @@ struct TuxOn : Module {
 		PARAM_STOP,
 		PARAM_FWD,
 		PARAM_BWD,
+		PARAM_EJECT,
 		PARAM_DB,
 		PARAM_PANNING,
 		PARAM_STARTPOS,
@@ -67,7 +68,7 @@ struct TuxOn : Module {
 	TuxOn();
 	void process(const ProcessArgs &) override;
 	char * fileName = NULL;
-	dsp::SchmittTrigger startTrigger,pauseTrigger,stopTrigger;
+	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger;
 	AudioParameters adp;
 	Audio audio;
 	std::string fileDesc;
@@ -79,6 +80,7 @@ struct TuxOn : Module {
 	float fadeGainScaled;
 	PackedBytes4 colorAndCloak;// see enum called ccIds for fields
 	float values[2];
+	int svgIndex;
 };
 
 struct MmSlider : SvgSlider {

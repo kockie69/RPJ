@@ -1,7 +1,6 @@
 #include "Audio.hpp"
 
 AudioParameters::AudioParameters() {
-
 }
 
 Audio::Audio() {
@@ -11,7 +10,15 @@ Audio::Audio() {
 	samplePos=0;
 	peak=0;
 	panningType=CONSTPOWER;
-	repeat = true;
+	repeat=true;
+	start=false;
+	pause=false;
+	loading=false;
+	fileLoaded=false;
+	play=false;
+	stop=false;
+	forward=false;
+	backward=false;
 }
 
 void Audio::setParameters(const AudioParameters& params) {
@@ -21,8 +28,7 @@ void Audio::setParameters(const AudioParameters& params) {
     rackSampleRate = params.rackSampleRate;
 	pause = params.pause;
 	stop = params.stop;
-	if (!play) // Play is a trigger, so only get trigger when I am playing otherwise I will stop
-		play = params.play;
+	start = params.start;
 	forward = params.forward;
 	backward = params.backward;
 	repeat = params.repeat;
@@ -66,6 +72,14 @@ bool Audio::loadSample(char *path) {
 	return fileLoaded;
 }
 
+void Audio::ejectSong(void) {
+	fileName=NULL;
+	fileLoaded=false;
+	play=false;
+	playBuffer[0].empty();
+	playBuffer[1].empty();	
+}
+
 void Audio::processAudioSample() {
 	
 	// Determine if we are going up or down
@@ -81,6 +95,9 @@ void Audio::processAudioSample() {
 		play=false;
 	}
 	
+	if (start)
+		play=true;
+
 	if (forward)
 		samplePos++;
 

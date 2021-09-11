@@ -19,7 +19,7 @@ struct AudioParameters {
     float panningValue;  
     float rackSampleRate;
     bool pause;
-    bool play;
+    bool start;
     bool stop;
     bool forward;
     bool backward;
@@ -32,6 +32,7 @@ struct Audio {
     Audio();
     void setParameters(const AudioParameters& );
   	bool loadSample(char *);
+    void ejectSong();
     PanPos panning(PanningType, double);
     void processAudioSample();
     vector<vector<float>> playBuffer;
@@ -45,7 +46,7 @@ struct Audio {
 	drwav_uint64 totalPCMFrameCount;
     drmp3_config mp3config;
     char * fileName;
-    bool start=false,pause=false,loading=false,fileLoaded=false,play=false,stop=false,forward=false,backward=false;
+    bool start,pause,loading,fileLoaded,play,stop,forward,backward,eject;
     float left,right;
     float dB;
     float speed;
