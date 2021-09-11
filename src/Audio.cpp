@@ -11,14 +11,11 @@ Audio::Audio() {
 	peak=0;
 	panningType=CONSTPOWER;
 	repeat=true;
-	start=false;
 	pause=false;
 	loading=false;
 	fileLoaded=false;
 	play=false;
 	stop=false;
-	forward=false;
-	backward=false;
 }
 
 void Audio::setParameters(const AudioParameters& params) {
@@ -28,9 +25,6 @@ void Audio::setParameters(const AudioParameters& params) {
     rackSampleRate = params.rackSampleRate;
 	pause = params.pause;
 	stop = params.stop;
-	start = params.start;
-	forward = params.forward;
-	backward = params.backward;
 	repeat = params.repeat;
 	beginRatio = params.startRatio;
 	endRatio = params.endRatio;
@@ -63,8 +57,7 @@ bool Audio::loadSample(char *path) {
 				peak = max(abs(pSampleData[i]),abs(pSampleData[i+1]));	
 		}
         fileLoaded=true;
-		if (samplePos==0)
-			samplePos = (totalPCMFrameCount*beginRatio/1024);
+		samplePos = (totalPCMFrameCount*beginRatio/1024);
 	}
 	else 
 		fileLoaded = false;
@@ -80,65 +73,63 @@ void Audio::ejectSong(void) {
 	playBuffer[1].empty();	
 }
 
+bool Audio::withinBoundery(void) {
+	return (((up) && (samplePos <= (totalPCMFrameCount * endRatio/1024)) && (samplePos >= (totalPCMFrameCount * beginRatio/1024))) 
+		|| ((!up) && (samplePos >= (totalPCMFrameCount * endRatio/1024)) && (samplePos <= (totalPCMFrameCount * beginRatio/1024))));
+}
+
+void Audio::backward(void) {
+	samplePos--;
+	if (!withinBoundery())
+		samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (endRatio/1024);
+
+}
+
+void Audio::forward(void) {
+		samplePos++;		
+		if (!withinBoundery())
+			samplePos = (up) ? totalPCMFrameCount * (endRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
+}
+
+void Audio::start(void) {
+	play=true;
+}
+
 void Audio::processAudioSample() {
 	
-	// Determine if we are going up or down
-	up = (endRatio >= beginRatio);
+	if (fileLoaded) {
+		// Determine if we are going up or down
+		up = (endRatio >= beginRatio);
 
-	if (pause || stop) {
-		if (stop) {
-			if (up)
-				samplePos = totalPCMFrameCount * (beginRatio/1024);
-			else
-				samplePos = totalPCMFrameCount * (beginRatio/1024);
-		}
-		play=false;
-	}
-	
-	if (start)
-		play=true;
-
-	if (forward)
-		samplePos++;
-
-	if (backward)
-		samplePos--;
-
-	// First check if samplePos is still within begin and end bounderies, otherwise return to start
-    if ((!loading) && (play) && (((up) && (floor(samplePos) <= (totalPCMFrameCount * endRatio/1024))) || ((!up) && (floor(samplePos) >= totalPCMFrameCount * endRatio/1024)))) {
-  
-		// if we are going up and beginPos has moved forward, change samplePos
-		if (up && samplePos < totalPCMFrameCount * beginRatio/1024)
-			samplePos = (totalPCMFrameCount * beginRatio/1024);
-
-		// if we are going down and endPos has moved backwards, change samplePos
-		if (!up && samplePos > totalPCMFrameCount * beginRatio/1024)
-			samplePos = (totalPCMFrameCount * beginRatio/1024);
-
-		if (channels == 1) {
-			left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
-			right = panning(panningType, panningValue).right * dB * (playBuffer[0][floor(samplePos)]);
-		}
-		else if (channels ==2) {
-			left = dB * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
-			right = dB * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
-       	}
-		if (up)
-			samplePos=samplePos+(sampleRate/rackSampleRate)+speed;
-		else
-			samplePos=samplePos-(sampleRate/rackSampleRate)-speed;
-	}
-	else {
-		if (up && play) {
-			samplePos = totalPCMFrameCount * (beginRatio/1024);
-		}
-		if (!up && play) {
-			samplePos = totalPCMFrameCount * (beginRatio/1024);
-		}
-
-		// remove next line if repeat added to parameters
-		if (!repeat)
+		if (pause || stop) {
+			if (stop) 
+				samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
 			play=false;
+		}
+
+		if (play) 
+			samplePos = (up) ? samplePos+(sampleRate/rackSampleRate)+speed : samplePos-(sampleRate/rackSampleRate)-speed;
+
+		// First check if samplePos is still within begin and end bounderies, otherwise return to start
+    	if (play && withinBoundery()) {
+
+			if (channels == 1) {
+				left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
+				right = panning(panningType, panningValue).right * dB * (playBuffer[0][floor(samplePos)]);
+			}
+			else if (channels ==2) {
+				left = dB * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
+				right = dB * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
+       		}
+		}
+
+		if (!withinBoundery()) {
+			samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
+
+			if (!repeat) {
+				play=false;
+			}
+		}
 	}
 }
 

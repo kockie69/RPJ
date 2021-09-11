@@ -26,13 +26,12 @@ TuxOn::TuxOn() {
 	adp.panningType=CONSTPOWER;
 	adp.dB=1;
 	adp.pause=false;
-	adp.start=false;
 	adp.stop=false;
 	adp.repeat=true;
 	vuMeters.reset();
 	vuColorThemeLocal=0;
 	fileName=NULL;
-	fileDesc="--- NO SONG SELECTED ---";
+	fileDesc="        --- NO SONG SELECTED ---";
 	svgIndex=7;
 }
 
@@ -42,19 +41,20 @@ void TuxOn::process(const ProcessArgs &args) {
 	adp.panningValue = params[PARAM_PANNING].getValue() + inputs[INPUT_PANCV].getVoltage()/5;
 	adp.rackSampleRate = args.sampleRate;
 	adp.pause = false;
-	adp.start = false;
 	adp.stop = false;
 	adp.speed = params[PARAM_SPEED].getValue();
 	adp.startRatio = params[PARAM_STARTPOS].getValue();
 	adp.endRatio = params[PARAM_ENDPOS].getValue();
-	adp.forward = params[PARAM_FWD].getValue();
-	adp.backward = params[PARAM_BWD].getValue();
+	if (params[PARAM_FWD].getValue())
+		audio.forward();
+	if (params[PARAM_BWD].getValue())
+		audio.backward();
 
 	if (startTrigger.process((bool)params[PARAM_START].getValue())) {
 		if (fileName != NULL) {
 			if (!audio.fileLoaded) {
 				if (audio.loadSample(fileName)) {
-					adp.start=true;
+					audio.start();
 					svgIndex=6;	
 					//params[PARAM_START].setValue(1.f);
 					vector<double>().swap(displayBuff);
@@ -67,7 +67,7 @@ void TuxOn::process(const ProcessArgs &args) {
 				}
 			}
 			else { 
-				adp.start=true;
+				audio.start();
 				svgIndex=6;	
 			}
 		}
@@ -90,10 +90,10 @@ void TuxOn::process(const ProcessArgs &args) {
 	if (ejectTrigger.process((bool)params[PARAM_EJECT].getValue())) {
 		svgIndex=4;
 		if (fileName != NULL) {
-			fileDesc="--- EJECTING SONG ---";
+			fileDesc="        --- EJECTING SONG ---";
 			audio.ejectSong();
 			fileName = NULL;
-			fileDesc="--- NO SONG SELECTED ---";
+				fileDesc="        --- NO SONG SELECTED ---";
 		}
 		else {
 			static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";

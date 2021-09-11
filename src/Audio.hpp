@@ -35,6 +35,10 @@ struct Audio {
     void ejectSong();
     PanPos panning(PanningType, double);
     void processAudioSample();
+    void start(void);
+    void backward(void);
+    void forward(void);
+    bool withinBoundery(void);
     vector<vector<float>> playBuffer;
     float peak;
     float scaleFac;
@@ -46,7 +50,7 @@ struct Audio {
 	drwav_uint64 totalPCMFrameCount;
     drmp3_config mp3config;
     char * fileName;
-    bool start,pause,loading,fileLoaded,play,stop,forward,backward,eject;
+    bool pause,loading,fileLoaded,play,stop;
     float left,right;
     float dB;
     float speed;

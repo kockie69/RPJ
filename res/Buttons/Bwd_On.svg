@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -62,13 +62,6 @@
        style="display:inline;fill:#ff6600;fill-opacity:1;stroke:#000000;stroke-width:0.0103874;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 0.19691745,4.6504147 c 0.06632,-1.471973 0.87292995,-2.8557271 2.15007795,-3.68849957 1.620757,-1.0568089 3.668751,-1.0558654 5.306803,0.00239 1.045954,0.67577137 1.803615,1.77738827 2.055141,2.98811957 0.05816,0.280119 0.130619,0.976749 0.104218,1.002475 -0.0079,0.0077 -0.118842,-0.03081 -0.246522,-0.08561 -2.175752,-0.933723 -4.816625,-1.079241 -7.595461,-0.418541 -0.459359,0.109215 -1.48020395,0.419324 -1.73714095,0.527698 -0.05087,0.02144 -0.0523,0.0088 -0.03712,-0.328102 z"
        id="path1176-5-8" />
-    <rect
-       style="display:inline;opacity:0.776961;fill:#ffffff;fill-opacity:1;stroke:#000023;stroke-width:0.0319888;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect3478-0-4-9-7"
-       width="0.98570794"
-       height="4.597167"
-       x="2.0607665"
-       y="2.7288516" />
     <path
        sodipodi:type="star"
        style="display:inline;opacity:0.779;fill:#ffffff;stroke:#000023;stroke-width:0.112141;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -85,7 +78,7 @@
        inkscape:randomized="0"
        inkscape:transform-center-x="0.37417448"
        inkscape:transform-center-y="-0.018880144"
-       transform="matrix(-0.22160853,0,0,0.37509279,23.930913,-42.773569)"
+       transform="matrix(-0.22160853,0,0,0.37509279,23.270764,-42.773569)"
        d="m 83.439065,121.57057 5.152614,3.07552 5.152615,3.07553 -5.239789,2.92453 -5.239789,2.92453 0.08717,-6.00005 z" />
     <path
        sodipodi:type="star"
@@ -103,7 +96,7 @@
        inkscape:randomized="0"
        inkscape:transform-center-x="0.37417391"
        inkscape:transform-center-y="-0.018879374"
-       transform="matrix(-0.22160853,0,0,0.37509279,26.163223,-42.698382)"
+       transform="matrix(-0.22160853,0,0,0.37509279,25.503074,-42.698382)"
        d="m 83.439065,121.57057 5.152614,3.07552 5.152615,3.07553 -5.239789,2.92453 -5.239789,2.92453 0.08717,-6.00005 z" />
   </g>
 </svg>
