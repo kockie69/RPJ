@@ -1,7 +1,7 @@
 #include "rack.hpp"
-#include "dr_wav.h"
-#include "dr_flac.h"
-#include "dr_mp3.h"
+#include "dep/dr_wav.h"
+#include "dep/dr_flac.h"
+#include "dep/dr_mp3.h"
 
 using namespace std;
 

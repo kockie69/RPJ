@@ -2,9 +2,6 @@
 #define DR_WAV_IMPLEMENTATION
 #define DR_FLAC_IMPLEMENTATION
 #define DR_MP3_IMPLEMENTATION
-#include "dr_wav.h"
-#include "dr_flac.h"
-#include "dr_mp3.h"
 #include "TuxOn.hpp"
 
 
@@ -121,7 +118,8 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
 
-		zoom = max(zoom--,0);
+		zoom--;
+		zoom = max(zoom,0);
 		if (audio.fileLoaded) {
 			setDisplay(audio.totalPCMFrameCount*audio.beginRatio/1024,audio.totalPCMFrameCount*audio.endRatio/1024,zoom);
 		}
@@ -325,7 +323,7 @@ struct ButtonSVG : TransparentWidget {
 		if (module) {
 			// Bit weird check, shouldn't that be module->start ?
 			if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
-				sw->setSvg(frames[module->static_cast<int>(svgIndex)]);
+				sw->setSvg(frames[static_cast<int>(module->buttonToDisplay)]);
 				fb->dirty = true;
 			}
 		}

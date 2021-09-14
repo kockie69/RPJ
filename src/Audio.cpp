@@ -87,7 +87,7 @@ bool Audio::loadSample(char *path) {
 void Audio::ejectSong(void) {
 	fileName=NULL;
 	fileLoaded=false;
-	audio.setPlay(false);
+	setPlay(false);
 	playBuffer[0].empty();
 	playBuffer[1].empty();	
 }
