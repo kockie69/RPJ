@@ -14,6 +14,8 @@ union PackedBytes4 {
 	int8_t cc4[4];
 };
 
+enum ButtonSvgs { EMPTY, PAUSE, REWIND, FORWARD, EJECT, STOP, START, BLACK, NUM_BUTTONSVGS};
+
 enum ccIds {
 	cloakedMode, // turn off track VUs only, keep master VUs (also called "Cloaked mode"), this has only two values, 0x0 and 0xFF so that it can be used in bit mask operations
 	vuColorGlobal, // 0 is green, 1 is aqua, 2 is cyan, 3 is blue, 4 is purple, 5 is individual colors for each track/group/master (every user of vuColor must first test for != 5 before using as index into color table, or else array overflow)
@@ -59,7 +61,6 @@ struct TuxOn : Module {
 	};
 
 	enum LightIds {
-		ENUMS(VU_LIGHTS, 2 * 5),
 		RATE_LIGHT,
 		START_LIGHT,
 		PAUSE_LIGHT,
@@ -70,7 +71,8 @@ struct TuxOn : Module {
 	TuxOn();
 	void process(const ProcessArgs &) override;
 	void setPlayBufferCopy(void);
-	void setDisplay(float, float,unsigned int);
+	void setDisplay(float, float,int);
+	void selectAndLoadFile(void);
 	char * fileName = NULL;
 	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
 	AudioParameters adp;
@@ -85,8 +87,9 @@ struct TuxOn : Module {
 	PackedBytes4 colorAndCloak;// see enum called ccIds for fields
 	float values[2];
 	int svgIndex;
-	unsigned int zoom;
+	int zoom;
 	vector<vector<float>> playBufferCopy;
+	ButtonSvgs buttonToDisplay;
 };
 
 struct MmSlider : SvgSlider {

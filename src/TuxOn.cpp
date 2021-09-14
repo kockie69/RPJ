@@ -25,35 +25,40 @@ TuxOn::TuxOn() {
 	configParam(PARAM_SPEED, -0.1f, 0.1f, 0.f);
 	adp.panningType=CONSTPOWER;
 	adp.dB=1;
-	adp.pause=false;
-	adp.stop=false;
 	adp.repeat=true;
 	vuMeters.reset();
 	vuColorThemeLocal=0;
 	fileName=NULL;
 	fileDesc="        --- NO SONG SELECTED ---";
-	svgIndex=7;
+	buttonToDisplay=BLACK;
 	playBufferCopy.resize(2);
 	playBufferCopy[0].resize(0);
 	playBufferCopy[1].resize(0);
 	zoom=0;
 }
 
-void TuxOn::setPlayBufferCopy(void) {
-	playBufferCopy[0].clear();
-	playBufferCopy[1].clear();
-	for (unsigned int i=0; i < audio.totalPCMFrameCount; i++) {
-		playBufferCopy[0].push_back(audio.playBuffer[0][i]);
-		if (audio.channels == 2)
-			playBufferCopy[1].push_back(audio.playBuffer[1][i]);
-	}
-}
-
-void TuxOn::setDisplay(float begin, float end, unsigned int zoom) {
+void TuxOn::setDisplay(float begin, float end, int zoom) {
 	vector<double>().swap(displayBuff);
-	for (int i=begin; i < floor(end); i = i + floor(end/130/zoom)) {
+	for (int i=begin; i < floor(end); i = i + floor((end-begin)/130/pow(2,zoom))) {
 		displayBuff.push_back(audio.playBuffer[0][i]);
 	}	
+}
+
+void TuxOn::selectAndLoadFile(void) {	
+	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
+	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
+	
+	char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+	if (PathC!=NULL) {
+		fileName = PathC;
+		if (audio.loadSample(PathC))
+		{
+			setDisplay(0,audio.totalPCMFrameCount,zoom);
+			fileDesc = rack::string::filename(PathC)+ "\n";
+			fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
+			fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
+		}
+	}
 }
 
 void TuxOn::process(const ProcessArgs &args) {
@@ -61,8 +66,8 @@ void TuxOn::process(const ProcessArgs &args) {
 	adp.dB = params[PARAM_DB].getValue();
 	adp.panningValue = params[PARAM_PANNING].getValue() + inputs[INPUT_PANCV].getVoltage()/5;
 	adp.rackSampleRate = args.sampleRate;
-	adp.pause = false;
-	adp.stop = false;
+	audio.setPause(false);
+	audio.setStop(false);
 	adp.speed = params[PARAM_SPEED].getValue();
 	adp.startRatio = params[PARAM_STARTPOS].getValue();
 	adp.endRatio = params[PARAM_ENDPOS].getValue();
@@ -76,48 +81,34 @@ void TuxOn::process(const ProcessArgs &args) {
 
 		if (audio.fileLoaded) {
 			audio.start();
-			svgIndex=6;	
+			buttonToDisplay=START;	
 		}
 	}
 
 	if (pauseTrigger.process((bool)params[PARAM_PAUSE].getValue())) {
-		if (audio.play) {
-			adp.pause=true;
-			svgIndex=1;
+		if (audio.getPlay()) {
+			audio.setPause(true);
+			buttonToDisplay=PAUSE;
 		}
 	}
 
 	if (stopTrigger.process((bool)params[PARAM_STOP].getValue())) {
-		if (audio.play) { 
-			adp.stop=true;
-			svgIndex=5;
+		if (audio.getPlay()) { 
+			audio.setStop(true);
+			buttonToDisplay=STOP;
 		}
 	}
 
 	if (ejectTrigger.process((bool)params[PARAM_EJECT].getValue())) {
-		svgIndex=4;
+		buttonToDisplay=EJECT;
 
 		fileDesc="        --- EJECTING SONG ---";
 		audio.ejectSong();
 		fileName = NULL;
 			fileDesc="        --- NO SONG SELECTED ---";
 
-		static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
-		osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
-	
-		char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
-		if (PathC!=NULL) {
-			fileName = PathC;
-			if (audio.loadSample(PathC))
-			{
-				setPlayBufferCopy();
-				setDisplay(0,audio.totalPCMFrameCount,pow(2,zoom));
-				fileDesc = rack::string::filename(PathC)+ "\n";
-				fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
-				fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
-			}
-		}
-		svgIndex=7;
+		selectAndLoadFile();
+		buttonToDisplay=BLACK;
 	}
 
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
@@ -130,11 +121,10 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
 
-//		audio.totalPCMFrameCount *= 2;
-//		displayBuff.clear();
-//		for (int i=audio.beginRatio*audio.totalPCMFrameCount/1024; i < floor(audio.endRatio*audio.totalPCMFrameCount/1024); i = i + floor(audio.totalPCMFrameCount/(130*zoom))) {
-//			displayBuff.push_back(audio.playBuffer[0][i]);
-//		}
+		zoom = max(zoom--,0);
+		if (audio.fileLoaded) {
+			setDisplay(audio.totalPCMFrameCount*audio.beginRatio/1024,audio.totalPCMFrameCount*audio.endRatio/1024,zoom);
+		}
 	}
 
 	audio.setParameters(adp);
@@ -236,21 +226,7 @@ void TuxOnDisplay::draw(const DrawArgs &args) {
 }
 
 void nSelectFileMenuItem::onAction(const event::Action& e) {
-	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
-	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
-	char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
-	
-	if (PathC!=NULL) {
-		module->fileName = PathC;
-		if (module->audio.loadSample(PathC))
-		{
-			module->setPlayBufferCopy();
-			module->setDisplay(0,module->audio.totalPCMFrameCount,module->zoom);
-			module->fileDesc = rack::string::filename(PathC)+ "\n";
-			module->fileDesc += std::to_string(module->audio.sampleRate)+ " Hz" + "\n";
-			module->fileDesc += std::to_string(module->audio.channels)+ " channel(s)" + "\n";
-		}
-	}
+	module->selectAndLoadFile();
 }
 
 void nSelectRepeatMenuItem::onAction(const event::Action& e) {
@@ -347,8 +323,9 @@ struct ButtonSVG : TransparentWidget {
 
 	void draw(const DrawArgs &args) override {
 		if (module) {
-			if (!(module->svgIndex == 6 && !module->audio.fileLoaded)) {
-				sw->setSvg(frames[module->svgIndex]);
+			// Bit weird check, shouldn't that be module->start ?
+			if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
+				sw->setSvg(frames[module->static_cast<int>(svgIndex)]);
 				fb->dirty = true;
 			}
 		}

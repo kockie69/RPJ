@@ -18,13 +18,32 @@ Audio::Audio() {
 	stop=false;
 }
 
+void Audio::setPause(bool status) {
+	pause=status;
+}
+
+void Audio::setStop(bool status) {
+	stop=status;
+}
+
+void Audio::setPlay(bool status) {
+	play=status;
+}
+
+bool Audio::getPlay(void) {
+	return play;
+}
+
+void Audio::setRepeat(bool status) {
+	repeat=status;
+}
+
+
 void Audio::setParameters(const AudioParameters& params) {
     dB = params.dB;
 	panningType = params.panningType;
     panningValue = params.panningValue;  
     rackSampleRate = params.rackSampleRate;
-	pause = params.pause;
-	stop = params.stop;
 	repeat = params.repeat;
 	beginRatio = params.startRatio;
 	endRatio = params.endRatio;
@@ -68,7 +87,7 @@ bool Audio::loadSample(char *path) {
 void Audio::ejectSong(void) {
 	fileName=NULL;
 	fileLoaded=false;
-	play=false;
+	audio.setPlay(false);
 	playBuffer[0].empty();
 	playBuffer[1].empty();	
 }
@@ -92,7 +111,7 @@ void Audio::forward(void) {
 }
 
 void Audio::start(void) {
-	play=true;
+	setPlay(true);
 }
 
 void Audio::processAudioSample() {
@@ -104,7 +123,7 @@ void Audio::processAudioSample() {
 		if (pause || stop) {
 			if (stop) 
 				samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
-			play=false;
+			setPlay(false);
 		}
 
 		if (play) 
@@ -127,7 +146,7 @@ void Audio::processAudioSample() {
 			samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
 
 			if (!repeat) {
-				play=false;
+				setPlay(false);
 			}
 		}
 	}
