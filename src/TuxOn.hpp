@@ -35,13 +35,15 @@ struct TuxOn : Module {
 		PARAM_START,
 		PARAM_STOP,
 		PARAM_FWD,
-		PARAM_BWD,
+		PARAM_RWD,
 		PARAM_EJECT,
 		PARAM_DB,
 		PARAM_PANNING,
 		PARAM_STARTPOS,
 		PARAM_ENDPOS,
 		PARAM_SPEED,
+		PARAM_ZOOMIN,
+		PARAM_ZOOMOUT,
 		NUM_PARAMS,
 	};
 
@@ -67,8 +69,10 @@ struct TuxOn : Module {
 
 	TuxOn();
 	void process(const ProcessArgs &) override;
+	void setPlayBufferCopy(void);
+	void setDisplay(float, float,unsigned int);
 	char * fileName = NULL;
-	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger;
+	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
 	AudioParameters adp;
 	Audio audio;
 	std::string fileDesc;
@@ -81,6 +85,8 @@ struct TuxOn : Module {
 	PackedBytes4 colorAndCloak;// see enum called ccIds for fields
 	float values[2];
 	int svgIndex;
+	unsigned int zoom;
+	vector<vector<float>> playBufferCopy;
 };
 
 struct MmSlider : SvgSlider {

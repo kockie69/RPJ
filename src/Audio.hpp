@@ -19,10 +19,7 @@ struct AudioParameters {
     float panningValue;  
     float rackSampleRate;
     bool pause;
-    bool start;
     bool stop;
-    bool forward;
-    bool backward;
     float startRatio,endRatio;
     bool repeat;
     float speed;
@@ -36,7 +33,7 @@ struct Audio {
     PanPos panning(PanningType, double);
     void processAudioSample();
     void start(void);
-    void backward(void);
+    void rewind(void);
     void forward(void);
     bool withinBoundery(void);
     vector<vector<float>> playBuffer;

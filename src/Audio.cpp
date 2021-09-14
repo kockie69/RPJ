@@ -78,7 +78,7 @@ bool Audio::withinBoundery(void) {
 		|| ((!up) && (samplePos >= (totalPCMFrameCount * endRatio/1024)) && (samplePos <= (totalPCMFrameCount * beginRatio/1024))));
 }
 
-void Audio::backward(void) {
+void Audio::rewind(void) {
 	samplePos--;
 	if (!withinBoundery())
 		samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (endRatio/1024);

@@ -14,7 +14,7 @@ TuxOn::TuxOn() {
 	configParam(PARAM_PAUSE, 0.f, 1.f, 0.f);
 	configParam(PARAM_STOP, 0.f, 1.f, 0.f);
 	configParam(PARAM_FWD, 0.f, 1.f, 1.f);
-	configParam(PARAM_BWD, 0.f, 1.f, 1.f);
+	configParam(PARAM_RWD, 0.f, 1.f, 1.f);
 	configParam(PARAM_EJECT, 0.f, 1.f, 1.f);
 	float maxTGFader = std::pow(2.0f, 1.0f / 3.0f);
 	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "", " dB", -10, 60.0f);
@@ -33,6 +33,27 @@ TuxOn::TuxOn() {
 	fileName=NULL;
 	fileDesc="        --- NO SONG SELECTED ---";
 	svgIndex=7;
+	playBufferCopy.resize(2);
+	playBufferCopy[0].resize(0);
+	playBufferCopy[1].resize(0);
+	zoom=0;
+}
+
+void TuxOn::setPlayBufferCopy(void) {
+	playBufferCopy[0].clear();
+	playBufferCopy[1].clear();
+	for (unsigned int i=0; i < audio.totalPCMFrameCount; i++) {
+		playBufferCopy[0].push_back(audio.playBuffer[0][i]);
+		if (audio.channels == 2)
+			playBufferCopy[1].push_back(audio.playBuffer[1][i]);
+	}
+}
+
+void TuxOn::setDisplay(float begin, float end, unsigned int zoom) {
+	vector<double>().swap(displayBuff);
+	for (int i=begin; i < floor(end); i = i + floor(end/130/zoom)) {
+		displayBuff.push_back(audio.playBuffer[0][i]);
+	}	
 }
 
 void TuxOn::process(const ProcessArgs &args) {
@@ -45,31 +66,17 @@ void TuxOn::process(const ProcessArgs &args) {
 	adp.speed = params[PARAM_SPEED].getValue();
 	adp.startRatio = params[PARAM_STARTPOS].getValue();
 	adp.endRatio = params[PARAM_ENDPOS].getValue();
+	
 	if (params[PARAM_FWD].getValue())
 		audio.forward();
-	if (params[PARAM_BWD].getValue())
-		audio.backward();
+	if (params[PARAM_RWD].getValue())
+		audio.rewind();
 
 	if (startTrigger.process((bool)params[PARAM_START].getValue())) {
-		if (fileName != NULL) {
-			if (!audio.fileLoaded) {
-				if (audio.loadSample(fileName)) {
-					audio.start();
-					svgIndex=6;	
-					//params[PARAM_START].setValue(1.f);
-					vector<double>().swap(displayBuff);
-					for (int i=0; i < floor(audio.totalPCMFrameCount); i = i + floor(audio.totalPCMFrameCount/130)) {
-						displayBuff.push_back(audio.playBuffer[0][i]);
-					}
-					fileDesc = rack::string::filename(fileName)+ "\n";
-					fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
-					fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
-				}
-			}
-			else { 
-				audio.start();
-				svgIndex=6;	
-			}
+
+		if (audio.fileLoaded) {
+			audio.start();
+			svgIndex=6;	
 		}
 	}
 
@@ -89,32 +96,45 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	if (ejectTrigger.process((bool)params[PARAM_EJECT].getValue())) {
 		svgIndex=4;
-		if (fileName != NULL) {
-			fileDesc="        --- EJECTING SONG ---";
-			audio.ejectSong();
-			fileName = NULL;
-				fileDesc="        --- NO SONG SELECTED ---";
-		}
-		else {
-			static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
-			osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
-		
-			char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
-			if (PathC!=NULL) {
-				fileName = PathC;
-				if (audio.loadSample(PathC))
-				{
-					vector<double>().swap(displayBuff);
-					for (int i=0; i < floor(audio.totalPCMFrameCount); i = i + floor(audio.totalPCMFrameCount/130)) {
-						displayBuff.push_back(audio.playBuffer[0][i]);
-					}
-					fileDesc = rack::string::filename(PathC)+ "\n";
-					fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
-					fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
-				}
+
+		fileDesc="        --- EJECTING SONG ---";
+		audio.ejectSong();
+		fileName = NULL;
+			fileDesc="        --- NO SONG SELECTED ---";
+
+		static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
+		osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
+	
+		char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+		if (PathC!=NULL) {
+			fileName = PathC;
+			if (audio.loadSample(PathC))
+			{
+				setPlayBufferCopy();
+				setDisplay(0,audio.totalPCMFrameCount,pow(2,zoom));
+				fileDesc = rack::string::filename(PathC)+ "\n";
+				fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
+				fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
 			}
 		}
 		svgIndex=7;
+	}
+
+	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
+
+		zoom++;
+		if (audio.fileLoaded) {
+			setDisplay(audio.totalPCMFrameCount*audio.beginRatio/1024,audio.totalPCMFrameCount*audio.endRatio/1024,zoom);
+		}
+	}
+
+	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
+
+//		audio.totalPCMFrameCount *= 2;
+//		displayBuff.clear();
+//		for (int i=audio.beginRatio*audio.totalPCMFrameCount/1024; i < floor(audio.endRatio*audio.totalPCMFrameCount/1024); i = i + floor(audio.totalPCMFrameCount/(130*zoom))) {
+//			displayBuff.push_back(audio.playBuffer[0][i]);
+//		}
 	}
 
 	audio.setParameters(adp);
@@ -218,19 +238,17 @@ void TuxOnDisplay::draw(const DrawArgs &args) {
 void nSelectFileMenuItem::onAction(const event::Action& e) {
 	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
 	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
-		
 	char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+	
 	if (PathC!=NULL) {
 		module->fileName = PathC;
 		if (module->audio.loadSample(PathC))
 		{
-				vector<double>().swap(module->displayBuff);
-				for (int i=0; i < floor(module->audio.totalPCMFrameCount); i = i + floor(module->audio.totalPCMFrameCount/130)) {
-					module->displayBuff.push_back(module->audio.playBuffer[0][i]);
-				}
-				module->fileDesc = rack::string::filename(PathC)+ "\n";
-				module->fileDesc += std::to_string(module->audio.sampleRate)+ " Hz" + "\n";
-				module->fileDesc += std::to_string(module->audio.channels)+ " channel(s)" + "\n";
+			module->setPlayBufferCopy();
+			module->setDisplay(0,module->audio.totalPCMFrameCount,module->zoom);
+			module->fileDesc = rack::string::filename(PathC)+ "\n";
+			module->fileDesc += std::to_string(module->audio.sampleRate)+ " Hz" + "\n";
+			module->fileDesc += std::to_string(module->audio.channels)+ " channel(s)" + "\n";
 		}
 	}
 }
@@ -279,11 +297,11 @@ struct FwdButton : SvgSwitch  {
 	}
 };
 
-struct BwdButton : SvgSwitch  {
-	BwdButton() {
+struct RwdButton : SvgSwitch  {
+	RwdButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Bwd_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Bwd_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_Off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_On.svg")));
 	}
 };
 
@@ -309,7 +327,7 @@ struct ButtonSVG : TransparentWidget {
 
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Pause_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Bwd_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Rwd_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Fwd_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Ejct_On.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Stop_On.svg")));
@@ -373,15 +391,17 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 
 	addParam(createParam<StartButton>(Vec(10, 85), module, TuxOn::PARAM_START));
 	addParam(createParam<PauseButton>(Vec(45, 85), module, TuxOn::PARAM_PAUSE));
-	addParam(createParam<BwdButton>(Vec(80, 85), module, TuxOn::PARAM_BWD));
+	addParam(createParam<RwdButton>(Vec(80, 85), module, TuxOn::PARAM_RWD));
 	addParam(createParam<FwdButton>(Vec(115, 85), module, TuxOn::PARAM_FWD));
-
 	addParam(createParam<EjectButton>(Vec(150, 85), module, TuxOn::PARAM_EJECT));
 	addParam(createParam<StopButton>(Vec(185, 85), module, TuxOn::PARAM_STOP));
 
 	addParam(createParam<RoundBlackKnob>(Vec(10, 233), module, TuxOn::PARAM_STARTPOS));
 	addParam(createParam<RoundBlackKnob>(Vec(55, 233), module, TuxOn::PARAM_ENDPOS));
-				
+
+	addParam(createParam<buttonMinSmall>(Vec(110,233),module, TuxOn::PARAM_ZOOMOUT));
+	addParam(createParam<buttonPlusSmall>(Vec(135,233),module, TuxOn::PARAM_ZOOMIN));
+			
 	// Fader
 	MmSmallFader *newFader;
 	addParam(newFader = createParamCentered<MmSmallFader>(mm2px(Vec(71,99.55)), module, TuxOn::PARAM_DB));

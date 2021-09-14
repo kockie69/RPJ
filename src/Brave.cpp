@@ -41,22 +41,6 @@ void Brave::process(const ProcessArgs &args) {
 	}
 }
 
-struct buttonPlusSmall : SvgSwitch  {
-	buttonPlusSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
-	}
-};
-
-struct buttonMinSmall : SvgSwitch  {
-	buttonMinSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
-	}
-};
-
 struct BraveModuleWidget : ModuleWidget {
 	BraveModuleWidget(Brave* module) {
 
