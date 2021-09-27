@@ -1,5 +1,7 @@
 #include "Audio.hpp"
 
+using namespace rack;
+
 AudioParameters::AudioParameters() {
 }
 
@@ -16,6 +18,10 @@ Audio::Audio() {
 	fileLoaded=false;
 	play=false;
 	stop=false;
+}
+
+
+Audio::~Audio() {
 }
 
 void Audio::setPause(bool status) {
@@ -45,20 +51,20 @@ void Audio::setParameters(const AudioParameters& params) {
     panningValue = params.panningValue;  
     rackSampleRate = params.rackSampleRate;
 	repeat = params.repeat;
-	beginRatio = params.startRatio;
-	endRatio = params.endRatio;
 	speed = params.speed;
+	begin = params.begin;
+	end = params.end;
 }
 
 bool Audio::loadSample(char *path) {
 	loading = true;
-	float* pSampleData = NULL;
+	pSampleData = NULL;
 
-	if (rack::string::filenameExtension(path)=="flac")
+	if (string::lowercase(system::getExtension(system::getFilename(path)))==".flac")
 		pSampleData = drflac_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
-	else if (rack::string::filenameExtension(path)=="wav")
+	else if (string::lowercase(system::getExtension(system::getFilename(path)))==".wav")
 		pSampleData = drwav_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
-    else if (rack::string::filenameExtension(path)=="mp3")
+    else if (string::lowercase(system::getExtension(system::getFilename(path)))==".mp3")
 	{
 		pSampleData = drmp3_open_file_and_read_pcm_frames_f32(path, &mp3config, &totalPCMFrameCount, NULL);
 		channels = mp3config.channels;
@@ -76,7 +82,6 @@ bool Audio::loadSample(char *path) {
 				peak = max(abs(pSampleData[i]),abs(pSampleData[i+1]));	
 		}
         fileLoaded=true;
-		samplePos = (totalPCMFrameCount*beginRatio/1024);
 	}
 	else 
 		fileLoaded = false;
@@ -92,22 +97,22 @@ void Audio::ejectSong(void) {
 	playBuffer[1].empty();	
 }
 
-bool Audio::withinBoundery(void) {
-	return (((up) && (samplePos <= (totalPCMFrameCount * endRatio/1024)) && (samplePos >= (totalPCMFrameCount * beginRatio/1024))) 
-		|| ((!up) && (samplePos >= (totalPCMFrameCount * endRatio/1024)) && (samplePos <= (totalPCMFrameCount * beginRatio/1024))));
+bool Audio::withinBoundery() {
+	return ((up) && (samplePos <= end && samplePos >= begin)) 
+		|| ((!up) && (samplePos >= end && samplePos <= begin));
 }
 
-void Audio::rewind(void) {
-	samplePos--;
+void Audio::rewind(float step) {
+	samplePos = samplePos - step;
 	if (!withinBoundery())
-		samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (endRatio/1024);
+		samplePos = (up) ? begin : end;
 
 }
 
-void Audio::forward(void) {
-		samplePos++;		
+void Audio::forward(float step) {
+		samplePos = samplePos + step;		
 		if (!withinBoundery())
-			samplePos = (up) ? totalPCMFrameCount * (endRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
+			samplePos = (up) ? end : begin;
 }
 
 void Audio::start(void) {
@@ -118,11 +123,11 @@ void Audio::processAudioSample() {
 	
 	if (fileLoaded) {
 		// Determine if we are going up or down
-		up = (endRatio >= beginRatio);
+		up = (end >= begin);
 
 		if (pause || stop) {
 			if (stop) 
-				samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
+				samplePos = (up) ? begin : end;
 			setPlay(false);
 		}
 
@@ -143,8 +148,7 @@ void Audio::processAudioSample() {
 		}
 
 		if (!withinBoundery()) {
-			samplePos = (up) ? totalPCMFrameCount * (beginRatio/1024) : totalPCMFrameCount * (beginRatio/1024);
-
+			samplePos = begin;		
 			if (!repeat) {
 				setPlay(false);
 			}

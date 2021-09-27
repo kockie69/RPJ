@@ -4,6 +4,17 @@
 #define DR_MP3_IMPLEMENTATION
 #include "TuxOn.hpp"
 
+template <typename TLightBase>
+LEDLightSliderFixed<TLightBase>::LEDLightSliderFixed() {
+	this->setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LEDSliderHandle.svg")));
+}
+
+MmSmallFader::MmSmallFader() {
+	// no adjustment needed in this code, simply adjust the background svg's width to match the width of the handle by temporarily making it visible in the code below, and tweaking the svg's width as needed (when scaling not 100% between inkscape and Rack)
+	setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel-bg.svg")));
+	setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel.svg")));
+	setupSlider();
+}
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -34,11 +45,32 @@ TuxOn::TuxOn() {
 	zoom=0;
 }
 
-void TuxOn::setDisplay(float begin, float end, int zoom) {
-	vector<double>().swap(displayBuff);
-	for (int i=begin; i < floor(end); i = i + floor((end-begin)/130/pow(2,zoom))) {
-		displayBuff.push_back(audio.playBuffer[0][i]);
-	}	
+void TuxOn::setDisplay() {
+	display->width = WIDTH;
+	if (zoomParameters.size()) {
+		display->setDisplayPos(audio.samplePos,zoomParameters[zoom].begin,zoomParameters[zoom].totalPCMFrameCount);
+		display->setBegin(beginRatio/1024);
+		display->setEnd(endRatio/1024);
+	}
+}
+
+float TuxOn::getBegin() {
+	if (zoomParameters.size()) 
+		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio/1024;
+	else return 0;
+}
+
+float TuxOn::getEnd() {
+	if (zoomParameters.size())	
+		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio/1024;
+	else return 0;
+}
+
+float TuxOn::stepSize() {
+	if (zoomParameters.size())
+		//return abs((zoomParameters[zoom].begin-zoomParameters[zoom].end)/pow(2,zoom));
+		return 1;
+	else return 0;
 }
 
 void TuxOn::selectAndLoadFile(void) {	
@@ -50,10 +82,14 @@ void TuxOn::selectAndLoadFile(void) {
 		fileName = PathC;
 		if (audio.loadSample(PathC))
 		{
-			setDisplay(0,audio.totalPCMFrameCount,zoom);
-			fileDesc = rack::string::filename(PathC)+ "\n";
-			fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
-			fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
+			zoomParameters.push_back(zoomParameter());
+			zoomParameters[0].totalPCMFrameCount=audio.totalPCMFrameCount;
+			zoomParameters[0].begin=0;
+			zoomParameters[0].end=audio.totalPCMFrameCount;
+			display->setDisplayBuff(zoomParameters[0].begin,zoomParameters[0].end,audio.playBuffer);
+			display->fileDesc = system::getFilename(PathC)+ "\n";
+			display->fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
+			display->fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
 		}
 	}
 }
@@ -66,16 +102,18 @@ void TuxOn::process(const ProcessArgs &args) {
 	audio.setPause(false);
 	audio.setStop(false);
 	adp.speed = params[PARAM_SPEED].getValue();
-	adp.startRatio = params[PARAM_STARTPOS].getValue();
-	adp.endRatio = params[PARAM_ENDPOS].getValue();
-	
+	beginRatio = params[PARAM_STARTPOS].getValue();
+	endRatio = params[PARAM_ENDPOS].getValue();
+	adp.begin = getBegin();
+	adp.end = getEnd();
+
+
 	if (params[PARAM_FWD].getValue())
-		audio.forward();
+		audio.forward(stepSize());
 	if (params[PARAM_RWD].getValue())
-		audio.rewind();
+		audio.rewind(stepSize());
 
 	if (startTrigger.process((bool)params[PARAM_START].getValue())) {
-
 		if (audio.fileLoaded) {
 			audio.start();
 			buttonToDisplay=START;	
@@ -111,116 +149,35 @@ void TuxOn::process(const ProcessArgs &args) {
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
 
 		zoom++;
-		if (audio.fileLoaded) {
-			setDisplay(audio.totalPCMFrameCount*audio.beginRatio/1024,audio.totalPCMFrameCount*audio.endRatio/1024,zoom);
-		}
+		zoomParameters.push_back(zoomParameter());
+		zoomParameters[zoom].begin=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*beginRatio/1024;
+		zoomParameters[zoom].end=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*endRatio/1024;
+		zoomParameters[zoom].totalPCMFrameCount=abs(zoomParameters[zoom].end-zoomParameters[zoom].begin);
+		if (audio.fileLoaded)
+			display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
 	}
 
 	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
 
 		zoom--;
-		zoom = max(zoom,0);
-		if (audio.fileLoaded) {
-			setDisplay(audio.totalPCMFrameCount*audio.beginRatio/1024,audio.totalPCMFrameCount*audio.endRatio/1024,zoom);
+		if (zoom==-1)
+			zoom=0;
+		else {
+			zoomParameters.pop_back();
+			if (audio.fileLoaded) 
+				display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
 		}
 	}
 
 	audio.setParameters(adp);
 	audio.processAudioSample();
-
+	setDisplay();
+	
 	outputs[OUTPUT_LEFT].setVoltage(10.f * audio.left);
 	outputs[OUTPUT_RIGHT].setVoltage(10.f * audio.right);
 
 	float sampleTimeEco = args.sampleTime * (1 + (ecoMode & 0x3));
 	vuMeters.process(sampleTimeEco, &audio.left);
-}
-
-TuxOnDisplay::TuxOnDisplay() {
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
-	frame = 0;
-}
-	
-void TuxOnDisplay::draw(const DrawArgs &args) {
-	if (module) {
-		nvgFontSize(args.vg, 12);
-		nvgFontFaceId(args.vg, font->handle);
-		nvgTextLetterSpacing(args.vg, -2);
-		nvgFillColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0xff));	
-		nvgTextBox(args.vg, 5, 5,215, module->fileDesc.c_str(), NULL);
-		
-		// Draw ref line
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0x40));
-		{
-			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg, 0, 125);
-			nvgLineTo(args.vg, 215, 125);
-			nvgClosePath(args.vg);
-		}
-		nvgStroke(args.vg);
-		
-		if (module->audio.fileLoaded) {
-			// Draw play line
-			nvgStrokeColor(args.vg, nvgRGBA(0x28, 0xb0, 0xf3, 0xff));
-            nvgStrokeWidth(args.vg, 0.8);
-			{
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg, floor(module->audio.samplePos * 215 / module->audio.totalPCMFrameCount) , 84);
-				nvgLineTo(args.vg, floor(module->audio.samplePos * 215 / module->audio.totalPCMFrameCount) , 164);
-				nvgClosePath(args.vg);
-			}
-			nvgStroke(args.vg);
-            
-            // Draw start line
-			nvgStrokeColor(args.vg, nvgRGBA(0x00, 0xff, 0x00, 0xff));
-            nvgStrokeWidth(args.vg, 1.5);
-			{
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg, floor((module->audio.beginRatio/1024) * 215) , 84);
-				nvgLineTo(args.vg, floor((module->audio.beginRatio/1024) * 215) , 164);
-				nvgClosePath(args.vg);
-			}
-			nvgStroke(args.vg);
-            
-			// Draw end line
-			nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x00, 0x00, 0xff));
-            nvgStrokeWidth(args.vg, 1.5);
-			{
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg, floor((module->audio.endRatio/1024) * 215) , 84);
-				nvgLineTo(args.vg, floor((module->audio.endRatio/1024) * 215) , 164);
-				nvgClosePath(args.vg);
-			}
-
-			nvgStroke(args.vg);
-			
-			// Draw waveform
-			nvgStrokeColor(args.vg, nvgRGBA(0xe1, 0x02, 0x78, 0xc0));
-			nvgSave(args.vg);
-			Rect b = Rect(Vec(0, 84), Vec(215, 80));
-			nvgScissor(args.vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
-			nvgBeginPath(args.vg);
-			for (unsigned int i = 0; i < module->displayBuff.size(); i++) {
-				float x, y;
-				x = (float)i / (module->displayBuff.size() - 1);
-				//y = module->displayBuff[i] / 2.0 + 0.5;
-				y = module->displayBuff[i] / 1.0 + 0.5;
-				Vec p;
-				p.x = b.pos.x + b.size.x * x;
-				p.y = b.pos.y + b.size.y * (1.0 - y);
-				if (i == 0)
-					nvgMoveTo(args.vg, p.x, p.y);
-				else
-					nvgLineTo(args.vg, p.x, p.y);
-			}
-			nvgLineCap(args.vg, NVG_ROUND);
-			nvgMiterLimit(args.vg, 2.0);
-			nvgStrokeWidth(args.vg, 1.5);
-			nvgGlobalCompositeOperation(args.vg, NVG_LIGHTER);
-			nvgStroke(args.vg);			
-			nvgResetScissor(args.vg);
-			nvgRestore(args.vg);	
-		}
-	}
 }
 
 void nSelectFileMenuItem::onAction(const event::Action& e) {
@@ -287,55 +244,49 @@ struct EjectButton : SvgSwitch  {
 	}
 };
 
-struct ButtonSVG : TransparentWidget {
-	TuxOn *module;
-	widget::FramebufferWidget *fb;
-	widget::SvgWidget *sw;
-    std::vector<std::shared_ptr<Svg>> frames;
 
-	ButtonSVG() {
-		fb = new widget::FramebufferWidget;
-		addChild(fb);
-		sw = new widget::SvgWidget;
-		fb->addChild(sw);
+ButtonSVG::ButtonSVG() {
+	fb = new widget::FramebufferWidget;
+	addChild(fb);
+	sw = new widget::SvgWidget;
+	fb->addChild(sw);
 
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Pause_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Rwd_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Fwd_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Ejct_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Stop_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Start_On.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Pause_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Rwd_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Fwd_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Ejct_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Stop_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Start_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
+}
+
+void ButtonSVG::addFrame(std::shared_ptr<Svg> svg) {
+	frames.push_back(svg);
+	// If this is our first frame, automatically set SVG and size
+	if (!sw->svg) {
+		sw->setSvg(svg);
+		box.size = sw->box.size;
+		fb->box.size = sw->box.size;
 	}
+}
 
-	void addFrame(std::shared_ptr<Svg> svg) {
-		frames.push_back(svg);
-		// If this is our first frame, automatically set SVG and size
-		if (!sw->svg) {
-			sw->setSvg(svg);
-			box.size = sw->box.size;
-			fb->box.size = sw->box.size;
-		}
-	}
-
-	void draw(const DrawArgs &args) override {
-		if (module) {
-			// Bit weird check, shouldn't that be module->start ?
-			if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
-				sw->setSvg(frames[static_cast<int>(module->buttonToDisplay)]);
-				fb->dirty = true;
-			}
-		}
-		else {
-
-		}
-
-		if (sw->svg && sw->svg->handle) {
-			svgDraw(args.vg, sw->svg->handle);
+void ButtonSVG::draw(const DrawArgs &args) {
+	if (module) {
+		// Bit weird check, shouldn't that be module->start ?
+		if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
+			sw->setSvg(frames[static_cast<int>(module->buttonToDisplay)]);
+			fb->dirty = true;
 		}
 	}
-};
+	else {
+	}
+
+	if (sw->svg && sw->svg->handle) {
+		svgDraw(args.vg, sw->svg->handle);
+	}
+}
+
 
 TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 
@@ -348,17 +299,16 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 
 	box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-
-	{
-		TuxOnDisplay *display = new TuxOnDisplay();
-		display->box.pos = Vec(5, 40);
-		display->box.size = Vec(215, 250);
-		display->module = module;
-		addChild(display);
+	if (module) {
+		module->display = new Display();
+		module->display->box.pos = Vec(5, 40);
+		module->display->box.size = Vec(WIDTH, 250);
+		module->display->setDisplayFont(pluginInstance,"res/DejaVuSansMono.ttf");
+		addChild(module->display);
 	}
 
 	{
-		ButtonSVG *button = new ButtonSVG();
+		button = new ButtonSVG();
 		button->box.pos = Vec(185, 35);
 		button->module = module;
 		addChild(button);
@@ -398,11 +348,11 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 }
 
 void TuxOnModuleWidget::appendContextMenu(Menu *menu) {
-	TuxOn *module = dynamic_cast<TuxOn*>(this->module);
+	TuxOn * module = dynamic_cast<TuxOn*>(this->module);
 
 	menu->addChild(new MenuSeparator());
 
-	MenuLabel *PantypeLabel = new MenuLabel();
+	PantypeLabel = new MenuLabel();
 	PantypeLabel->text = "Panning Type";
 	menu->addChild(PantypeLabel);
 

@@ -205,28 +205,28 @@ void RPJLFO::process(const ProcessArgs &args) {
 				switch (mode) {
 					case FREE_MODE:
 						parameter[i]->unit=" Hz";
-						parameter[i]->label="Frequency";
+						parameter[i]->name="Frequency";
 						parameter[i]->minValue=-7.f;
 						parameter[i]->maxValue=7.f;
 						parameter[i]->displayBase=2;
 						break;
 					case QUAD_MODE:
 						parameter[i]->unit="";
-						parameter[i]->label="Attenuation";
+						parameter[i]->name="Attenuation";
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=1;
 						parameter[i]->displayBase=0;
 						break;
 					case PHASE_MODE:
 						parameter[i]->unit=" Degrees";
-						parameter[i]->label="Phase";
+						parameter[i]->name="Phase";
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=360;
 						parameter[i]->displayBase=0;
 						break;
 					case DIVIDE_MODE:
 						parameter[i]->unit="";
-						parameter[i]->label="Ratio";
+						parameter[i]->name="Ratio";
 						parameter[i]->minValue=2;
 						parameter[i]->maxValue=32;
 						parameter[i]->displayBase=0;
@@ -303,6 +303,8 @@ void RPJLFO::process(const ProcessArgs &args) {
 
 BGKnob::BGKnob(int dim) {
 	setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob.svg")));
+	bg->setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob-bg.svg")));
+
 	box.size = Vec(dim, dim);
 	shadow->blurRadius = 2.0;
 	shadow->box.pos = Vec(0.0, 3.0);

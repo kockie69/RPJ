@@ -91,9 +91,6 @@ struct Toggle2P : SvgSwitch {
 
 	// handle the manually entered values
 	void onChange(const event::Change &) override;
-
-	// override the base randomizer as it sets switches to invalid values.
-	void randomize() override;
 };
 
 /* Context Menu Item for changing the LPF setting */

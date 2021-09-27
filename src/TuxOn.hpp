@@ -3,11 +3,13 @@
 #include <osdialog.h>
 #include "Audio.hpp"
 #include "VuMeters.hpp"
+#include "Display.hpp"
 
 using namespace rack;
 
 const int MODULE_WIDTH=15;
 const uint16_t ecoMode = 0xFFFF;// all 1's means yes, 0 means no
+const int WIDTH=215;
 
 union PackedBytes4 {
 	int32_t cc1;
@@ -25,9 +27,13 @@ enum ccIds {
 
 template <typename TLightBase = RedLight>
 struct LEDLightSliderFixed : LEDLightSlider<TLightBase> {
-	LEDLightSliderFixed() {
-		this->setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LEDSliderHandle.svg")));
-	}
+	LEDLightSliderFixed();
+};
+
+struct zoomParameter {
+	float begin;
+	float end;
+	int totalPCMFrameCount;
 };
 
 struct TuxOn : Module {
@@ -71,14 +77,17 @@ struct TuxOn : Module {
 	TuxOn();
 	void process(const ProcessArgs &) override;
 	void setPlayBufferCopy(void);
-	void setDisplay(float, float,int);
 	void selectAndLoadFile(void);
+	float getBegin(void);
+	float getEnd(void);
+	float stepSize(void);
+	void setDisplay(void);
 	char * fileName = NULL;
 	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
 	AudioParameters adp;
 	Audio audio;
 	std::string fileDesc;
-	vector<double> displayBuff;
+	vector<zoomParameter> zoomParameters;
 	VuMeterAllDual vuMeters;
 
 	int clipping; // 0 is soft, 1 is hard (must be single ls bit)
@@ -90,6 +99,8 @@ struct TuxOn : Module {
 	int zoom;
 	vector<vector<float>> playBufferCopy;
 	ButtonSvgs buttonToDisplay;
+	float beginRatio, endRatio;
+	Display *display;
 };
 
 struct MmSlider : SvgSlider {
@@ -104,20 +115,7 @@ struct MmSlider : SvgSlider {
 };
 
 struct MmSmallFader : MmSlider {
-	MmSmallFader() {
-		// no adjustment needed in this code, simply adjust the background svg's width to match the width of the handle by temporarily making it visible in the code below, and tweaking the svg's width as needed (when scaling not 100% between inkscape and Rack)
-		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel-bg.svg")));
-		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel.svg")));
-		setupSlider();
-	}
-};
-
-struct TuxOnDisplay : TransparentWidget {
-	TuxOnDisplay(); 
-	void draw(const DrawArgs &args) override; 
-	TuxOn *module;
-	int frame;
-	shared_ptr<Font> font;
+	MmSmallFader();
 };
 
 struct nSelectFileMenuItem : ui::MenuItem {
@@ -137,8 +135,20 @@ struct nSelectPantypeMenuItem : ui::MenuItem {
 	void onAction(const event::Action&) override; 
 };
 
+struct ButtonSVG : TransparentWidget {
+	ButtonSVG();
+	void addFrame(std::shared_ptr<Svg>);
+	void draw(const DrawArgs &) override;
+	TuxOn *module;
+	widget::FramebufferWidget *fb;
+	widget::SvgWidget *sw;
+    std::vector<std::shared_ptr<Svg>> frames;
+};
+
 struct TuxOnModuleWidget : ModuleWidget {
 	TuxOnModuleWidget(TuxOn*);
 	void appendContextMenu(Menu *) override;
+	ButtonSVG *button;
+	MenuLabel *PantypeLabel;
 };
 

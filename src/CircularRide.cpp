@@ -302,7 +302,6 @@ Toggle2P::Toggle2P() {
 
 	// no shadow for switches
 	shadow->opacity = 0.0f;
-
 	neg = pos = 0;
 }
 
@@ -311,22 +310,11 @@ void Toggle2P::onChange(const event::Change &e) {
 
 	SvgSwitch::onChange(e);
 
-	if (paramQuantity->getValue() > 0.5f)
-		paramQuantity->setValue(1.0f);
+	if (getParamQuantity()->getValue() > 0.5f)
+		getParamQuantity()->setValue(1.0f);
 	else
-		paramQuantity->setValue(0.0f);
+		getParamQuantity()->setValue(0.0f);
 }
-
-
-// override the base randomizer as it sets switches to invalid values.
-void Toggle2P::randomize() {
-	SvgSwitch::randomize();
-
-	if (paramQuantity->getValue() > 0.5f)
-		paramQuantity->setValue(1.0f);
-	else
-		paramQuantity->setValue(0.0f);
-}	
 
 json_t *CircularRide::dataToJson() {
 	json_t *rootJ=json_object();
