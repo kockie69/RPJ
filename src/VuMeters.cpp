@@ -44,11 +44,13 @@ void VuMeterBase::processPeakHold() {// use APP->window->getLastFrameRate()
 }
 
 void VuMeterBase::draw(const DrawArgs &args) {
-
+	
 	processPeakHold();
 	
 	setColor();
 
+	nvgGlobalTint(args.vg, color::WHITE);
+	
 	// PEAK
 	drawVu(args, VuMeterAllDual::getPeak(srcLevels, 0), 0, 0);
 	drawVu(args, VuMeterAllDual::getPeak(srcLevels, 1), barX + gapX, 0);
@@ -61,7 +63,6 @@ void VuMeterBase::draw(const DrawArgs &args) {
 	drawPeakHold(args, peakHold[0], 0);
 	drawPeakHold(args, peakHold[1], barX + gapX);	
 
-	
 	Widget::draw(args);
 }
 

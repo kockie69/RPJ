@@ -28,16 +28,18 @@ void Display::setEnd(float endRatio) {
 }
 
 void Display::setDisplayBuff(float begin, float end, vector<vector<float>> playBuffer) {
-	if (((end-begin)/width)>=1) {
+	if (abs(((end-begin)/width))>=1) {
 		vector<double>().swap(displayBuff);
+
 		for (int i=floor(begin); i < floor(end); i = i + floor((end-begin)/width)) {
+			float q = playBuffer[0][i];
 			displayBuff.push_back(playBuffer[0][i]);
 		}
 	}
-	float q = displayBuff.size();	
 }
 
 void Display::draw(const DrawArgs &args) {
+	nvgGlobalTint(args.vg, color::WHITE);
 	if (fontPath!="") {
 		std::shared_ptr<Font> font = APP->window->loadFont(fontPath);
 		nvgFontSize(args.vg, 12);
@@ -102,7 +104,6 @@ void Display::draw(const DrawArgs &args) {
 		for (unsigned int i = 0; i < displayBuff.size(); i++) {
 			float x, y;
 			x = (float)i / (displayBuff.size() - 1);
-			float q = displayBuff.size();
 			y = displayBuff[i] + 0.5;
 			Vec p;
 			p.x = b.pos.x + b.size.x * x;

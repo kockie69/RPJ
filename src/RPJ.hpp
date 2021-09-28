@@ -76,6 +76,11 @@ struct buttonPlusSmall : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
 	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
+	}
 };
 
 struct buttonMinSmall : SvgSwitch  {
@@ -83,6 +88,11 @@ struct buttonMinSmall : SvgSwitch  {
 		momentary=true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
+	}
+	
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
 	}
 };
 

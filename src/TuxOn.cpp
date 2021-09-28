@@ -107,7 +107,6 @@ void TuxOn::process(const ProcessArgs &args) {
 	adp.begin = getBegin();
 	adp.end = getEnd();
 
-
 	if (params[PARAM_FWD].getValue())
 		audio.forward(stepSize());
 	if (params[PARAM_RWD].getValue())
@@ -148,6 +147,11 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
 
+		if (endRatio < beginRatio) {
+			float temp = beginRatio;
+			beginRatio = endRatio;
+			endRatio = temp;
+		}
 		zoom++;
 		zoomParameters.push_back(zoomParameter());
 		zoomParameters[zoom].begin=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*beginRatio/1024;
@@ -200,6 +204,11 @@ struct StartButton : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_On.svg")));
 	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
+	}
 };
 
 struct StopButton : SvgSwitch  {
@@ -209,6 +218,11 @@ struct StopButton : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_On.svg")));
 	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
+	}
 };
 
 struct PauseButton : SvgSwitch  {
@@ -216,6 +230,11 @@ struct PauseButton : SvgSwitch  {
 		momentary=true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_On.svg")));
+	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
 	}
 };
 
@@ -226,6 +245,11 @@ struct FwdButton : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_On.svg")));
 	}
+
+		void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
+	}
 };
 
 struct RwdButton : SvgSwitch  {
@@ -234,6 +258,11 @@ struct RwdButton : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_On.svg")));
 	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
+	}
 };
 
 struct EjectButton : SvgSwitch  {
@@ -241,6 +270,11 @@ struct EjectButton : SvgSwitch  {
 		momentary=true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_Off.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_On.svg")));
+	}
+
+	void draw(const DrawArgs &args)override {
+		nvgGlobalTint(args.vg, color::WHITE);
+		SvgSwitch::draw(args);
 	}
 };
 
@@ -272,6 +306,7 @@ void ButtonSVG::addFrame(std::shared_ptr<Svg> svg) {
 }
 
 void ButtonSVG::draw(const DrawArgs &args) {
+	nvgGlobalTint(args.vg, color::WHITE);
 	if (module) {
 		// Bit weird check, shouldn't that be module->start ?
 		if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
