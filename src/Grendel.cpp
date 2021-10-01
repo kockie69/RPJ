@@ -158,6 +158,7 @@ RPJLFO::RPJLFO() {
 	parameter[3] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ4_PARAM]);
 	prevMode = NUM_MODES;
 	parameter[0]->module = this;
+	paramQuantities[RPJLFO::MODE_PARAM]->snapEnabled=true;
 }
 
 ModeValuePair RPJLFO::getModeValuePair(ModeIds m) {
@@ -338,7 +339,7 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		{
 			auto w = createParam<Knob16>(Vec(73,49), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
-			k->snap = true;
+			//k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);
