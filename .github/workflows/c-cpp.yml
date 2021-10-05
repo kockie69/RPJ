@@ -3,6 +3,8 @@ on:
   push:
     branches:
     - Development
+    - Master
+    - Main
 
 env:
   rack-sdk-version: 2.git.042a9ce0-win
@@ -23,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: Development
           submodules: recursive
       - name: Get RackSDK
         shell: bash
