@@ -3,8 +3,7 @@ on:
   push:
     branches:
     - Development
-    - Master
-    - Main
+    - main
 
 env:
   rack-sdk-version: 2.git.042a9ce0-win
