@@ -60,11 +60,11 @@ bool Audio::loadSample(char *path) {
 	loading = true;
 	pSampleData = NULL;
 
-	if (string::lowercase(system::getExtension(system::getFilename(path)))==".flac")
+	if (std::string::lowercase(system::getExtension(system::getFilename(path)))==".flac")
 		pSampleData = drflac_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
-	else if (string::lowercase(system::getExtension(system::getFilename(path)))==".wav")
+	else if (std::string::lowercase(system::getExtension(system::getFilename(path)))==".wav")
 		pSampleData = drwav_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
-    else if (string::lowercase(system::getExtension(system::getFilename(path)))==".mp3")
+    else if (std::string::lowercase(system::getExtension(system::getFilename(path)))==".mp3")
 	{
 		pSampleData = drmp3_open_file_and_read_pcm_frames_f32(path, &mp3config, &totalPCMFrameCount, NULL);
 		channels = mp3config.channels;
