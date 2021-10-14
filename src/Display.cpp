@@ -4,7 +4,8 @@ Display::Display() {
 		frame = 0;
 		font = NULL;
 		fontPath="";
-		displayBuff.resize(1);	
+		displayBuff.resize(1);
+		start = 8;
 }
 
 void Display::setDisplayFont(Plugin *pluginInstance,std::string font) {
@@ -31,8 +32,8 @@ void Display::setDisplayBuff(float begin, float end, vector<vector<float>> playB
 	if (abs(((end-begin)/width))>=1) {
 		vector<double>().swap(displayBuff);
 
-		for (int i=floor(begin); i < floor(end); i = i + floor((end-begin)/width)) {
-			float q = playBuffer[0][i];
+		// for (int i=floor(begin); i < floor(end); i = i + floor((end-begin)/width)) {
+		for (int i=begin; i < end; i = i + (end-begin)/width) {
 			displayBuff.push_back(playBuffer[0][i]);
 		}
 	}
@@ -42,20 +43,21 @@ void Display::draw(const DrawArgs &args) {
 	nvgGlobalTint(args.vg, color::WHITE);
 	if (fontPath!="") {
 		std::shared_ptr<Font> font = APP->window->loadFont(fontPath);
-		nvgFontSize(args.vg, 12);
-		if (font)
-			nvgFontFaceId(args.vg, font->handle);
-		nvgTextLetterSpacing(args.vg, -2);
-		nvgFillColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0xff));	
-		nvgTextBox(args.vg, 5, 5,215, fileDesc.c_str(), NULL);
+	nvgFontSize(args.vg, 12);	
+	if (font)
+		nvgFontFaceId(args.vg, font->handle);
+	nvgTextLetterSpacing(args.vg, 0);
+	int add = 75;
+	nvgFillColor(args.vg, nvgRGB(add + 48, add + 125, 255));	
+	nvgTextBox(args.vg, 15, 5,165, fileDesc.c_str(), NULL);
 	}
 		
 	// Draw ref line
 	nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 0x40));
 	{
 		nvgBeginPath(args.vg);
-		nvgMoveTo(args.vg, 0, 125);
-		nvgLineTo(args.vg, width, 125);
+		nvgMoveTo(args.vg, start, 125);
+		nvgLineTo(args.vg, start+width, 125);
 		nvgClosePath(args.vg);
 	}
 	nvgStroke(args.vg);
@@ -66,8 +68,8 @@ void Display::draw(const DrawArgs &args) {
         nvgStrokeWidth(args.vg, 0.8);
 		{
 			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg, displayPos , 84);
-			nvgLineTo(args.vg, displayPos , 164);
+			nvgMoveTo(args.vg, start + displayPos , 84);
+			nvgLineTo(args.vg, start + displayPos , 164);
 
 			nvgClosePath(args.vg);
 		}
@@ -78,8 +80,8 @@ void Display::draw(const DrawArgs &args) {
         nvgStrokeWidth(args.vg, 1.5);
 		{
 			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg, displayBegin , 84);
-			nvgLineTo(args.vg, displayBegin , 164);
+			nvgMoveTo(args.vg, start + displayBegin , 84);
+			nvgLineTo(args.vg, start + displayBegin , 164);
 			nvgClosePath(args.vg);
 		}
 		nvgStroke(args.vg);
@@ -89,16 +91,17 @@ void Display::draw(const DrawArgs &args) {
         nvgStrokeWidth(args.vg, 1.5);
 		{
 			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg, displayEnd , 84);
-			nvgLineTo(args.vg, displayEnd , 164);
+			nvgMoveTo(args.vg, start + displayEnd , 84);
+			nvgLineTo(args.vg, start + displayEnd , 164);
 			nvgClosePath(args.vg);
 		}
 		nvgStroke(args.vg);
 		
 		// Draw waveform
-		nvgStrokeColor(args.vg, nvgRGBA(0xe1, 0x02, 0x78, 0xc0));
+		int add = 75;
+		nvgStrokeColor(args.vg, nvgRGB(add + 48, add + 125, 255));
 		nvgSave(args.vg);
-		rack::Rect b = Rect(Vec(0, 84), Vec(215, 80));
+		rack::Rect b = Rect(Vec(0, 84), Vec(start+215, 80));
 		nvgScissor(args.vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
 		nvgBeginPath(args.vg);
 		for (unsigned int i = 0; i < displayBuff.size(); i++) {
@@ -109,9 +112,9 @@ void Display::draw(const DrawArgs &args) {
 			p.x = b.pos.x + b.size.x * x;
 			p.y = b.pos.y + b.size.y * (1.0 - y);
 			if (i == 0)
-				nvgMoveTo(args.vg, p.x, p.y);
+				nvgMoveTo(args.vg, start + p.x, p.y);
 			else
-				nvgLineTo(args.vg, p.x, p.y);
+				nvgLineTo(args.vg, start + p.x, p.y);
 		}
 		nvgLineCap(args.vg, NVG_ROUND);
 		nvgMiterLimit(args.vg, 2.0);

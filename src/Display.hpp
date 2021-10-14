@@ -23,4 +23,5 @@ struct Display : TransparentWidget {
 	float displayPos;
 	float totalPCMFrameCount;
 	int zoom;
+	int start;
 };

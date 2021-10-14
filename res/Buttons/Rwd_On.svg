@@ -13,7 +13,7 @@
    version="1.1"
    id="svg1524"
    inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"
-   sodipodi:docname="Bwd_On.svg">
+   sodipodi:docname="Rwd_On.svg">
   <defs
      id="defs1518" />
   <sodipodi:namedview
@@ -53,13 +53,13 @@
      inkscape:groupmode="layer"
      id="layer1">
     <circle
-       style="display:inline;fill:#ff9955;fill-opacity:1;stroke:#000000;stroke-width:0.0597166;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:#307dee;fill-opacity:1;stroke:#000000;stroke-width:0.0597166;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path911-04-6"
        cx="5"
        cy="5"
        r="4.9701419" />
     <path
-       style="display:inline;fill:#ff6600;fill-opacity:1;stroke:#000000;stroke-width:0.0103874;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:#384ccf;fill-opacity:1;stroke:#000000;stroke-width:0.0103874;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 0.19691745,4.6504147 c 0.06632,-1.471973 0.87292995,-2.8557271 2.15007795,-3.68849957 1.620757,-1.0568089 3.668751,-1.0558654 5.306803,0.00239 1.045954,0.67577137 1.803615,1.77738827 2.055141,2.98811957 0.05816,0.280119 0.130619,0.976749 0.104218,1.002475 -0.0079,0.0077 -0.118842,-0.03081 -0.246522,-0.08561 -2.175752,-0.933723 -4.816625,-1.079241 -7.595461,-0.418541 -0.459359,0.109215 -1.48020395,0.419324 -1.73714095,0.527698 -0.05087,0.02144 -0.0523,0.0088 -0.03712,-0.328102 z"
        id="path1176-5-8" />
     <path

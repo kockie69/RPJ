@@ -7,7 +7,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=15;
+const int MODULE_WIDTH=16;
 const uint16_t ecoMode = 0xFFFF;// all 1's means yes, 0 means no
 const int WIDTH=215;
 
@@ -35,6 +35,7 @@ struct zoomParameter {
 	float end;
 	int totalPCMFrameCount;
 };
+
 
 struct TuxOn : Module {
 
@@ -144,6 +145,8 @@ struct ButtonSVG : TransparentWidget {
 	widget::SvgWidget *sw;
     std::vector<std::shared_ptr<Svg>> frames;
 };
+
+
 
 struct TuxOnModuleWidget : ModuleWidget {
 	TuxOnModuleWidget(TuxOn*);

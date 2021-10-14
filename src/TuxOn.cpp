@@ -2,9 +2,10 @@
 #define DR_WAV_IMPLEMENTATION
 #define DR_FLAC_IMPLEMENTATION
 #define DR_MP3_IMPLEMENTATION
+#include "ctrl/ToggleButton.h"
 #include "TuxOn.hpp"
 
-template <typename TLightBase>
+/*template <typename TLightBase>
 LEDLightSliderFixed<TLightBase>::LEDLightSliderFixed() {
 	this->setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LEDSliderHandle.svg")));
 }
@@ -14,16 +15,32 @@ MmSmallFader::MmSmallFader() {
 	setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel-bg.svg")));
 	setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel.svg")));
 	setupSlider();
-}
+}*/
+
+struct TestKnob : RoundKnob {
+	TestKnob() {
+		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJBigKnob.svg")));
+		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJBigKnob_bg.svg")));
+	}
+};
+
+class SqBlueButton : public ToggleButton {
+public:
+    SqBlueButton() {
+		rack::app::Switch::momentary = true;
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-up-grey.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-down.svg")));
+    }
+};
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_START, 0.f, 1.f, 0.f);
 	configParam(PARAM_PAUSE, 0.f, 1.f, 0.f);
 	configParam(PARAM_STOP, 0.f, 1.f, 0.f);
-	configParam(PARAM_FWD, 0.f, 1.f, 1.f);
-	configParam(PARAM_RWD, 0.f, 1.f, 1.f);
-	configParam(PARAM_EJECT, 0.f, 1.f, 1.f);
+	configParam(PARAM_FWD, 0.f, 1.f, 0.f);
+	configParam(PARAM_RWD, 0.f, 1.f, 0.f);
+	configParam(PARAM_EJECT, 0.f, 1.f, 0.f);
 	float maxTGFader = std::pow(2.0f, 1.0f / 3.0f);
 	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "", " dB", -10, 60.0f);
 
@@ -37,7 +54,7 @@ TuxOn::TuxOn() {
 	vuMeters.reset();
 	vuColorThemeLocal=0;
 	fileName=NULL;
-	fileDesc="        --- NO SONG SELECTED ---";
+	fileDesc="No WAV, FLAC or MP3 file loaded.";
 	buttonToDisplay=BLACK;
 	playBufferCopy.resize(2);
 	playBufferCopy[0].resize(0);
@@ -47,6 +64,7 @@ TuxOn::TuxOn() {
 
 void TuxOn::setDisplay() {
 	display->width = WIDTH;
+	display->fileDesc=fileDesc;
 	if (zoomParameters.size()) {
 		display->setDisplayPos(audio.samplePos,zoomParameters[zoom].begin,zoomParameters[zoom].totalPCMFrameCount);
 		display->setBegin(beginRatio/1024);
@@ -139,7 +157,7 @@ void TuxOn::process(const ProcessArgs &args) {
 		fileDesc="        --- EJECTING SONG ---";
 		audio.ejectSong();
 		fileName = NULL;
-			fileDesc="        --- NO SONG SELECTED ---";
+			fileDesc="No WAV, FLAC or MP3 file loaded.";
 
 		selectAndLoadFile();
 		buttonToDisplay=BLACK;
@@ -198,11 +216,12 @@ void nSelectPantypeMenuItem::onAction(const event::Action& e) {
 	module->adp.panningType = Pantype;
 }
 
-struct StartButton : SvgSwitch  {
+struct StartButton : ToggleButton  {
+	
 	StartButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_on.svg")));
 	}
 
 	void draw(const DrawArgs &args)override {
@@ -211,12 +230,12 @@ struct StartButton : SvgSwitch  {
 	}
 };
 
-struct StopButton : SvgSwitch  {
+struct StopButton : ToggleButton  {
 
 	StopButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_on.svg")));
 	}
 
 	void draw(const DrawArgs &args)override {
@@ -225,11 +244,12 @@ struct StopButton : SvgSwitch  {
 	}
 };
 
-struct PauseButton : SvgSwitch  {
+struct PauseButton : ToggleButton  {
+
 	PauseButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_on.svg")));
 	}
 
 	void draw(const DrawArgs &args)override {
@@ -239,11 +259,12 @@ struct PauseButton : SvgSwitch  {
 };
 
 
-struct FwdButton : SvgSwitch  {
+struct FwdButton : ToggleButton  {
+
 	FwdButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_on.svg")));
 	}
 
 		void draw(const DrawArgs &args)override {
@@ -252,11 +273,12 @@ struct FwdButton : SvgSwitch  {
 	}
 };
 
-struct RwdButton : SvgSwitch  {
+struct RwdButton : ToggleButton  {
+
 	RwdButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_on.svg")));
 	}
 
 	void draw(const DrawArgs &args)override {
@@ -265,11 +287,12 @@ struct RwdButton : SvgSwitch  {
 	}
 };
 
-struct EjectButton : SvgSwitch  {
+struct EjectButton : ToggleButton  {
+
 	EjectButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_Off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_On.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_on.svg")));
 	}
 
 	void draw(const DrawArgs &args)override {
@@ -277,7 +300,6 @@ struct EjectButton : SvgSwitch  {
 		SvgSwitch::draw(args);
 	}
 };
-
 
 ButtonSVG::ButtonSVG() {
 	fb = new widget::FramebufferWidget;
@@ -322,7 +344,6 @@ void ButtonSVG::draw(const DrawArgs &args) {
 	}
 }
 
-
 TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 
 	setModule(module);
@@ -338,32 +359,30 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 		module->display = new Display();
 		module->display->box.pos = Vec(5, 40);
 		module->display->box.size = Vec(WIDTH, 250);
-		module->display->setDisplayFont(pluginInstance,"res/DejaVuSansMono.ttf");
+		module->display->setDisplayFont(pluginInstance,asset::system("res/fonts/ShareTechMono-Regular.ttf"));
 		addChild(module->display);
 	}
 
 	{
 		button = new ButtonSVG();
-		button->box.pos = Vec(185, 35);
+		button->box.pos = Vec(192, 35);
 		button->module = module;
 		addChild(button);
 	}
 
-	addParam(createParam<StartButton>(Vec(10, 85), module, TuxOn::PARAM_START));
-	addParam(createParam<PauseButton>(Vec(45, 85), module, TuxOn::PARAM_PAUSE));
-	addParam(createParam<RwdButton>(Vec(80, 85), module, TuxOn::PARAM_RWD));
-	addParam(createParam<FwdButton>(Vec(115, 85), module, TuxOn::PARAM_FWD));
-	addParam(createParam<EjectButton>(Vec(150, 85), module, TuxOn::PARAM_EJECT));
-	addParam(createParam<StopButton>(Vec(185, 85), module, TuxOn::PARAM_STOP));
+	addParam(createParam<StartButton>(Vec(17, 89), module, TuxOn::PARAM_START));
+	addParam(createParam<PauseButton>(Vec(52, 93), module, TuxOn::PARAM_PAUSE));
+	addParam(createParam<RwdButton>(Vec(82, 89), module, TuxOn::PARAM_RWD));
+	addParam(createParam<FwdButton>(Vec(117, 89), module, TuxOn::PARAM_FWD));
+	addParam(createParam<EjectButton>(Vec(157, 91), module, TuxOn::PARAM_EJECT));
+	addParam(createParam<StopButton>(Vec(192, 95), module, TuxOn::PARAM_STOP));
 
 	addParam(createParam<RoundBlackKnob>(Vec(10, 233), module, TuxOn::PARAM_STARTPOS));
-	addParam(createParam<RoundBlackKnob>(Vec(55, 233), module, TuxOn::PARAM_ENDPOS));
-
-	addParam(createParam<buttonMinSmall>(Vec(110,233),module, TuxOn::PARAM_ZOOMOUT));
-	addParam(createParam<buttonPlusSmall>(Vec(135,233),module, TuxOn::PARAM_ZOOMIN));
-			
+	addParam(createParam<RoundBlackKnob>(Vec(65, 233), module, TuxOn::PARAM_ENDPOS));
+	addParam(createParam<RoundBlackKnob>(Vec(120, 233), module, TuxOn::PARAM_PANNING));
+	
 	// Fader
-	MmSmallFader *newFader;
+	/*MmSmallFader *newFader;
 	addParam(newFader = createParamCentered<MmSmallFader>(mm2px(Vec(71,99.55)), module, TuxOn::PARAM_DB));
 	if (module) {
 		// VU meters
@@ -371,15 +390,17 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 		newVU->srcLevels = module->vuMeters.vuValues;
 		newVU->colorThemeLocal = &(module->vuColorThemeLocal);
 		addChild(newVU);
-	}
+	}*/
 	
-	addParam(createParam<RoundBlackKnob>(Vec(55, 285), module, TuxOn::PARAM_PANNING));
+	addParam(createParam<SqBlueButton>(Vec(65,292),module, TuxOn::PARAM_ZOOMOUT));
+	addParam(createParam<SqBlueButton>(Vec(65,332),module, TuxOn::PARAM_ZOOMIN));
 
-	addParam(createParam<RoundBlackKnob>(Vec(10, 285), module, TuxOn::PARAM_SPEED));
+	addParam(createParam<TestKnob>(Vec(120, 295), module, TuxOn::PARAM_DB));
+	addParam(createParam<RoundBlackKnob>(Vec(10, 295), module, TuxOn::PARAM_SPEED));
 
-	addInput(createInput<PJ301MPort>(Vec(57, 328), module, TuxOn::INPUT_PANCV));
-	addOutput(createOutput<PJ301MPort>(Vec(105, 285), module, TuxOn::OUTPUT_LEFT));
-	addOutput(createOutput<PJ301MPort>(Vec(105, 328), module, TuxOn::OUTPUT_RIGHT));
+	addInput(createInput<PJ301MPort>(Vec(192, 237), module, TuxOn::INPUT_PANCV));
+	addOutput(createOutput<PJ301MPort>(Vec(192, 285), module, TuxOn::OUTPUT_LEFT));
+	addOutput(createOutput<PJ301MPort>(Vec(192, 328), module, TuxOn::OUTPUT_RIGHT));
 }
 
 void TuxOnModuleWidget::appendContextMenu(Menu *menu) {

@@ -23,9 +23,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.02"
-     inkscape:cx="240.67007"
-     inkscape:cy="126.472"
+     inkscape:zoom="4.64"
+     inkscape:cx="83.433173"
+     inkscape:cy="64.467655"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -53,14 +53,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <circle
-       style="display:inline;fill:#ff9955;fill-opacity:1;stroke:#000000;stroke-width:0.0597166;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:#307dee;fill-opacity:1;stroke:#000000;stroke-width:0.0597166;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path911-04-6-4"
        cx="5"
        cy="5"
        r="4.9701419" />
     <path
-       style="display:inline;fill:#ff6600;fill-opacity:1;stroke:#000000;stroke-width:0.0103874;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 1.2552477,4.650414 C 1.3215654,3.1784408 2.1281785,1.7946869 3.4053262,0.96191446 5.0260835,-0.0948908 7.0740777,-0.09394728 8.7121289,0.96430315 9.7580838,1.6400745 10.515744,2.7416912 10.767271,3.9524221 c 0.05816,0.2801188 0.130618,0.9767492 0.104218,1.0024751 -0.0079,0.0077 -0.118842,-0.030814 -0.246522,-0.08561 C 8.4492145,3.9355641 5.8083416,3.7900466 3.0295055,4.4507455 2.5701472,4.5599613 1.5493008,4.8700698 1.2923646,4.9784435 c -0.050867,0.021438 -0.0523,0.00884 -0.03712,-0.3281011 z"
+       style="display:inline;fill:#384ccf;fill-opacity:1;stroke:#000000;stroke-width:0.0103874;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0.19691436,4.650414 C 0.26323206,3.1784408 1.0698451,1.7946869 2.3469928,0.96191443 3.9677501,-0.0948908 6.0157443,-0.09394728 7.6537955,0.96430443 8.6997504,1.6400758 9.4574106,2.7416925 9.7089373,3.9524234 c 0.05816,0.2801188 0.130618,0.9767492 0.104218,1.0024751 -0.0079,0.0077 -0.118842,-0.030814 -0.246522,-0.08561 C 7.3908811,3.9355641 4.7500082,3.7900466 1.9711721,4.4507455 1.5118138,4.5599613 0.49096743,4.8700698 0.23403126,4.9784435 c -0.050867,0.021438 -0.0523,0.00884 -0.03712,-0.3281011 z"
        id="path1176-5-8-3" />
     <path
        sodipodi:type="star"
