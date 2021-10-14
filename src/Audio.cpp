@@ -78,7 +78,7 @@ bool Audio::loadSample(char *path) {
 			playBuffer[0].push_back(pSampleData[i]);
 			if (channels == 2)
 				playBuffer[1].push_back((float)pSampleData[i+1]);
-			if ((abs(pSampleData[i])>peak) || abs((pSampleData[i+1])>peak))
+			if (abs(pSampleData[i])>peak || abs(pSampleData[i+1])>peak)
 				peak = max(abs(pSampleData[i]),abs(pSampleData[i+1]));	
 		}
         fileLoaded=true;
