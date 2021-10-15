@@ -1,5 +1,6 @@
 
 #include "Grendel.hpp"
+#include "ctrl/knob/RPJKnob.h"
 
 template <typename T>
 LFO<T>::LFO() {
@@ -302,19 +303,6 @@ void RPJLFO::process(const ProcessArgs &args) {
 	prevMode = mode;
 }
 
-BGKnob::BGKnob(int dim) {
-	setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob.svg")));
-	bg->setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob-bg.svg")));
-
-	box.size = Vec(dim, dim);
-	shadow->blurRadius = 2.0;
-	shadow->box.pos = Vec(0.0, 3.0);
-}
-
-Knob16::Knob16() : BGKnob(24) {
-	shadow->box.pos = Vec(0.0, 2.5);
-}
-
 struct RPJLFOModuleWidget : ModuleWidget {
 	RPJLFOModuleWidget(RPJLFO* module) {
 
@@ -327,19 +315,8 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("GRENDEL");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 19),10);
-			tl->setText("Quadruple LFO");
-			addChild(tl);
-		}
-		{
-			auto w = createParam<Knob16>(Vec(73,49), module, RPJLFO::MODE_PARAM);
+			auto w = createParam<RPJKnob>(Vec(73,49), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
-			//k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);
@@ -348,12 +325,12 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(34, 95), module, RPJLFO::FREQ1_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(70, 95), module, RPJLFO::FREQ2_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(140, 95), module, RPJLFO::FREQ4_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(140.5, 95), module, RPJLFO::FREQ4_LIGHT));
 	
-		addParam(createParam<RoundSmallBlackKnob>(Vec(27, 110), module, RPJLFO::FREQ1_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(63, 110), module, RPJLFO::FREQ2_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(98, 110), module, RPJLFO::FREQ3_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(134, 110), module, RPJLFO::FREQ4_PARAM));
+		addParam(createParam<RPJKnob>(Vec(24, 110), module, RPJLFO::FREQ1_PARAM));
+		addParam(createParam<RPJKnob>(Vec(60, 110), module, RPJLFO::FREQ2_PARAM));
+		addParam(createParam<RPJKnob>(Vec(95, 110), module, RPJLFO::FREQ3_PARAM));
+		addParam(createParam<RPJKnob>(Vec(131, 110), module, RPJLFO::FREQ4_PARAM));
 
 		addInput(createInput<PJ301MPort>(Vec(26, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(62, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));

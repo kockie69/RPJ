@@ -1,9 +1,12 @@
 #include "RPJ.hpp"
+#include "ctrl/knob/RPJKnob.h"
 #include "BlindCurve.hpp"
 
 BlindCurve::BlindCurve() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
+	configInput(INPUT_MAIN, "Audio");
+	configOutput(OUTPUT_MAIN, "Audio");
     configParam(PARAM_ATK, 1.f, 250.0f,20.f, "Attack"," mSec");
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
 	configParam<DetectModeQuantity>(PARAM_MODE, 0.f, 2.f, 0.f, "Detect Mode");
@@ -36,67 +39,15 @@ struct BlindCurveModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("BLINDCURVE");
-			addChild(title);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 17),10,MODULE_WIDTH);
-			tl->setText("Audio Detector");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("ATTACK");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(35, 80));
-			tl->setText("RELEASE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 170));
-			tl->setText("DETECT MODE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(8, 220),10);
-			tl->setText("PEAK");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(39, 189),10);
-			tl->setText("MS");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 220),10);
-			tl->setText("RMS");
-			addChild(tl);
-		}				
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 260));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-
-		addInput(createInput<PJ301MPort>(Vec(10, 290), module, BlindCurve::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, BlindCurve::OUTPUT_MAIN));
+	
+		addInput(createInput<PJ301MPort>(Vec(33, 255), module, BlindCurve::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(33, 310), module, BlindCurve::OUTPUT_MAIN));
 		
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, BlindCurve::PARAM_ATK));
-       	addParam(createParam<RoundBlackKnob>(Vec(55, 110), module, BlindCurve::PARAM_REL)); 
+		addParam(createParam<RPJKnob>(Vec(31, 52), module, BlindCurve::PARAM_ATK));
+       	addParam(createParam<RPJKnob>(Vec(31, 115), module, BlindCurve::PARAM_REL)); 
 		{
-			auto w = createParam<RoundBlackKnob>(Vec(31,210), module, BlindCurve::PARAM_MODE);
+			auto w = createParam<RPJKnobSnap>(Vec(32,185), module, BlindCurve::PARAM_MODE);
 			auto k = dynamic_cast<SvgKnob*>(w);
-			k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);

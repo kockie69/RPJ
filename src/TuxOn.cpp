@@ -2,7 +2,8 @@
 #define DR_WAV_IMPLEMENTATION
 #define DR_FLAC_IMPLEMENTATION
 #define DR_MP3_IMPLEMENTATION
-#include "ctrl/ToggleButton.h"
+#include "ctrl/button/ToggleButton.h"
+#include "ctrl/knob/RPJKnob.h"
 #include "TuxOn.hpp"
 
 /*template <typename TLightBase>
@@ -17,13 +18,6 @@ MmSmallFader::MmSmallFader() {
 	setupSlider();
 }*/
 
-struct RPJKnob : RoundKnob {
-	RPJKnob() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob.svg")));
-		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob_bg.svg")));
-	}
-};
-
 class RedButton : public ToggleButton {
 public:
     RedButton() {
@@ -35,6 +29,9 @@ public:
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	configInput(INPUT_PANCV, "Pan CV");
+	configOutput(OUTPUT_LEFT, "Left Audio");
+	configOutput(OUTPUT_RIGHT, "Right Audio");
 	configParam(PARAM_START, 0.f, 1.f, 0.f);
 	configParam(PARAM_PAUSE, 0.f, 1.f, 0.f);
 	configParam(PARAM_STOP, 0.f, 1.f, 0.f);
