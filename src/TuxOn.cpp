@@ -17,16 +17,16 @@ MmSmallFader::MmSmallFader() {
 	setupSlider();
 }*/
 
-struct TestKnob : RoundKnob {
-	TestKnob() {
-		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJBigKnob.svg")));
-		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJBigKnob_bg.svg")));
+struct RPJKnob : RoundKnob {
+	RPJKnob() {
+		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob.svg")));
+		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob_bg.svg")));
 	}
 };
 
-class SqBlueButton : public ToggleButton {
+class RedButton : public ToggleButton {
 public:
-    SqBlueButton() {
+    RedButton() {
 		rack::app::Switch::momentary = true;
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-up-grey.svg")));
         addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-down.svg")));
@@ -377,9 +377,9 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addParam(createParam<EjectButton>(Vec(157, 91), module, TuxOn::PARAM_EJECT));
 	addParam(createParam<StopButton>(Vec(192, 95), module, TuxOn::PARAM_STOP));
 
-	addParam(createParam<RoundBlackKnob>(Vec(10, 233), module, TuxOn::PARAM_STARTPOS));
-	addParam(createParam<RoundBlackKnob>(Vec(65, 233), module, TuxOn::PARAM_ENDPOS));
-	addParam(createParam<RoundBlackKnob>(Vec(120, 233), module, TuxOn::PARAM_PANNING));
+	addParam(createParam<RPJKnob>(Vec(12, 233), module, TuxOn::PARAM_STARTPOS));
+	addParam(createParam<RPJKnob>(Vec(71, 233), module, TuxOn::PARAM_ENDPOS));
+	addParam(createParam<RPJKnob>(Vec(131, 233), module, TuxOn::PARAM_PANNING));
 	
 	// Fader
 	/*MmSmallFader *newFader;
@@ -392,15 +392,15 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 		addChild(newVU);
 	}*/
 	
-	addParam(createParam<SqBlueButton>(Vec(65,292),module, TuxOn::PARAM_ZOOMOUT));
-	addParam(createParam<SqBlueButton>(Vec(65,332),module, TuxOn::PARAM_ZOOMIN));
+	addParam(createParam<RedButton>(Vec(70,286),module, TuxOn::PARAM_ZOOMIN));
+	addParam(createParam<RedButton>(Vec(70,320),module, TuxOn::PARAM_ZOOMOUT));
 
-	addParam(createParam<TestKnob>(Vec(120, 295), module, TuxOn::PARAM_DB));
-	addParam(createParam<RoundBlackKnob>(Vec(10, 295), module, TuxOn::PARAM_SPEED));
+	addParam(createParam<RPJKnob>(Vec(131, 285), module, TuxOn::PARAM_DB));
+	addParam(createParam<RPJKnob>(Vec(12, 285), module, TuxOn::PARAM_SPEED));
 
 	addInput(createInput<PJ301MPort>(Vec(192, 237), module, TuxOn::INPUT_PANCV));
-	addOutput(createOutput<PJ301MPort>(Vec(192, 285), module, TuxOn::OUTPUT_LEFT));
-	addOutput(createOutput<PJ301MPort>(Vec(192, 328), module, TuxOn::OUTPUT_RIGHT));
+	addOutput(createOutput<PJ301MPort>(Vec(192, 287), module, TuxOn::OUTPUT_LEFT));
+	addOutput(createOutput<PJ301MPort>(Vec(192, 339), module, TuxOn::OUTPUT_RIGHT));
 }
 
 void TuxOnModuleWidget::appendContextMenu(Menu *menu) {

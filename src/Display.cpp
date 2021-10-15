@@ -47,8 +47,7 @@ void Display::draw(const DrawArgs &args) {
 	if (font)
 		nvgFontFaceId(args.vg, font->handle);
 	nvgTextLetterSpacing(args.vg, 0);
-	int add = 75;
-	nvgFillColor(args.vg, nvgRGB(add + 48, add + 125, 255));	
+	nvgFillColor(args.vg, nvgRGB(0x21, 0x46, 0x8b));	
 	nvgTextBox(args.vg, 15, 5,165, fileDesc.c_str(), NULL);
 	}
 		
@@ -87,7 +86,7 @@ void Display::draw(const DrawArgs &args) {
 		nvgStroke(args.vg);
             
 		// Draw end line
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x00, 0x00, 0xff));
+		nvgStrokeColor(args.vg, nvgRGBA(0xae, 0x1c, 0x28, 0xff));
         nvgStrokeWidth(args.vg, 1.5);
 		{
 			nvgBeginPath(args.vg);
@@ -98,8 +97,7 @@ void Display::draw(const DrawArgs &args) {
 		nvgStroke(args.vg);
 		
 		// Draw waveform
-		int add = 75;
-		nvgStrokeColor(args.vg, nvgRGB(add + 48, add + 125, 255));
+		nvgStrokeColor(args.vg, nvgRGB(0x21, 0x46, 0x8b));
 		nvgSave(args.vg);
 		rack::Rect b = Rect(Vec(0, 84), Vec(start+215, 80));
 		nvgScissor(args.vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
