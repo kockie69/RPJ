@@ -165,7 +165,8 @@ void AlgorithmDisplay::setColor(unsigned char r, unsigned char g, unsigned char 
 
 void AlgorithmDisplay::draw(const DrawArgs &args) {
 	char tbuf[11];
-
+	nvgGlobalTint(args.vg, color::WHITE);
+	
 	if (module == NULL) return;
 
 	std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioDelay.getParameters().strAlgorithm[0]);
