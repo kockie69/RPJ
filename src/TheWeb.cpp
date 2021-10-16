@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "TheWeb.hpp"
-
+#include "ctrl/knob/RPJKnob.hpp"
 
 TheWeb::TheWeb() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -81,62 +81,6 @@ struct TheWebModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("THE WEB");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("2nd Order Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 85));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 155));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 155));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 210));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 210));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("HPF");
-			addChild(tl);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 290));
-			tl->setText("BPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("BSF");
-			addChild(tl);
-		}
-
 		addInput(createInput<PJ301MPort>(Vec(10, 240), module, TheWeb::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, TheWeb::OUTPUT_LPFMAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, TheWeb::OUTPUT_HPFMAIN));
@@ -144,12 +88,12 @@ struct TheWebModuleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, TheWeb::OUTPUT_BSFMAIN));
 
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, TheWeb::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, TheWeb::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, TheWeb::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, TheWeb::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(8, 115), module, TheWeb::PARAM_Q));
 		addInput(createInput<PJ301MPort>(Vec(55, 117), module, TheWeb::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, TheWeb::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, TheWeb::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 175), module, TheWeb::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 175), module, TheWeb::PARAM_DRY));
 	}
 
 };

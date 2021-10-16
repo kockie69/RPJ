@@ -105,6 +105,15 @@
          in="result3"
          id="feComposite957" />
     </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Invert"
+       id="filter1540">
+      <feColorMatrix
+         values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0.21 0.72 0.07 1 0 "
+         result="color2"
+         id="feColorMatrix1538" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -115,7 +124,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.9720632"
      inkscape:cx="45.356819"
-     inkscape:cy="213.8675"
+     inkscape:cy="153.01752"
      inkscape:document-units="mm"
      inkscape:current-layer="g13383"
      showgrid="true"
@@ -200,7 +209,7 @@
                  transform="translate(-188.93134,0.28519852)" />
               <path
                  style="fill:none;stroke:#ffffff;stroke-width:0.958553px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="m -373.82316,-9.138028 49.57872,0.486067"
+                 d="m -373.82316,-12.972238 49.57872,0.486067"
                  id="path899" />
               <g
                  aria-label="RPJ"
