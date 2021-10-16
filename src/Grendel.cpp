@@ -322,10 +322,10 @@ struct RPJLFOModuleWidget : ModuleWidget {
 			addParam(w);
 		}
 	
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(34, 95), module, RPJLFO::FREQ1_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(70, 95), module, RPJLFO::FREQ2_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(140.5, 95), module, RPJLFO::FREQ4_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(34, 95), module, RPJLFO::FREQ1_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(70, 95), module, RPJLFO::FREQ2_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(140.5, 95), module, RPJLFO::FREQ4_LIGHT));
 	
 		addParam(createParam<RPJKnob>(Vec(24, 110), module, RPJLFO::FREQ1_PARAM));
 		addParam(createParam<RPJKnob>(Vec(60, 110), module, RPJLFO::FREQ2_PARAM));

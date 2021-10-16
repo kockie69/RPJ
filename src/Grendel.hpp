@@ -125,16 +125,16 @@ struct RPJLFO : Module {
 		ModeValues mv;
 };
 
- template <typename TBase = GrayModuleLightWidget>
- struct TRedGreenBlueYellowLight : TBase {
-     TRedGreenBlueYellowLight() {
+ template <typename TBase = ModuleLightWidget>
+ struct TRedGreenBlueWhiteLight : TBase {
+     TRedGreenBlueWhiteLight() {
          this->addBaseColor(SCHEME_RED);
          this->addBaseColor(SCHEME_GREEN);
          this->addBaseColor(SCHEME_BLUE);
-		this->addBaseColor(SCHEME_YELLOW);
+		this->addBaseColor(SCHEME_WHITE);
      }
  };
- typedef TRedGreenBlueYellowLight<> RedGreenBlueYellowLight;
+ typedef TRedGreenBlueWhiteLight<> RedGreenBlueWhiteLight;
 
 struct BGKnob : RoundKnob {
 	std::string _svgBase;
