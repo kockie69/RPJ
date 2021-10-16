@@ -315,55 +315,55 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
-			auto w = createParam<RPJKnob>(Vec(73,49), module, RPJLFO::MODE_PARAM);
+			auto w = createParam<RPJKnob>(Vec(70,49), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);
 		}
 	
-		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(34, 95), module, RPJLFO::FREQ1_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(70, 95), module, RPJLFO::FREQ2_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(16, 95), module, RPJLFO::FREQ1_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(52, 95), module, RPJLFO::FREQ2_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(140.5, 95), module, RPJLFO::FREQ4_LIGHT));
 	
-		addParam(createParam<RPJKnob>(Vec(24, 110), module, RPJLFO::FREQ1_PARAM));
-		addParam(createParam<RPJKnob>(Vec(60, 110), module, RPJLFO::FREQ2_PARAM));
+		addParam(createParam<RPJKnob>(Vec(6, 110), module, RPJLFO::FREQ1_PARAM));
+		addParam(createParam<RPJKnob>(Vec(42, 110), module, RPJLFO::FREQ2_PARAM));
 		addParam(createParam<RPJKnob>(Vec(95, 110), module, RPJLFO::FREQ3_PARAM));
 		addParam(createParam<RPJKnob>(Vec(131, 110), module, RPJLFO::FREQ4_PARAM));
 
-		addInput(createInput<PJ301MPort>(Vec(26, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(62, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(8, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(44, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(97, 142), module, RPJLFO::FRQ_PH_DIV3_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(132, 142), module, RPJLFO::FRQ_PH_DIV4_INPUT));
 
-		addInput(createInput<PJ301MPort>(Vec(26, 173), module, RPJLFO::RESET1_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(62, 173), module, RPJLFO::RESET2_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(8, 173), module, RPJLFO::RESET1_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(44, 173), module, RPJLFO::RESET2_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(97, 173), module, RPJLFO::RESET3_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(132, 173), module, RPJLFO::RESET4_INPUT));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 204), module, RPJLFO::SAWDOWN_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 204), module, RPJLFO::SAWDOWN_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 204), module, RPJLFO::SAWDOWN_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 204), module, RPJLFO::SAWDOWN_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 204), module, RPJLFO::SAWDOWN_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 204), module, RPJLFO::SAWDOWN_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 235), module, RPJLFO::SAWUP_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 235), module, RPJLFO::SAWUP_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 235), module, RPJLFO::SAWUP_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 235), module, RPJLFO::SAWUP_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 235), module, RPJLFO::SAWUP_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 235), module, RPJLFO::SAWUP_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 266), module, RPJLFO::SQR_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 266), module, RPJLFO::SQR_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 266), module, RPJLFO::SQR_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 266), module, RPJLFO::SQR_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 266), module, RPJLFO::SQR_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 266), module, RPJLFO::SQR_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 297), module, RPJLFO::TRI_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 297), module, RPJLFO::TRI_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 297), module, RPJLFO::TRI_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 297), module, RPJLFO::TRI_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 297), module, RPJLFO::TRI_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 297), module, RPJLFO::TRI_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 328), module, RPJLFO::SIN_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 328), module, RPJLFO::SIN_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 328), module, RPJLFO::SIN_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 328), module, RPJLFO::SIN_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 328), module, RPJLFO::SIN_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 328), module, RPJLFO::SIN_OUTPUT4));
 

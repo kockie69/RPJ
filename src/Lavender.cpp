@@ -1,10 +1,10 @@
 #include "RPJ.hpp"
 #include "Lavender.hpp"
+#include "ctrl/knob/RPJKnob.h"
 
 
 Lavender::Lavender() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
@@ -13,6 +13,10 @@ Lavender::Lavender() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
 	LPFaudioFilter.reset(44100);
 	HPFaudioFilter.reset(44100);
 	BPFaudioFilter.reset(44100);
@@ -77,62 +81,6 @@ struct LavenderModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("LAVENDER");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("2nd order LPF/HPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 85));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 155));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 155));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 210));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 210));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("HPF");
-			addChild(tl);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 290));
-			tl->setText("BPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("BSF");
-			addChild(tl);
-		}
-
 		addInput(createInput<PJ301MPort>(Vec(10, 240), module, Lavender::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, Lavender::OUTPUT_LPFMAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, Lavender::OUTPUT_HPFMAIN));
@@ -140,12 +88,12 @@ struct LavenderModuleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Lavender::OUTPUT_BSFMAIN));
 
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Lavender::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, Lavender::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, Lavender::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, Lavender::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(8, 115), module, Lavender::PARAM_Q));
 		addInput(createInput<PJ301MPort>(Vec(55, 117), module, Lavender::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, Lavender::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, Lavender::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 175), module, Lavender::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 175), module, Lavender::PARAM_DRY));
 	}
 
 };
