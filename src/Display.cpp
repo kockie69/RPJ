@@ -47,7 +47,7 @@ void Display::draw(const DrawArgs &args) {
 	if (font)
 		nvgFontFaceId(args.vg, font->handle);
 	nvgTextLetterSpacing(args.vg, 0);
-	nvgFillColor(args.vg, nvgRGB(0x21, 0x46, 0x8b));	
+	nvgFillColor(args.vg, nvgRGB(0xff, 0xff, 0xff));	
 	nvgTextBox(args.vg, 15, 5,165, fileDesc.c_str(), NULL);
 	}
 		

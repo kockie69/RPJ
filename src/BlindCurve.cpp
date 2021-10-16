@@ -1,5 +1,5 @@
 #include "RPJ.hpp"
-#include "ctrl/knob/RPJKnob.h"
+#include "ctrl/knob/RPJKnob.hpp"
 #include "BlindCurve.hpp"
 
 BlindCurve::BlindCurve() {

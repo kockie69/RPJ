@@ -76,7 +76,7 @@ struct FilterNameDisplay : TransparentWidget {
 
 	void draw(const DrawArgs &args) override {
 		char tbuf[11];
-
+		nvgGlobalTint(args.vg, color::WHITE);
 		if (module == NULL) return;
 
 		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioFilter.getParameters().strAlgorithm[0]);

@@ -1,5 +1,8 @@
 #include "RPJ.hpp"
 #include "Easter.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/button/ToggleButton.hpp"
+#include "ctrl/button/SmallButton.hpp"
 
 Easter::Easter() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -12,6 +15,7 @@ Easter::Easter() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	audioFilter.reset(44100);
 	afp.algorithm = filterAlgorithm::kResonA;
 }
@@ -61,62 +65,22 @@ struct EasterModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("EASTER");
-			addChild(title);
-		} 
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("Resonance Filter");
-			addChild(tl);
-		}
-		{
 			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
 			fnd->module = module;
 			addChild(fnd);
 		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 190));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 190));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Easter::INPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 320), module, Easter::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Easter::OUTPUT_MAIN));
 		
 		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Easter::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Easter::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Easter::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Easter::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Easter::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Easter::INPUT_CVQ));	
-		addParam(createParam<RoundBlackKnob>(Vec(8, 225), module, Easter::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 225), module, Easter::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 105), module, Easter::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(55, 107), module, Easter::INPUT_CVFC));
+		addParam(createParam<RPJKnob>(Vec(8, 175), module, Easter::PARAM_Q));
+		addInput(createInput<PJ301MPort>(Vec(55, 177), module, Easter::INPUT_CVQ));	
+		addParam(createParam<RPJKnob>(Vec(8, 250), module, Easter::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 250), module, Easter::PARAM_DRY));
 	}
 
 };

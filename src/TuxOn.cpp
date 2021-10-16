@@ -2,8 +2,9 @@
 #define DR_WAV_IMPLEMENTATION
 #define DR_FLAC_IMPLEMENTATION
 #define DR_MP3_IMPLEMENTATION
-#include "ctrl/button/ToggleButton.h"
-#include "ctrl/knob/RPJKnob.h"
+#include "ctrl/button/ToggleButton.hpp"
+#include "ctrl/button/RedButton.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 #include "TuxOn.hpp"
 
 /*template <typename TLightBase>
@@ -17,15 +18,6 @@ MmSmallFader::MmSmallFader() {
 	setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel.svg")));
 	setupSlider();
 }*/
-
-class RedButton : public ToggleButton {
-public:
-    RedButton() {
-		rack::app::Switch::momentary = true;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-up-grey.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-down.svg")));
-    }
-};
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "CircularRide.hpp"
+#include "ctrl/button/SmallButton.hpp"
 
 
 CircularRide::CircularRide() {

@@ -70,30 +70,4 @@ struct RPJTitle: TransparentWidget {
 };
 
 
-struct buttonPlusSmall : SvgSwitch  {
-	buttonPlusSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-struct buttonMinSmall : SvgSwitch  {
-	buttonMinSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
-	}
-	
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
 

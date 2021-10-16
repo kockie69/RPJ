@@ -425,11 +425,20 @@
                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
                    id="path953" />
               </g>
+              <rect
+                 id="Rectangle_9"
+                 data-name="Rectangle 9"
+                 width="44.145512"
+                 height="146.15155"
+                 rx="4.1386418"
+                 x="-344.61597"
+                 y="171.2424"
+                 style="stroke-width:2.00808" />
               <g
                  aria-label="Lpf"
                  id="text979"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                 transform="translate(49.74747,40.866822)">
+                 transform="translate(49.74747,42.802662)">
                 <path
                    d="m -380.3475,143.76915 h 5.16719 v 1.17572 h -6.61251 v -10.90354 h 1.44532 z"
                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
@@ -461,6 +470,16 @@
                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
                    id="path996" />
               </g>
+              <rect
+                 id="Rectangle_9-8"
+                 data-name="Rectangle 9"
+                 width="49.760353"
+                 height="99.229721"
+                 rx="4.6650314"
+                 x="-322.55902"
+                 y="-404.78848"
+                 style="stroke-width:1.75672"
+                 transform="matrix(-0.01896035,-0.99982024,0.99997284,-0.00736967,0,0)" />
               <g
                  aria-label="Bpf"
                  id="text1001"
@@ -483,7 +502,7 @@
                  aria-label="Bsf"
                  id="text1012"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                 transform="translate(14.45119,4.755785)">
+                 transform="translate(14.45119,3.273025)">
                 <path
                    d="m -346.79609,283.95972 v -10.90354 h 3.56462 q 1.77482,0 2.66598,0.73389 0.89864,0.73389 0.89864,2.17172 0,0.76385 -0.43435,1.35546 -0.43434,0.58411 -1.18321,0.90613 0.88367,0.24713 1.3929,0.94357 0.51672,0.68896 0.51672,1.64752 0,1.46778 -0.95107,2.30651 -0.95106,0.83874 -2.68844,0.83874 z m 1.43783,-5.0998 v 3.92407 h 2.37392 q 1.00348,0 1.58011,-0.51672 0.58412,-0.52421 0.58412,-1.43783 0,-1.96952 -2.14177,-1.96952 z m 0,-1.15326 h 2.17172 q 0.94358,0 1.50523,-0.47179 0.56914,-0.47179 0.56914,-1.28057 0,-0.89864 -0.52421,-1.30303 -0.52421,-0.41188 -1.59509,-0.41188 h -2.12679 z"
                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"

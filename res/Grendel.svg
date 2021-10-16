@@ -114,8 +114,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.7651755"
-     inkscape:cx="200.52977"
-     inkscape:cy="305.95236"
+     inkscape:cx="108.85485"
+     inkscape:cy="41.18168"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -287,46 +287,6 @@
       </g>
     </g>
     <g
-       id="g3705"
-       transform="matrix(1.3970799,0,0,-1.4158708,-58.240318,200.55959)">
-      <path
-         class="0.0"
-         d="M 55.099268,80.08323 A 3.3072916,3.3072916 0 0 1 51.791976,76.775938"
-         stroke-width="0.185208"
-         stroke-linecap="round"
-         stroke="#333333"
-         fill="none"
-         id="path5350"
-         style="fill-opacity:1" />
-      <path
-         class="0.0"
-         d="M 52.8437,79.194738 A 3.3072917,3.3072917 0 0 1 52.680468,74.520371"
-         stroke-width="0.185208"
-         stroke-linecap="round"
-         stroke="#333333"
-         fill="none"
-         id="path5352"
-         style="fill-opacity:1" />
-      <path
-         class="0.0"
-         d="M 55.099268,80.08323 A 3.3072916,3.3072916 0 0 0 58.40656,76.775938"
-         stroke-width="0.185208"
-         stroke-linecap="round"
-         stroke="#333333"
-         fill="none"
-         id="path5354"
-         style="fill-opacity:1" />
-      <path
-         class="0.0"
-         d="m 57.354835,79.194738 a 3.3072917,3.3072917 0 0 0 0.163233,-4.674367"
-         stroke-width="0.185208"
-         stroke-linecap="round"
-         stroke="#333333"
-         fill="none"
-         id="path5356"
-         style="fill-opacity:1" />
-    </g>
-    <g
        aria-label="RPJ"
        id="text5378"
        style="font-size:39.9999px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal'"
@@ -434,7 +394,7 @@
        aria-label="Quad"
        id="text941"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#76bd23;fill-opacity:1;stroke-width:0.264583"
-       transform="translate(-0.52916667)">
+       transform="translate(-1.5875)">
       <path
          d="m 7.0053143,88.8083 q 0,0.436149 -0.1384927,0.752409 -0.1384927,0.314192 -0.3886064,0.491959 l 0.5374344,0.421679 -0.2707843,0.250114 -0.634586,-0.504362 q -0.148828,0.03721 -0.3141925,0.03721 -0.3555335,0 -0.6304519,-0.173632 -0.2749184,-0.1757 -0.4278805,-0.498161 -0.1508951,-0.324527 -0.1550292,-0.750341 v -0.217041 q 0,-0.434081 0.1508951,-0.766877 0.150895,-0.332796 0.4258134,-0.508496 0.2769855,-0.177767 0.632519,-0.177767 0.3638018,0 0.6387202,0.1757 0.2769854,0.1757 0.4258134,0.506429 0.148828,0.328661 0.148828,0.768944 z M 6.6084397,88.613997 q 0,-0.531233 -0.2129068,-0.818554 -0.2108396,-0.289388 -0.6035802,-0.289388 -0.374137,0 -0.5911779,0.287321 Q 4.985801,88.07863 4.9795999,88.587125 V 88.8083 q 0,0.516764 0.2149738,0.81442 0.2170408,0.297656 0.6015131,0.297656 0.3844724,0 0.595312,-0.279052 0.2108397,-0.28112 0.2170409,-0.804085 z"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#76bd23;fill-opacity:1;stroke-width:0.264583"
@@ -482,7 +442,7 @@
        aria-label="Free"
        id="text978"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ae1c28;fill-opacity:1;stroke-width:0.264583"
-       transform="translate(-13.160737,-18.627098)">
+       transform="translate(-13.347809,-18.627098)">
       <path
          d="m 19.745403,114.92243 h -1.262972 v 1.32912 h -0.396875 v -3.00964 h 1.864485 v 0.3266 h -1.46761 v 1.02939 h 1.262972 z"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ae1c28;fill-opacity:1;stroke-width:0.264583"

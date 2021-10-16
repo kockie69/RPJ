@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "DryLand.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 
 DryLand::DryLand() {
@@ -54,56 +55,15 @@ struct DryLandModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("DRY LAND");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("1st order LPF/HPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 155));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 155));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("HPF");
-			addChild(tl);
-		}
+		addInput(createInput<PJ301MPort>(Vec(10, 220), module, DryLand::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 220), module, DryLand::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, DryLand::OUTPUT_HPFMAIN));
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, DryLand::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, DryLand::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, DryLand::OUTPUT_HPFMAIN));
-
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, DryLand::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, DryLand::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, DryLand::INPUT_CVFC));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, DryLand::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, DryLand::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 145), module, DryLand::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 145), module, DryLand::PARAM_DRY));
 	}
 
 };
