@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "Gazpacho.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 
 Gazpacho::Gazpacho() {
@@ -13,6 +14,8 @@ Gazpacho::Gazpacho() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
 	LPFaudioFilter.reset(44100);
 	HPFaudioFilter.reset(44100);
 	LPFafp.algorithm=filterAlgorithm::kLWRLPF2;
@@ -57,56 +60,15 @@ struct GazpachoModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("GAZPACHO");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
-			tl->setText("Linkwitz-Riley");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 155));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 155));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("HPF");
-			addChild(tl);
-		}
+		addInput(createInput<PJ301MPort>(Vec(10, 245), module, Gazpacho::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 245), module, Gazpacho::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 305), module, Gazpacho::OUTPUT_HPFMAIN));
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Gazpacho::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, Gazpacho::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Gazpacho::OUTPUT_HPFMAIN));
-
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Gazpacho::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, Gazpacho::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, Gazpacho::INPUT_CVFC));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, Gazpacho::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, Gazpacho::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 155), module, Gazpacho::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 155), module, Gazpacho::PARAM_DRY));
 	}
 
 };

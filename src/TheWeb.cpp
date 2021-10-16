@@ -13,6 +13,10 @@ TheWeb::TheWeb() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
 	LPFaudioFilter.reset(44100);
 	HPFaudioFilter.reset(44100);
 	BPFaudioFilter.reset(44100);
