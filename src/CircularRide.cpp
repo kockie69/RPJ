@@ -1,6 +1,7 @@
 #include "RPJ.hpp"
 #include "CircularRide.hpp"
 #include "ctrl/button/SmallButton.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 
 CircularRide::CircularRide() {
@@ -78,119 +79,29 @@ struct CircularRideModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("CIRCULARRIDE");
-			addChild(title);
-		}
         {
-			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(54,40));
+			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(76,30));
 			ad->module = module;
 			addChild(ad);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
-			tl->setText("Stereo Delay");
-			addChild(tl);
-		}	
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(21, 60));
-			tl->setText("L");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 60));
-			tl->setText("C");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(90, 60));
-			tl->setText("R");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(125, 60));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(42, 110),10);
-			tl->setText("Delay");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(60, 120));
-			tl->setText("FEEDBACK");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 120));
-			tl->setText("RATIO");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(125, 120));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(20,165),10);
-			tl->setText("Left+Ratio");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(20, 200),10);
-			tl->setText("Left&Right");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 205));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(125, 205));
-			tl->setText("HPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 260));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(82, 260));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 278));
-			tl->setText("L");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 310));
-			tl->setText("R");
-			addChild(tl);
 		}
 
 		addInput(createInput<PJ301MPort>(Vec(10, 290), module, CircularRide::INPUT_LEFT));
         addInput(createInput<PJ301MPort>(Vec(10, 320), module, CircularRide::INPUT_RIGHT));
-		addOutput(createOutput<PJ301MPort>(Vec(82, 290), module, CircularRide::OUTPUT_LEFT));
-        addOutput(createOutput<PJ301MPort>(Vec(82, 320), module, CircularRide::OUTPUT_RIGHT));
+		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
+        addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
 		
-        addParam(createParam<RoundBlackKnob>(Vec(8,90),module, CircularRide::PARAM_DELAYL));
-		addParam(createParam<RoundBlackKnob>(Vec(44,90),module, CircularRide::PARAM_DELAYC));
-		addParam(createParam<RoundBlackKnob>(Vec(82,90),module, CircularRide::PARAM_DELAYR));
-		addParam(createParam<RoundBlackKnob>(Vec(120, 90), module, CircularRide::PARAM_DRY));
-        addParam(createParam<RoundBlackKnob>(Vec(82,150),module, CircularRide::PARAM_FEEDBACK));
-        addParam(createParam<RoundBlackKnob>(Vec(8,150),module, CircularRide::PARAM_RATIO));
-       	addParam(createParam<RoundBlackKnob>(Vec(120, 150), module, CircularRide::PARAM_WET));
-        addParam(createParam<buttonMinSmall>(Vec(20,55),module, CircularRide::PARAM_DOWN));
-		addParam(createParam<buttonPlusSmall>(Vec(91,55),module, CircularRide::PARAM_UP));
-        addParam(createParam<RoundBlackKnob>(Vec(8,235),module, CircularRide::PARAM_LPFFC));
-		addParam(createParam<RoundBlackKnob>(Vec(120,235),module, CircularRide::PARAM_HPFFC));
-        addParam(createParam<Toggle2P>(Vec(42, 180), module, CircularRide::PARAM_TYPE)); 
+        addParam(createParam<RPJKnob>(Vec(9,90),module, CircularRide::PARAM_DELAYL));
+		addParam(createParam<RPJKnob>(Vec(67,90),module, CircularRide::PARAM_DELAYC));
+		addParam(createParam<RPJKnob>(Vec(125,90),module, CircularRide::PARAM_DELAYR));
+        addParam(createParam<RPJKnob>(Vec(125,155),module, CircularRide::PARAM_FEEDBACK));
+        addParam(createParam<RPJKnob>(Vec(9,155),module, CircularRide::PARAM_RATIO));
+        addParam(createParam<buttonMinSmall>(Vec(42,45),module, CircularRide::PARAM_DOWN));
+		addParam(createParam<buttonPlusSmall>(Vec(113,45),module, CircularRide::PARAM_UP));
+        addParam(createParam<RPJKnob>(Vec(9,237),module, CircularRide::PARAM_LPFFC));
+		addParam(createParam<RPJKnob>(Vec(47, 237), module, CircularRide::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(87, 237), module, CircularRide::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(125,237),module, CircularRide::PARAM_HPFFC));
+        addParam(createParam<Toggle2P>(Vec(65, 170), module, CircularRide::PARAM_TYPE)); 
 	}
 
 	void appendContextMenu(Menu *menu) override {
