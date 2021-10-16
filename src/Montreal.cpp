@@ -1,11 +1,16 @@
 #include "RPJ.hpp"
 #include "Montreal.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 
 Montreal::Montreal() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
+	configBypass(INPUT_MAIN, OUTPUT_LPF);
+	configBypass(INPUT_MAIN, OUTPUT_HPF);
+	configBypass(INPUT_MAIN, OUTPUT_BPF);
+	configBypass(INPUT_MAIN, OUTPUT_BSF);
 	sampleRate=0;
 	wdfp.fc=0;
 }
@@ -57,60 +62,14 @@ struct MontrealModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("MONTREAL");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("2nd Order Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 210));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 210));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("HPF");
-			addChild(tl);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 290));
-			tl->setText("BPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("BSF");
-			addChild(tl);
-		}
-
 		addInput(createInput<PJ301MPort>(Vec(10, 240), module, Montreal::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, Montreal::OUTPUT_LPF));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, Montreal::OUTPUT_HPF));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, Montreal::OUTPUT_BPF));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Montreal::OUTPUT_BSF));
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Montreal::PARAM_FC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Montreal::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(30, 60), module, Montreal::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(30, 140), module, Montreal::PARAM_Q));
 	}
 
 };

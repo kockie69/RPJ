@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "SugarMice.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 
 SugarMice::SugarMice() {
@@ -47,36 +48,10 @@ struct SugarMiceModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("SUGARMICE");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("Ladder Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, SugarMice::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, SugarMice::OUTPUT_MAIN));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, SugarMice::PARAM_FC));
+	
+		addInput(createInput<PJ301MPort>(Vec(11, 250), module, SugarMice::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(11, 320), module, SugarMice::OUTPUT_MAIN));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, SugarMice::PARAM_FC));
 	}
 
 	void appendContextMenu(Menu *menu) override {

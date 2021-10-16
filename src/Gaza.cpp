@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "Gaza.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 Gaza::Gaza() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -10,6 +11,7 @@ Gaza::Gaza() {
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
     configParam(PARAM_THRES, -20.f, 0.f,-6.f, "Threshold");
     configParam(PARAM_SENS, 0.5f, 5.f,1.f, "Sensitivity");
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	envelopeFollower.reset(14400);
 }
 
@@ -40,65 +42,15 @@ struct GazaModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("GAZA");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("Envelope Follower");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(25, 75));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 115));
-			tl->setText("ATTACK");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(35, 155));
-			tl->setText("RELEASE");
-			addChild(tl);
-		}
-        		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 190));
-			tl->setText("THRESH");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 235));
-			tl->setText("SENS");
-			addChild(tl);
-		}		
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 260));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 290), module, Gaza::INPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 320), module, Gaza::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Gaza::OUTPUT_MAIN));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, Gaza::PARAM_FC));
-       	addParam(createParam<RoundBlackKnob>(Vec(55, 110), module, Gaza::PARAM_Q)); 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 145), module, Gaza::PARAM_ATK));
-       	addParam(createParam<RoundBlackKnob>(Vec(55, 187), module, Gaza::PARAM_REL)); 
-        addParam(createParam<RoundBlackKnob>(Vec(8, 220), module, Gaza::PARAM_THRES));
-       	addParam(createParam<RoundBlackKnob>(Vec(55, 265), module, Gaza::PARAM_SENS)); 
+		addParam(createParam<RPJKnob>(Vec(30, 55), module, Gaza::PARAM_FC));
+       	addParam(createParam<RPJKnob>(Vec(30, 105), module, Gaza::PARAM_Q)); 
+		addParam(createParam<RPJKnob>(Vec(8, 160), module, Gaza::PARAM_ATK));
+       	addParam(createParam<RPJKnob>(Vec(55, 160), module, Gaza::PARAM_REL)); 
+        addParam(createParam<RPJKnob>(Vec(30, 213), module, Gaza::PARAM_THRES));
+       	addParam(createParam<RPJKnob>(Vec(30, 262), module, Gaza::PARAM_SENS)); 
 	}
 
 };

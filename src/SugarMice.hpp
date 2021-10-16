@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=3;
 
 struct SugarMice : Module {
 
