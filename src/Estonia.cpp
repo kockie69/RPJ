@@ -1,6 +1,7 @@
 #include "RPJ.hpp"
 #include "Estonia.hpp"
 #include "ctrl/button/SmallButton.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 Estonia::Estonia() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -11,6 +12,7 @@ Estonia::Estonia() {
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kLowShelf;
 }
 
@@ -57,50 +59,20 @@ struct EstoniaModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("ESTONIA");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
-			tl->setText(" Shelving filter");
-			addChild(tl);
-		}
-		{
 			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
 			fnd->module = module;
 			addChild(fnd);
 		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 70));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 130));
-			tl->setText("BOOST/CUT");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Estonia::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Estonia::OUTPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(33, 258), module, Estonia::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(33, 315), module, Estonia::OUTPUT_MAIN));
 		
 		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Estonia::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Estonia::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 100), module, Estonia::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 100), module, Estonia::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 102), module, Estonia::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 160), module, Estonia::PARAM_BOOSTCUT_DB));
-		addInput(createInput<PJ301MPort>(Vec(55, 162), module, Estonia::INPUT_CVB));	
+		addParam(createParam<RPJKnob>(Vec(8, 173), module, Estonia::PARAM_BOOSTCUT_DB));
+		addInput(createInput<PJ301MPort>(Vec(55, 175), module, Estonia::INPUT_CVB));	
 	}
 
 };
