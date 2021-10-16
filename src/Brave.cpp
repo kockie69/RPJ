@@ -1,5 +1,6 @@
 #include "RPJ.hpp"
 #include "Brave.hpp"
+#include "ctrl/knob/RPJKnob.hpp"
 
 Brave::Brave() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -9,6 +10,7 @@ Brave::Brave() {
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kNCQParaEQ;
 }
 
@@ -52,50 +54,14 @@ struct BraveModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("BRAVE");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("2nd Order Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 170));
-			tl->setText("BOOST/CUT");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Brave::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Brave::OUTPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(33, 258), module, Brave::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(33, 315), module, Brave::OUTPUT_MAIN));
 		
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Brave::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 80), module, Brave::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Brave::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Brave::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(8, 140), module, Brave::PARAM_Q));
 		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Brave::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 200), module, Brave::PARAM_BOOSTCUT_DB));
+		addParam(createParam<RPJKnob>(Vec(8, 200), module, Brave::PARAM_BOOSTCUT_DB));
 		addInput(createInput<PJ301MPort>(Vec(55, 202), module, Brave::INPUT_CVB));	
 	}
 
