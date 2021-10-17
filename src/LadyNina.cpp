@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "LadyNina.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 LadyNina::LadyNina() {

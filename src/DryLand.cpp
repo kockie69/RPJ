@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "DryLand.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 DryLand::DryLand() {

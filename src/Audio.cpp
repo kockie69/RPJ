@@ -18,6 +18,8 @@ Audio::Audio() {
 	fileLoaded=false;
 	play=false;
 	stop=false;
+	left=0;
+	right=0;
 }
 
 

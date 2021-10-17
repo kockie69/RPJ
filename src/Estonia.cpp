@@ -1,7 +1,7 @@
 #include "RPJ.hpp"
 #include "Estonia.hpp"
-#include "ctrl/button/SmallButton.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJButtons.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 Estonia::Estonia() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

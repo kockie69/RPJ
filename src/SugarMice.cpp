@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "SugarMice.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 SugarMice::SugarMice() {

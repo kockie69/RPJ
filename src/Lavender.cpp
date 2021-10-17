@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "Lavender.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 Lavender::Lavender() {

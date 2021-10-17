@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "Montreal.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 Montreal::Montreal() {

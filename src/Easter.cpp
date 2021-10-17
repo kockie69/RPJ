@@ -1,8 +1,7 @@
 #include "RPJ.hpp"
 #include "Easter.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
-#include "ctrl/button/ToggleButton.hpp"
-#include "ctrl/button/SmallButton.hpp"
+#include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJButtons.hpp"
 
 Easter::Easter() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

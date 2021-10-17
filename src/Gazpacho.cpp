@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "Gazpacho.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 
 Gazpacho::Gazpacho() {

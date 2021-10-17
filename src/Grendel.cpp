@@ -1,6 +1,7 @@
 
 #include "Grendel.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJLights.hpp"
 
 template <typename T>
 LFO<T>::LFO() {

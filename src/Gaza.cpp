@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "Gaza.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 Gaza::Gaza() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

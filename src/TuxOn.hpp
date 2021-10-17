@@ -2,7 +2,7 @@
 #include <thread>
 #include <osdialog.h>
 #include "Audio.hpp"
-#include "VuMeters.hpp"
+#include "ctrl/RPJVumeters.hpp"
 #include "Display.hpp"
 
 using namespace rack;
@@ -17,18 +17,6 @@ union PackedBytes4 {
 };
 
 enum ButtonSvgs { EMPTY, PAUSE, REWIND, FORWARD, EJECT, STOP, START, BLACK, NUM_BUTTONSVGS};
-
-enum ccIds {
-	cloakedMode, // turn off track VUs only, keep master VUs (also called "Cloaked mode"), this has only two values, 0x0 and 0xFF so that it can be used in bit mask operations
-	vuColorGlobal, // 0 is green, 1 is aqua, 2 is cyan, 3 is blue, 4 is purple, 5 is individual colors for each track/group/master (every user of vuColor must first test for != 5 before using as index into color table, or else array overflow)
-	dispColorGlobal, // 0 is yellow, 1 is light-gray, 2 is green, 3 is aqua, 4 is cyan, 5 is blue, 6 is purple, 7 is per track
-	detailsShow // bit 0 is knob param arc, bit 1 is knob cv arc, bit 2 is fader cv pointer
-};
-
-template <typename TLightBase = RedLight>
-struct LEDLightSliderFixed : LEDLightSlider<TLightBase> {
-	LEDLightSliderFixed();
-};
 
 struct zoomParameter {
 	float begin;
@@ -68,12 +56,16 @@ struct TuxOn : Module {
 	};
 
 	enum LightIds {
-		RATE_LIGHT,
-		START_LIGHT,
-		PAUSE_LIGHT,
+		LIGHT_LEFT_LOW1,
+		LIGHT_LEFT_LOW2,
+		LIGHT_LEFT_MED1,
+		LIGHT_LEFT_HIGH1,
+		LIGHT_RIGHT_LOW1,
+		LIGHT_RIGHT_LOW2,
+		LIGHT_RIGHT_MED1,
+		LIGHT_RIGHT_HIGH1,
 		NUM_LIGHTS
 	};
-
 
 	TuxOn();
 	void process(const ProcessArgs &) override;

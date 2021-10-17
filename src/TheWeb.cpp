@@ -1,6 +1,6 @@
 #include "RPJ.hpp"
 #include "TheWeb.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 TheWeb::TheWeb() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

@@ -2,22 +2,10 @@
 #define DR_WAV_IMPLEMENTATION
 #define DR_FLAC_IMPLEMENTATION
 #define DR_MP3_IMPLEMENTATION
-#include "ctrl/button/ToggleButton.hpp"
-#include "ctrl/button/RedButton.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
+#include "ctrl/RPJButtons.hpp"
+#include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJLights.hpp"
 #include "TuxOn.hpp"
-
-/*template <typename TLightBase>
-LEDLightSliderFixed<TLightBase>::LEDLightSliderFixed() {
-	this->setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/LEDSliderHandle.svg")));
-}
-
-MmSmallFader::MmSmallFader() {
-	// no adjustment needed in this code, simply adjust the background svg's width to match the width of the handle by temporarily making it visible in the code below, and tweaking the svg's width as needed (when scaling not 100% between inkscape and Rack)
-	setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel-bg.svg")));
-	setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/fader-channel.svg")));
-	setupSlider();
-}*/
 
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -40,7 +28,7 @@ TuxOn::TuxOn() {
 	adp.panningType=CONSTPOWER;
 	adp.dB=1;
 	adp.repeat=true;
-	vuMeters.reset();
+	vuMeters.reset(lights);
 	vuColorThemeLocal=0;
 	fileName=NULL;
 	fileDesc="No WAV, FLAC or MP3 file loaded.";
@@ -187,8 +175,17 @@ void TuxOn::process(const ProcessArgs &args) {
 	outputs[OUTPUT_LEFT].setVoltage(10.f * audio.left);
 	outputs[OUTPUT_RIGHT].setVoltage(10.f * audio.right);
 
-	float sampleTimeEco = args.sampleTime * (1 + (ecoMode & 0x3));
-	vuMeters.process(sampleTimeEco, &audio.left);
+	// vuMeters.process(lights,audio.left,audio.right);
+	/*float level=abs(audio.left)*10;
+	lights[LightIds::LIGHT_LEFT_HIGH1].value = (level >= 7) ? .8f : .2f;
+    lights[LightIds::LIGHT_LEFT_MED1].value = (level >= 3.5) ? .8f : .2f;
+   	lights[LightIds::LIGHT_LEFT_LOW2].value = (level >= 1.75) ? .8f : .2f;
+    lights[LightIds::LIGHT_LEFT_LOW1].value = (level >= .87) ? .8f : .2f;
+	level=abs(audio.right)*10;
+	lights[LightIds::LIGHT_RIGHT_HIGH1].value = (level >= 7) ? .8f : .2f;
+    lights[LightIds::LIGHT_RIGHT_MED1].value = (level >= 3.5) ? .8f : .2f;
+   	lights[LightIds::LIGHT_RIGHT_LOW2].value = (level >= 1.75) ? .8f : .2f;
+    lights[LightIds::LIGHT_RIGHT_LOW1].value = (level >= .87) ? .8f : .2f;*/
 }
 
 void nSelectFileMenuItem::onAction(const event::Action& e) {
@@ -205,90 +202,6 @@ void nSelectPantypeMenuItem::onAction(const event::Action& e) {
 	module->adp.panningType = Pantype;
 }
 
-struct StartButton : ToggleButton  {
-	
-	StartButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_on.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-struct StopButton : ToggleButton  {
-
-	StopButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_on.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-struct PauseButton : ToggleButton  {
-
-	PauseButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_on.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-
-struct FwdButton : ToggleButton  {
-
-	FwdButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_on.svg")));
-	}
-
-		void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-struct RwdButton : ToggleButton  {
-
-	RwdButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_on.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
-
-struct EjectButton : ToggleButton  {
-
-	EjectButton() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_on.svg")));
-	}
-
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
-	}
-};
 
 ButtonSVG::ButtonSVG() {
 	fb = new widget::FramebufferWidget;
@@ -370,17 +283,6 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addParam(createParam<RPJKnob>(Vec(71, 233), module, TuxOn::PARAM_ENDPOS));
 	addParam(createParam<RPJKnob>(Vec(131, 233), module, TuxOn::PARAM_PANNING));
 	
-	// Fader
-	/*MmSmallFader *newFader;
-	addParam(newFader = createParamCentered<MmSmallFader>(mm2px(Vec(71,99.55)), module, TuxOn::PARAM_DB));
-	if (module) {
-		// VU meters
-		VuMeterTrack *newVU = createWidgetCentered<VuMeterTrack>(mm2px(Vec(67.25, 99.65)));
-		newVU->srcLevels = module->vuMeters.vuValues;
-		newVU->colorThemeLocal = &(module->vuColorThemeLocal);
-		addChild(newVU);
-	}*/
-	
 	addParam(createParam<RedButton>(Vec(70,286),module, TuxOn::PARAM_ZOOMIN));
 	addParam(createParam<RedButton>(Vec(70,320),module, TuxOn::PARAM_ZOOMOUT));
 
@@ -390,6 +292,32 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addInput(createInput<PJ301MPort>(Vec(192, 237), module, TuxOn::INPUT_PANCV));
 	addOutput(createOutput<PJ301MPort>(Vec(192, 287), module, TuxOn::OUTPUT_LEFT));
 	addOutput(createOutput<PJ301MPort>(Vec(192, 339), module, TuxOn::OUTPUT_RIGHT));
+	
+	/*for (int i=0;i<2;i++) {
+		for (int j=0;j<4;j++) {
+        	switch (j) {
+            	case 0:
+            	case 1:
+                	addChild(createLightCentered<SmallLight<GreenLight>>(
+                    	Vec(127+(j*10), 320+(i*10)),
+                    	module,
+                    	TuxOn::LIGHT_LEFT_LOW1+j+(4*i)));
+                	break;
+            	case 2:
+                	addChild(createLightCentered<SmallLight<YellowLight>>(
+                    	Vec(127+(j*10), 320+(i*10)),
+                    	module,
+                    	TuxOn::LIGHT_LEFT_LOW1+j+(4*i)));
+                	break;
+            	case 3:
+                	addChild(createLightCentered<SmallLight<RedLight>>(
+                    	Vec(127+(j*10), 320+(i*10)),
+                    	module,
+                    	TuxOn::LIGHT_LEFT_LOW1 + j+(4*i)));
+                	break;
+        	}
+    	}
+	}*/
 }
 
 void TuxOnModuleWidget::appendContextMenu(Menu *menu) {

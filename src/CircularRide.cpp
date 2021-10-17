@@ -1,8 +1,7 @@
 #include "RPJ.hpp"
 #include "CircularRide.hpp"
-#include "ctrl/button/SmallButton.hpp"
-#include "ctrl/knob/RPJKnob.hpp"
-
+#include "ctrl/RPJButtons.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 CircularRide::CircularRide() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -101,7 +100,7 @@ struct CircularRideModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(47, 237), module, CircularRide::PARAM_DRY));
 		addParam(createParam<RPJKnob>(Vec(87, 237), module, CircularRide::PARAM_WET));
 		addParam(createParam<RPJKnob>(Vec(125,237),module, CircularRide::PARAM_HPFFC));
-        addParam(createParam<Toggle2P>(Vec(65, 170), module, CircularRide::PARAM_TYPE)); 
+        addParam(createParam<Toggle2P>(Vec(65, 170), module, CircularRide::PARAM_TYPE));
 	}
 
 	void appendContextMenu(Menu *menu) override {
