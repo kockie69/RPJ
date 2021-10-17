@@ -8,24 +8,9 @@ DrillingHoles::DrillingHoles() {
 
 void DrillingHoles::process(const ProcessArgs &args) {
 
-	if (outputs[OUTPUT_1].isConnected() && (inputs[INPUT_A].isConnected() || inputs[INPUT_B].isConnected())) {
-		if (inputs[INPUT_B].isConnected())
-			outputs[OUTPUT_1].setVoltage(inputs[INPUT_B].getVoltage());
-		else
-			outputs[OUTPUT_1].setVoltage(inputs[INPUT_A].getVoltage());
-	}
-	if (outputs[OUTPUT_2].isConnected() && (inputs[INPUT_C].isConnected() || inputs[INPUT_D].isConnected())) {
-		if (inputs[INPUT_D].isConnected())
-			outputs[OUTPUT_2].setVoltage(inputs[INPUT_D].getVoltage());
-		else
-			outputs[OUTPUT_2].setVoltage(inputs[INPUT_C].getVoltage());
-	}
-	if (outputs[OUTPUT_3].isConnected() && (inputs[INPUT_E].isConnected() || inputs[INPUT_F].isConnected())) {
-		if (inputs[INPUT_F].isConnected())
-			outputs[OUTPUT_3].setVoltage(inputs[INPUT_F].getVoltage());
-		else
-			outputs[OUTPUT_3].setVoltage(inputs[INPUT_E].getVoltage());
-	}
+	for (int i=0; i<3;i++)
+		if (outputs[OUTPUT_1+i].isConnected() && (inputs[INPUT_A+(2*i)].isConnected() || inputs[INPUT_B+(2*i)].isConnected())) 
+			inputs[INPUT_B+(2*i)].isConnected() ? outputs[OUTPUT_1+i].setVoltage(inputs[INPUT_B+(2*i)].getVoltage()) : outputs[OUTPUT_1+i].setVoltage(inputs[INPUT_A+(2*i)].getVoltage());
 }
 
 struct DrillingHolesModuleWidget : ModuleWidget {
