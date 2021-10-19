@@ -175,17 +175,17 @@ void TuxOn::process(const ProcessArgs &args) {
 	outputs[OUTPUT_LEFT].setVoltage(10.f * audio.left);
 	outputs[OUTPUT_RIGHT].setVoltage(10.f * audio.right);
 
-	// vuMeters.process(lights,audio.left,audio.right);
-	/*float level=abs(audio.left)*10;
-	lights[LightIds::LIGHT_LEFT_HIGH1].value = (level >= 7) ? .8f : .2f;
-    lights[LightIds::LIGHT_LEFT_MED1].value = (level >= 3.5) ? .8f : .2f;
-   	lights[LightIds::LIGHT_LEFT_LOW2].value = (level >= 1.75) ? .8f : .2f;
-    lights[LightIds::LIGHT_LEFT_LOW1].value = (level >= .87) ? .8f : .2f;
+	vuMeters.process(lights,audio.left,audio.right);
+	float level=abs(audio.left)*10;
+	lights[LightIds::LIGHT_LEFT_HIGH1].value = (level >= 7) ? .8f : .1f;
+    lights[LightIds::LIGHT_LEFT_MED1].value = (level >= 3.5) ? .8f : .1f;
+   	lights[LightIds::LIGHT_LEFT_LOW2].value = (level >= 1.75) ? .8f : .1f;
+    lights[LightIds::LIGHT_LEFT_LOW1].value = (level >= .87) ? .8f : .1f;
 	level=abs(audio.right)*10;
-	lights[LightIds::LIGHT_RIGHT_HIGH1].value = (level >= 7) ? .8f : .2f;
-    lights[LightIds::LIGHT_RIGHT_MED1].value = (level >= 3.5) ? .8f : .2f;
-   	lights[LightIds::LIGHT_RIGHT_LOW2].value = (level >= 1.75) ? .8f : .2f;
-    lights[LightIds::LIGHT_RIGHT_LOW1].value = (level >= .87) ? .8f : .2f;*/
+	lights[LightIds::LIGHT_RIGHT_HIGH1].value = (level >= 7) ? .8f : .1f;
+    lights[LightIds::LIGHT_RIGHT_MED1].value = (level >= 3.5) ? .8f : .1f;
+   	lights[LightIds::LIGHT_RIGHT_LOW2].value = (level >= 1.75) ? .8f : .1f;
+    lights[LightIds::LIGHT_RIGHT_LOW1].value = (level >= .87) ? .8f : .1f;
 }
 
 void nSelectFileMenuItem::onAction(const event::Action& e) {
@@ -229,21 +229,23 @@ void ButtonSVG::addFrame(std::shared_ptr<Svg> svg) {
 	}
 }
 
-void ButtonSVG::draw(const DrawArgs &args) {
-	nvgGlobalTint(args.vg, color::WHITE);
-	if (module) {
-		// Bit weird check, shouldn't that be module->start ?
-		if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
-			sw->setSvg(frames[static_cast<int>(module->buttonToDisplay)]);
-			fb->dirty = true;
+void ButtonSVG::drawLayer(const DrawArgs &args, int layer) {
+	if (layer == 1) {
+		if (module) {
+			// Bit weird check, shouldn't that be module->start ?
+			if (!(module->buttonToDisplay == START && !module->audio.fileLoaded)) {
+				sw->setSvg(frames[static_cast<int>(module->buttonToDisplay)]);
+				fb->dirty = true;
+			}
+		}
+		else {
+		}
+
+		if (sw->svg && sw->svg->handle) {
+			svgDraw(args.vg, sw->svg->handle);
 		}
 	}
-	else {
-	}
-
-	if (sw->svg && sw->svg->handle) {
-		svgDraw(args.vg, sw->svg->handle);
-	}
+	TransparentWidget::drawLayer(args,layer);
 }
 
 TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
@@ -293,7 +295,7 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addOutput(createOutput<PJ301MPort>(Vec(192, 287), module, TuxOn::OUTPUT_LEFT));
 	addOutput(createOutput<PJ301MPort>(Vec(192, 339), module, TuxOn::OUTPUT_RIGHT));
 	
-	/*for (int i=0;i<2;i++) {
+	for (int i=0;i<2;i++) {
 		for (int j=0;j<4;j++) {
         	switch (j) {
             	case 0:
@@ -317,7 +319,7 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
                 	break;
         	}
     	}
-	}*/
+	}
 }
 
 void TuxOnModuleWidget::appendContextMenu(Menu *menu) {

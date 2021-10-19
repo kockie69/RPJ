@@ -162,17 +162,19 @@ void AlgorithmDisplay::setColor(unsigned char r, unsigned char g, unsigned char 
 	txtCol.a = a;
 }
 
-void AlgorithmDisplay::draw(const DrawArgs &args) {
-	char tbuf[11];
+void AlgorithmDisplay::drawLayer(const DrawArgs &args,int layer) {
+	if (layer == 1) {
+		char tbuf[11];
 
-	if (module == NULL) return;
-	nvgGlobalTint(args.vg, color::WHITE);
+		if (module == NULL) return;
 
-	std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioDelay.getParameters().strAlgorithm[0]);
+		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioDelay.getParameters().strAlgorithm[0]);
 		
-	TransparentWidget::draw(args);
-	drawBackground(args);
-	drawValue(args, tbuf);
+		TransparentWidget::draw(args);
+		drawBackground(args);
+		drawValue(args, tbuf);
+	}
+	TransparentWidget::drawLayer(args,layer);
 }
 
 void AlgorithmDisplay::drawBackground(const DrawArgs &args) {

@@ -74,17 +74,18 @@ struct FilterNameDisplay : TransparentWidget {
 		txtCol.a = a;
 	}
 
-	void draw(const DrawArgs &args) override {
-		char tbuf[11];
-		nvgGlobalTint(args.vg, color::WHITE);
-		if (module == NULL) return;
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			char tbuf[11];
+			if (module == NULL) return;
 
-		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioFilter.getParameters().strAlgorithm[0]);
+			std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioFilter.getParameters().strAlgorithm[0]);
 		
-		TransparentWidget::draw(args);
-		drawBackground(args);
-		drawValue(args, tbuf);
-
+			TransparentWidget::draw(args);
+			drawBackground(args);
+			drawValue(args, tbuf);
+		}
+		TransparentWidget::drawLayer(args,layer);
 	}
 
 	void drawBackground(const DrawArgs &args) {

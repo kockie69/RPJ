@@ -11,7 +11,7 @@ struct Display : TransparentWidget {
     void setBegin(float);
 	void setEnd(float);
 	void setDisplayPos(float, float, float);
-	void draw(const DrawArgs &) override; 
+	void drawLayer(const DrawArgs &,int layer) override; 
 	int frame;
 	shared_ptr<Font> font;
 	std::string fontPath;

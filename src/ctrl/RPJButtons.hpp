@@ -7,9 +7,11 @@ struct buttonPlusSmall : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_1.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -20,9 +22,11 @@ struct buttonMinSmall : SvgSwitch  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_1.svg")));
 	}
 	
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -55,10 +59,12 @@ public:
         addFrame(APP->window->loadSvg(resPath));
     }
 
-    void draw(const DrawArgs& args) override {
-	    nvgGlobalTint(args.vg, rack::color::WHITE);
-        ::rack::app::SvgSwitch::draw(args);
-    }
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
 };
 
 class RedButton : public ToggleButton {
@@ -78,9 +84,11 @@ struct StartButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_on.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -92,9 +100,11 @@ struct StopButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_on.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -106,9 +116,11 @@ struct PauseButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_on.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -121,9 +133,11 @@ struct FwdButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_on.svg")));
 	}
 
-		void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -135,9 +149,11 @@ struct RwdButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_on.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };
 
@@ -149,8 +165,10 @@ struct EjectButton : ToggleButton  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_on.svg")));
 	}
 
-	void draw(const DrawArgs &args)override {
-		nvgGlobalTint(args.vg, color::WHITE);
-		SvgSwitch::draw(args);
+	void drawLayer(const DrawArgs &args, int layer)override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
 	}
 };

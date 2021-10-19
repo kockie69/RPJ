@@ -76,7 +76,7 @@ struct AlgorithmDisplay : TransparentWidget {
 
 	void setColor(unsigned char , unsigned char , unsigned char , unsigned char );
 
-	void draw(const DrawArgs &) override;
+	void drawLayer(const DrawArgs &, int) override;
 
 	void drawBackground(const DrawArgs &);
 

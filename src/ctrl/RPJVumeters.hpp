@@ -4,7 +4,7 @@ struct VuMeterAllDual {
     
     void reset(std::vector<Light> lights) {
 
-	    for (int i=0;i<24;i++)
+	    for (int i=0;i<8;i++)
             lights[i].setBrightness(0.f);
     }
 

@@ -131,7 +131,7 @@ struct nSelectPantypeMenuItem : ui::MenuItem {
 struct ButtonSVG : TransparentWidget {
 	ButtonSVG();
 	void addFrame(std::shared_ptr<Svg>);
-	void draw(const DrawArgs &) override;
+	void drawLayer(const DrawArgs &, int) override;
 	TuxOn *module;
 	widget::FramebufferWidget *fb;
 	widget::SvgWidget *sw;
