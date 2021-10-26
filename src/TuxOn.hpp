@@ -7,6 +7,19 @@
 
 using namespace rack;
 
+const char *JSON_FILE_NAME="Filename";
+const char *JSON_ZOOM_LEVEL="Zoomlevel";
+const char *JSON_PLAY="Play";
+const char *JSON_STOP="Stop";
+const char *JSON_PAUSE="Pause";
+const char *JSON_SAMPLE_POS="Samplepos";
+const char *JSON_BEGIN_POS="Beginpos";
+const char *JSON_END_POS="Endpos";
+const char *JSON_ZOOM_PARAMS="Zoomparams";
+const char *JSON_ZOOM_TOTALPCM="TotalPCM";
+const char *JSON_ZOOM_BEGIN="Begin";
+const char *JSON_ZOOM_END="End";
+
 const int MODULE_WIDTH=16;
 const uint16_t ecoMode = 0xFFFF;// all 1's means yes, 0 means no
 const int WIDTH=215;
@@ -71,11 +84,13 @@ struct TuxOn : Module {
 	void process(const ProcessArgs &) override;
 	void setPlayBufferCopy(void);
 	void selectAndLoadFile(void);
+	json_t *dataToJson(void) override;
+	void dataFromJson(json_t *) override;
 	float getBegin(void);
 	float getEnd(void);
 	float stepSize(void);
 	void setDisplay(void);
-	char * fileName = NULL;
+	std::string fileName;
 	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
 	AudioParameters adp;
 	Audio audio;
@@ -93,7 +108,7 @@ struct TuxOn : Module {
 	vector<vector<float>> playBufferCopy;
 	ButtonSvgs buttonToDisplay;
 	float beginRatio, endRatio;
-	Display *display;
+	Display *display = new Display(WIDTH);
 };
 
 struct MmSlider : SvgSlider {

@@ -1,11 +1,12 @@
 #include "Display.hpp"
 
-Display::Display() {
+Display::Display(int theWidth) {
 		frame = 0;
 		font = NULL;
 		fontPath="";
 		displayBuff.resize(1);
 		start = 8;
+		width=theWidth;
 }
 
 void Display::setDisplayFont(Plugin *pluginInstance,std::string font) {

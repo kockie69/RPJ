@@ -30,13 +30,109 @@ TuxOn::TuxOn() {
 	adp.repeat=true;
 	vuMeters.reset(lights);
 	vuColorThemeLocal=0;
-	fileName=NULL;
+	fileName="";
 	fileDesc="No WAV, FLAC or MP3 file loaded.";
 	buttonToDisplay=BLACK;
 	playBufferCopy.resize(2);
 	playBufferCopy[0].resize(0);
 	playBufferCopy[1].resize(0);
 	zoom=0;
+}
+
+json_t *TuxOn::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_FILE_NAME, json_string(fileName.c_str()));
+	json_object_set_new(rootJ, JSON_ZOOM_LEVEL, json_integer(zoom));
+	json_object_set_new(rootJ, JSON_PLAY, json_boolean(buttonToDisplay==START));
+	json_object_set_new(rootJ, JSON_PAUSE, json_boolean(buttonToDisplay==PAUSE));
+	json_object_set_new(rootJ, JSON_STOP, json_boolean(buttonToDisplay==STOP));
+	json_object_set_new(rootJ, JSON_SAMPLE_POS, json_real(audio.samplePos));
+	json_object_set_new(rootJ, JSON_BEGIN_POS, json_real(audio.begin));
+	json_object_set_new(rootJ, JSON_END_POS, json_real(audio.end));
+	json_t *zoomP = json_array();
+	if (zoomParameters.size()>0) {
+		for (int i=0;i<(int)zoomParameters.size();i++) {
+			json_t *zoomObject = json_object();
+			json_object_set(zoomObject, JSON_ZOOM_BEGIN, json_real(zoomParameters[i].begin));
+			json_object_set(zoomObject, JSON_ZOOM_END, json_real(zoomParameters[i].end));
+			json_object_set(zoomObject, JSON_ZOOM_TOTALPCM, json_integer(zoomParameters[i].totalPCMFrameCount));
+			json_array_append(zoomP, zoomObject);
+		}
+		json_object_set(rootJ, JSON_ZOOM_PARAMS, zoomP);
+	}
+	return rootJ;
+}
+
+void TuxOn::dataFromJson(json_t *rootJ) {
+	json_t *nfileNameJ = json_object_get(rootJ, JSON_FILE_NAME);
+	json_t *nzoomJ = json_object_get(rootJ, JSON_ZOOM_LEVEL);
+	json_t *nplayJ = json_object_get(rootJ, JSON_PLAY);
+	json_t *npauseJ = json_object_get(rootJ, JSON_PAUSE);
+	json_t *nstopJ = json_object_get(rootJ, JSON_STOP);
+	json_t *nsamplePosJ = json_object_get(rootJ, JSON_SAMPLE_POS);
+	json_t *nbeginPosJ = json_object_get(rootJ, JSON_BEGIN_POS);
+	json_t *nendPosJ = json_object_get(rootJ, JSON_END_POS);
+	json_t *nparamsJ = json_object_get(rootJ, JSON_ZOOM_PARAMS);	
+
+	if (nfileNameJ) {
+		fileName=(char *)json_string_value(nfileNameJ);
+		selectAndLoadFile();
+	}
+	if (nzoomJ) {
+		zoom=json_integer_value(nzoomJ);
+	}
+	if (nplayJ) {
+		if (json_boolean_value(nplayJ)) {
+			audio.start(); 
+			buttonToDisplay = START;
+		}
+	}
+	if (npauseJ) {
+		if (json_boolean_value(npauseJ)) {
+			audio.pause=true;
+			buttonToDisplay = PAUSE;
+		}
+	}
+	if (nstopJ) {
+		if (json_boolean_value(nstopJ)) {
+			audio.stop=true;
+			buttonToDisplay = STOP;
+		}
+	}
+	if (nsamplePosJ) {
+		audio.samplePos=json_real_value(nsamplePosJ);
+	}
+	if (nbeginPosJ) {
+		audio.begin=json_real_value(nbeginPosJ);
+	}
+	if (nendPosJ) {
+		audio.end=json_real_value(nendPosJ);
+	}
+	if (nparamsJ) {
+		if (json_is_array(nparamsJ)) {
+			json_t *zoomObject = json_object();
+			size_t i;
+			zoomParameters.clear();			
+			json_array_foreach(nparamsJ, i, zoomObject) {
+				const char *key;
+				json_t *value;
+				zoomParameters.push_back(zoomParameter());
+				json_object_foreach(zoomObject, key, value) {
+					if (!strcmp(key, JSON_ZOOM_BEGIN)) 
+						zoomParameters[(int)i].begin=json_real_value(value);
+					if (!strcmp(key, JSON_ZOOM_END)) 	
+						zoomParameters[(int)i].end=json_real_value(value);
+					if (!strcmp(key, JSON_ZOOM_TOTALPCM)) 
+						zoomParameters[(int)i].totalPCMFrameCount=json_integer_value(value);
+				}
+			}
+		}
+	}
+	if (zoom >0) {
+		audio.begin = zoomParameters[zoom].begin;
+		audio.end = zoomParameters[zoom].end;
+		audio.totalPCMFrameCount = zoomParameters[zoom].totalPCMFrameCount;
+	}
 }
 
 void TuxOn::setDisplay() {
@@ -72,25 +168,25 @@ void TuxOn::selectAndLoadFile(void) {
 	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
 	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
 	
-	char * PathC = osdialog_file(OSDIALOG_OPEN, "", "", filters);
-	if (PathC!=NULL) {
-		fileName = PathC;
-		if (audio.loadSample(PathC))
+	if (fileName=="")
+		fileName = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+	if (fileName!="") {
+		if (audio.loadSample(fileName))
 		{
 			zoomParameters.push_back(zoomParameter());
 			zoomParameters[0].totalPCMFrameCount=audio.totalPCMFrameCount;
 			zoomParameters[0].begin=0;
 			zoomParameters[0].end=audio.totalPCMFrameCount;
 			display->setDisplayBuff(zoomParameters[0].begin,zoomParameters[0].end,audio.playBuffer);
-			display->fileDesc = system::getFilename(PathC)+ "\n";
-			display->fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
-			display->fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
+			fileDesc = system::getFilename(fileName)+ "\n";
+			fileDesc += std::to_string(audio.sampleRate)+ " Hz" + "\n";
+			fileDesc += std::to_string(audio.channels)+ " channel(s)" + "\n";
 		}
 	}
 }
 
 void TuxOn::process(const ProcessArgs &args) {
-			
+
 	adp.dB = params[PARAM_DB].getValue();
 	adp.panningValue = params[PARAM_PANNING].getValue() + inputs[INPUT_PANCV].getVoltage()/5;
 	adp.rackSampleRate = args.sampleRate;
@@ -133,8 +229,8 @@ void TuxOn::process(const ProcessArgs &args) {
 
 		fileDesc="        --- EJECTING SONG ---";
 		audio.ejectSong();
-		fileName = NULL;
-			fileDesc="No WAV, FLAC or MP3 file loaded.";
+		fileName = "";
+		fileDesc="No WAV, FLAC or MP3 file loaded.";
 
 		selectAndLoadFile();
 		buttonToDisplay=BLACK;
@@ -142,11 +238,9 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
 
-		if (endRatio < beginRatio) {
-			float temp = beginRatio;
-			beginRatio = endRatio;
-			endRatio = temp;
-		}
+		if (endRatio < beginRatio) 
+			std::swap(beginRatio,endRatio);
+
 		zoom++;
 		zoomParameters.push_back(zoomParameter());
 		zoomParameters[zoom].begin=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*beginRatio/1024;
@@ -260,7 +354,7 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 
 	box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 	if (module) {
-		module->display = new Display();
+		//module->display = new Display();
 		module->display->box.pos = Vec(5, 40);
 		module->display->box.size = Vec(WIDTH, 250);
 		module->display->setDisplayFont(pluginInstance,asset::system("res/fonts/ShareTechMono-Regular.ttf"));
@@ -301,19 +395,19 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
             	case 0:
             	case 1:
                 	addChild(createLightCentered<SmallLight<GreenLight>>(
-                    	Vec(127+(j*10), 320+(i*10)),
+                    	Vec(130+(j*10), 320+(i*10)),
                     	module,
                     	TuxOn::LIGHT_LEFT_LOW1+j+(4*i)));
                 	break;
             	case 2:
                 	addChild(createLightCentered<SmallLight<YellowLight>>(
-                    	Vec(127+(j*10), 320+(i*10)),
+                    	Vec(130+(j*10), 320+(i*10)),
                     	module,
                     	TuxOn::LIGHT_LEFT_LOW1+j+(4*i)));
                 	break;
             	case 3:
                 	addChild(createLightCentered<SmallLight<RedLight>>(
-                    	Vec(127+(j*10), 320+(i*10)),
+                    	Vec(130+(j*10), 320+(i*10)),
                     	module,
                     	TuxOn::LIGHT_LEFT_LOW1 + j+(4*i)));
                 	break;
@@ -367,7 +461,7 @@ void TuxOnModuleWidget::appendContextMenu(Menu *menu) {
 	nSelectFileMenuItem *nSelectFileItem = new nSelectFileMenuItem();
 	nSelectFileItem->text = "Select Audio File";
 	nSelectFileItem->module = module;
-	if (module->fileName!=NULL)
+	if (module->fileName!="")
 		nSelectFileItem->rightText = module->fileName;
 	else 
 		nSelectFileItem->rightText = "";

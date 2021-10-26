@@ -27,7 +27,7 @@ struct AudioParameters {
 struct Audio {
     Audio();
     ~Audio();
-    bool loadSample(char *);
+    bool loadSample(std::string);
     bool pause,loading,fileLoaded,play,stop;
     float * pSampleData;
     unsigned int channels;
@@ -47,12 +47,13 @@ struct Audio {
     void setPause(bool);
     void setPlay(bool);
     bool getPlay(void);
+    bool getPause(void);
+    bool getStop(void);
     void setStop(bool);
     void setRepeat(bool);
     float scaleFac;
 	float samplePos;
     PanningType panningType;
-    char * fileName;
     float left,right;
     float dB;
     float speed;

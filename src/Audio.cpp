@@ -42,6 +42,14 @@ bool Audio::getPlay(void) {
 	return play;
 }
 
+bool Audio::getPause(void) {
+	return pause;
+}
+
+bool Audio::getStop(void) {
+	return stop;
+}
+
 void Audio::setRepeat(bool status) {
 	repeat=status;
 }
@@ -58,17 +66,17 @@ void Audio::setParameters(const AudioParameters& params) {
 	end = params.end;
 }
 
-bool Audio::loadSample(char *path) {
+bool Audio::loadSample(std::string path) {
 	loading = true;
 	pSampleData = NULL;
 
 	if (rack::string::lowercase(system::getExtension(system::getFilename(path)))==".flac")
-		pSampleData = drflac_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
+		pSampleData = drflac_open_file_and_read_pcm_frames_f32(path.c_str(), &channels, &sampleRate, &totalPCMFrameCount, NULL);
 	else if (rack::string::lowercase(system::getExtension(system::getFilename(path)))==".wav")
-		pSampleData = drwav_open_file_and_read_pcm_frames_f32(path, &channels, &sampleRate, &totalPCMFrameCount, NULL);
+		pSampleData = drwav_open_file_and_read_pcm_frames_f32(path.c_str(), &channels, &sampleRate, &totalPCMFrameCount, NULL);
     else if (rack::string::lowercase(system::getExtension(system::getFilename(path)))==".mp3")
 	{
-		pSampleData = drmp3_open_file_and_read_pcm_frames_f32(path, &mp3config, &totalPCMFrameCount, NULL);
+		pSampleData = drmp3_open_file_and_read_pcm_frames_f32(path.c_str(), &mp3config, &totalPCMFrameCount, NULL);
 		channels = mp3config.channels;
 		sampleRate = mp3config.sampleRate;
 	}
@@ -92,7 +100,6 @@ bool Audio::loadSample(char *path) {
 }
 
 void Audio::ejectSong(void) {
-	fileName=NULL;
 	fileLoaded=false;
 	setPlay(false);
 	playBuffer[0].empty();

@@ -4,7 +4,7 @@ using namespace rack;
 using namespace std;
 
 struct Display : TransparentWidget {
-	Display();
+	Display(int);
 	void setDisplayFont(Plugin *,std::string);
 	void setDisplayWidth(int); 
     void setDisplayBuff(float, float, vector<vector<float>>);
