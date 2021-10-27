@@ -10,6 +10,7 @@
 TuxOn::TuxOn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configInput(INPUT_PANCV, "Pan CV");
+	configInput(INPUT_STARTSTOP, "Start/Stop Trigger");
 	configOutput(OUTPUT_LEFT, "Left Audio");
 	configOutput(OUTPUT_RIGHT, "Right Audio");
 	configParam(PARAM_START, 0.f, 1.f, 0.f);
@@ -217,14 +218,14 @@ void TuxOn::process(const ProcessArgs &args) {
 	if (params[PARAM_RWD].getValue())
 		audio.rewind(stepSize());
 
-	if (startTrigger.process((bool)params[PARAM_START].getValue())) {
+	if (startTrigger.process((bool)params[PARAM_START].getValue()) || cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 0.1f, 2.f, 0.f, 1.f))) {
 		if (audio.fileLoaded) {
 			audio.start();
 			buttonToDisplay=START;	
 		}
 	}
 
-	if (pauseTrigger.process((bool)params[PARAM_PAUSE].getValue())) {
+	if (pauseTrigger.process((bool)params[PARAM_PAUSE].getValue()) || cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 2.f, 0.1f, 0.f, 1.f))) {
 		if (audio.getPlay()) {
 			audio.setPause(true);
 			buttonToDisplay=PAUSE;
@@ -389,6 +390,7 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 	addParam(createParam<RPJKnob>(Vec(12, 285), module, TuxOn::PARAM_SPEED));
 
 	addInput(createInput<PJ301MPort>(Vec(192, 237), module, TuxOn::INPUT_PANCV));
+	addInput(createInput<PJ301MPort>(Vec(12, 339), module, TuxOn::INPUT_STARTSTOP));
 	addOutput(createOutput<PJ301MPort>(Vec(192, 287), module, TuxOn::OUTPUT_LEFT));
 	addOutput(createOutput<PJ301MPort>(Vec(192, 339), module, TuxOn::OUTPUT_RIGHT));
 	

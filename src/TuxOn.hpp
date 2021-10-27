@@ -60,6 +60,7 @@ struct TuxOn : Module {
 
 	enum InputIds {
 		INPUT_PANCV,
+		INPUT_STARTSTOP,
 		NUM_INPUTS,
 	};
 
@@ -93,6 +94,7 @@ struct TuxOn : Module {
 	void setDisplay(void);
 	std::string fileName;
 	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
+	dsp::SchmittTrigger cvPlayStopTrigger;
 	AudioParameters adp;
 	Audio audio;
 	std::string fileDesc;
