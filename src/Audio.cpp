@@ -12,7 +12,6 @@ Audio::Audio() {
 	samplePos=0;
 	peak=0;
 	panningType=CONSTPOWER;
-	repeat=true;
 	pause=false;
 	loading=false;
 	fileLoaded=false;
@@ -20,6 +19,8 @@ Audio::Audio() {
 	stop=false;
 	left=0;
 	right=0;
+	playMode=REPEAT;
+	delta = 1;
 }
 
 
@@ -50,8 +51,8 @@ bool Audio::getStop(void) {
 	return stop;
 }
 
-void Audio::setRepeat(bool status) {
-	repeat=status;
+void Audio::setPlayMode(PlayMode mode) {
+		playMode=mode;
 }
 
 
@@ -60,10 +61,11 @@ void Audio::setParameters(const AudioParameters& params) {
 	panningType = params.panningType;
     panningValue = params.panningValue;  
     rackSampleRate = params.rackSampleRate;
-	repeat = params.repeat;
 	speed = params.speed;
 	begin = params.begin;
 	end = params.end;
+	up = ( begin <= end);
+	setPlayMode(params.playMode);
 }
 
 bool Audio::loadSample(std::string path) {
@@ -107,21 +109,20 @@ void Audio::ejectSong(void) {
 }
 
 bool Audio::withinBoundery() {
-	return ((up) && (samplePos <= end && samplePos >= begin)) 
-		|| ((!up) && (samplePos >= end && samplePos <= begin));
+	return (((samplePos <= end) && (samplePos >= begin)) || ((samplePos <= begin) && (samplePos >= end)));
 }
 
 void Audio::rewind(float step) {
 	samplePos = samplePos - step;
 	if (!withinBoundery())
-		samplePos = (up) ? begin : end;
+		samplePos = (delta==1) ? begin : end;
 
 }
 
 void Audio::forward(float step) {
 		samplePos = samplePos + step;		
 		if (!withinBoundery())
-			samplePos = (up) ? end : begin;
+			samplePos = (delta==1) ? end : begin;
 }
 
 void Audio::start(void) {
@@ -131,25 +132,26 @@ void Audio::start(void) {
 void Audio::processAudioSample() {
 	
 	if (fileLoaded) {
-		// Determine if we are going up or down
-		up = (end >= begin);
+
 
 		if (pause || stop) {
 			if (stop) 
-				samplePos = (up) ? begin : end;
+				// Determine if we are going up or down
+				samplePos = (delta==1) ? begin : end;
 			setPlay(false);
 		}
 
 		if (play) 
-			samplePos = (up) ? samplePos+(sampleRate/rackSampleRate)+speed : samplePos-(sampleRate/rackSampleRate)-speed;
+			samplePos = (up) ? samplePos+(delta*(sampleRate/rackSampleRate)+speed) : samplePos+(-1*delta*(sampleRate/rackSampleRate)+speed);
 
 		// First check if samplePos is still within begin and end bounderies, otherwise return to start
     	if (play && withinBoundery()) {
-
+			// If mono
 			if (channels == 1) {
 				left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
 				right = panning(panningType, panningValue).right * dB * (playBuffer[0][floor(samplePos)]);
 			}
+			// If stereo
 			else if (channels ==2) {
 				left = dB * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
 				right = dB * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
@@ -157,10 +159,26 @@ void Audio::processAudioSample() {
 		}
 
 		if (!withinBoundery()) {
-			samplePos = begin;		
-			if (!repeat) {
-				setPlay(false);
+			if (!(playMode==PINGPONG)) {
+				samplePos = begin;
+				if (!(playMode==REPEAT))
+					// PlayMode == SINGLE
+					setPlay(false);
 			}
+			// PlayMode == PINGPONG
+			else {
+				if (up)
+					if (delta==1)
+						samplePos = end;
+					else 
+						samplePos = begin;
+				else
+					if (delta==-1)
+						samplePos = begin;
+					else
+						samplePos = end;
+				delta = delta * -1;
+			} 
 		}
 	}
 }

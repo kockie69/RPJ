@@ -6,6 +6,7 @@
 using namespace std;
 
 enum PanningType {SIMPLEPAN, CONSTPOWER };
+enum PlayMode {SINGLE, REPEAT, PINGPONG};
 
 struct PanPos {
 	double left;
@@ -19,7 +20,7 @@ struct AudioParameters {
     float panningValue;  
     float rackSampleRate;
     bool stop;
-    bool repeat;
+    PlayMode playMode;
     float speed;
     float begin, end;
 };
@@ -50,7 +51,8 @@ struct Audio {
     bool getPause(void);
     bool getStop(void);
     void setStop(bool);
-    void setRepeat(bool);
+    void setPlayMode(PlayMode);
+    bool goingUp(void);
     float scaleFac;
 	float samplePos;
     PanningType panningType;
@@ -60,6 +62,8 @@ struct Audio {
     float panningValue; 
     float rackSampleRate;
     float begin, end;
-    bool up,repeat; 
+    PlayMode playMode;
+    int delta;
+    bool up;
 };
 

@@ -13,21 +13,30 @@ TuxOn::TuxOn() {
 	configOutput(OUTPUT_LEFT, "Left Audio");
 	configOutput(OUTPUT_RIGHT, "Right Audio");
 	configParam(PARAM_START, 0.f, 1.f, 0.f);
+	configButton(PARAM_START, "Start Button");
 	configParam(PARAM_PAUSE, 0.f, 1.f, 0.f);
+	configButton(PARAM_PAUSE, "Pause Button");
 	configParam(PARAM_STOP, 0.f, 1.f, 0.f);
+	configButton(PARAM_STOP, "Stop Button");
 	configParam(PARAM_FWD, 0.f, 1.f, 0.f);
+	configButton(PARAM_FWD, "Fast Forward Button");
 	configParam(PARAM_RWD, 0.f, 1.f, 0.f);
+	configButton(PARAM_RWD, "Fast Backward Button");
 	configParam(PARAM_EJECT, 0.f, 1.f, 0.f);
+	configButton(PARAM_EJECT, "Eject Button");
+	configParam(PARAM_ZOOMIN, 0.f, 1.f, 0.f);
+	configButton(PARAM_ZOOMIN, "Zoom in");
+	configParam(PARAM_ZOOMOUT, 0.f, 1.f, 0.f);
+	configButton(PARAM_ZOOMOUT, "Zoom out");
 	float maxTGFader = std::pow(2.0f, 1.0f / 3.0f);
-	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "", " dB", -10, 60.0f);
+	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "Volume level", " dB", -10, 60.0f);
 
-	configParam(PARAM_PANNING, -1.f, 1.f, 0.f);
-	configParam(PARAM_STARTPOS, 0.f, 1024.f, 0.f);
-	configParam(PARAM_ENDPOS, 0.f, 1024.f, 1024.f);
-	configParam(PARAM_SPEED, -0.1f, 0.1f, 0.f);
+	configParam(PARAM_PANNING, -1.f, 1.f, 0.f, "Panning");
+	configParam(PARAM_STARTPOS, 0.f, 1024.f, 0.f, "Start position");
+	configParam(PARAM_ENDPOS, 0.f, 1024.f, 1024.f, "End position");
+	configParam(PARAM_SPEED, -0.1f, 0.1f, 0.f, "Speed");
 	adp.panningType=CONSTPOWER;
 	adp.dB=1;
-	adp.repeat=true;
 	vuMeters.reset(lights);
 	vuColorThemeLocal=0;
 	fileName="";
@@ -60,6 +69,7 @@ json_t *TuxOn::dataToJson() {
 		}
 		json_object_set(rootJ, JSON_ZOOM_PARAMS, zoomP);
 	}
+	json_object_set_new(rootJ, JSON_PLAY_MODE, json_integer(static_cast<int>(adp.playMode)));
 	return rootJ;
 }
 
@@ -72,7 +82,8 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 	json_t *nsamplePosJ = json_object_get(rootJ, JSON_SAMPLE_POS);
 	json_t *nbeginPosJ = json_object_get(rootJ, JSON_BEGIN_POS);
 	json_t *nendPosJ = json_object_get(rootJ, JSON_END_POS);
-	json_t *nparamsJ = json_object_get(rootJ, JSON_ZOOM_PARAMS);	
+	json_t *nparamsJ = json_object_get(rootJ, JSON_ZOOM_PARAMS);
+	json_t *nplaymodeJ = json_object_get(rootJ, JSON_PLAY_MODE);
 
 	if (nfileNameJ) {
 		fileName=(char *)json_string_value(nfileNameJ);
@@ -132,6 +143,9 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 		audio.begin = zoomParameters[zoom].begin;
 		audio.end = zoomParameters[zoom].end;
 		audio.totalPCMFrameCount = zoomParameters[zoom].totalPCMFrameCount;
+	}
+	if (nplaymodeJ) {
+		adp.playMode=static_cast<PlayMode>(json_integer_value(nplaymodeJ));
 	}
 }
 
@@ -286,17 +300,6 @@ void nSelectFileMenuItem::onAction(const event::Action& e) {
 	module->selectAndLoadFile();
 }
 
-void nSelectRepeatMenuItem::onAction(const event::Action& e) {
-
-	module->adp.repeat = Repeat;
-}
-
-void nSelectPantypeMenuItem::onAction(const event::Action& e) {
-
-	module->adp.panningType = Pantype;
-}
-
-
 ButtonSVG::ButtonSVG() {
 	fb = new widget::FramebufferWidget;
 	addChild(fb);
@@ -421,51 +424,15 @@ void TuxOnModuleWidget::appendContextMenu(Menu *menu) {
 
 	menu->addChild(new MenuSeparator());
 
-	PantypeLabel = new MenuLabel();
-	PantypeLabel->text = "Panning Type";
-	menu->addChild(PantypeLabel);
-
-	nSelectPantypeMenuItem *nSelectSimplepanItem = new nSelectPantypeMenuItem();
-	nSelectSimplepanItem->text = "Simple Panning";
-	nSelectSimplepanItem->module = module;
-	nSelectSimplepanItem->Pantype = PanningType::SIMPLEPAN;
-	nSelectSimplepanItem->rightText = CHECKMARK(module->adp.panningType == nSelectSimplepanItem->Pantype);
-	menu->addChild(nSelectSimplepanItem);
-
-	nSelectPantypeMenuItem *nSelectConstpowerItem = new nSelectPantypeMenuItem();
-	nSelectConstpowerItem->text = "Constant Power";
-	nSelectConstpowerItem->module = module;
-	nSelectConstpowerItem->Pantype = PanningType::CONSTPOWER;
-	nSelectConstpowerItem->rightText = CHECKMARK(module->adp.panningType == nSelectConstpowerItem->Pantype);
-	menu->addChild(nSelectConstpowerItem);
+	menu->addChild(createIndexPtrSubmenuItem("Panningtype", {"Simple", "Constant Power"}, &module->adp.panningType));
 
 	menu->addChild(new MenuSeparator());
 
-	MenuLabel *RepeatLabel = new MenuLabel();
-	RepeatLabel->text = "Repeat";
-	menu->addChild(RepeatLabel);
-
-	nSelectRepeatMenuItem *nSelectRepeatItem = new nSelectRepeatMenuItem();
-	nSelectRepeatItem->text = "Repeat fragment";
-	nSelectRepeatItem->module = module;
-	nSelectRepeatItem->Repeat = !module->adp.repeat;
-	nSelectRepeatItem->rightText = CHECKMARK(!nSelectRepeatItem->Repeat);
-	menu->addChild(nSelectRepeatItem);
+	menu->addChild(createIndexPtrSubmenuItem("PlayMode", {"Single", "Repeat", "PingPong"}, &module->adp.playMode));
 
 	menu->addChild(new MenuSeparator());
 
-	MenuLabel *AudioFileLabel = new MenuLabel();
-	AudioFileLabel->text = "Audio File";
-	menu->addChild(AudioFileLabel);
-
-	nSelectFileMenuItem *nSelectFileItem = new nSelectFileMenuItem();
-	nSelectFileItem->text = "Select Audio File";
-	nSelectFileItem->module = module;
-	if (module->fileName!="")
-		nSelectFileItem->rightText = module->fileName;
-	else 
-		nSelectFileItem->rightText = "";
-	menu->addChild(nSelectFileItem);
+	menu->addChild(createMenuItem("Select Audio File", module->fileName, [=]() {module->selectAndLoadFile();}));
 }
 
 Model * modelTuxOn = createModel<TuxOn, TuxOnModuleWidget>("TuxOn");

@@ -19,6 +19,7 @@ const char *JSON_ZOOM_PARAMS="Zoomparams";
 const char *JSON_ZOOM_TOTALPCM="TotalPCM";
 const char *JSON_ZOOM_BEGIN="Begin";
 const char *JSON_ZOOM_END="End";
+const char *JSON_PLAY_MODE="Playmode";
 
 const int MODULE_WIDTH=16;
 const uint16_t ecoMode = 0xFFFF;// all 1's means yes, 0 means no
@@ -128,18 +129,6 @@ struct MmSmallFader : MmSlider {
 
 struct nSelectFileMenuItem : ui::MenuItem {
 	TuxOn *module;
-	void onAction(const event::Action&) override; 
-};
-
-struct nSelectRepeatMenuItem : ui::MenuItem {
-	TuxOn *module;
-	bool Repeat;
-	void onAction(const event::Action&) override; 
-};
-
-struct nSelectPantypeMenuItem : ui::MenuItem {
-	TuxOn *module;
-	PanningType Pantype;
 	void onAction(const event::Action&) override; 
 };
 
