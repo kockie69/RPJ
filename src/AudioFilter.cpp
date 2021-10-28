@@ -2,11 +2,10 @@
 
 bool AudioFilter::reset(double _sampleRate) {
 		
-	BiquadParameters bqp = biquad.getParameters();
+	bqp = biquad.getParameters();
 
-	// --- you can try both forms - do you hear a difference?
 	bqp.biquadCalcType = audioFilterParameters.bqa; 
-	biquad.setParameters(bqp);
+	biquad.setParameters(bqp); 
 
 	sampleRate = _sampleRate;
 	return biquad.reset(_sampleRate);
@@ -38,6 +37,8 @@ void AudioFilter::setParameters(const AudioFilterParameters& parameters) {
 	{
 		// --- save new params
 		audioFilterParameters = parameters;
+		bqp.biquadCalcType = audioFilterParameters.bqa; 
+		biquad.setParameters(bqp);
 	}
 	else
 		return;

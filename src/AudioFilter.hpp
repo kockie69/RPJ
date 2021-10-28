@@ -35,7 +35,7 @@ struct AudioFilterParameters
 	double boostCut_dB = 0.0; ///< filter gain; note not used in all types
 	double wet = 0;
 	double dry = 1;
-	biquadAlgorithm bqa = kDirect;
+	biquadAlgorithm bqa;
 };
 
 struct AudioFilter {
@@ -90,4 +90,5 @@ protected:
 
 	/** --- function to recalculate coefficients due to a change in filter parameters */
 	bool calculateFilterCoeffs();
+	BiquadParameters bqp;
 };

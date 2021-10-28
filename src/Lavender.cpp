@@ -17,14 +17,22 @@ Lavender::Lavender() {
 	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
-	LPFaudioFilter.reset(44100);
-	HPFaudioFilter.reset(44100);
-	BPFaudioFilter.reset(44100);
-	BSFaudioFilter.reset(44100);
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	BPFaudioFilter.reset(APP->engine->getSampleRate());
+	BSFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.algorithm=filterAlgorithm::kLPF2;
 	HPFafp.algorithm=filterAlgorithm::kHPF2;
 	BPFafp.algorithm=filterAlgorithm::kBPF2;
 	BSFafp.algorithm=filterAlgorithm::kBSF2;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void Lavender::onSampleRateChange() {
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 }
 
 void Lavender::process(const ProcessArgs &args) {
@@ -42,27 +50,24 @@ void Lavender::process(const ProcessArgs &args) {
 		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * cvq;
 		LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
+		LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
 
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setSampleRate(args.sampleRate);
 			LPFaudioFilter.setParameters(LPFafp);
 			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
 			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
 		}
 		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setSampleRate(args.sampleRate);
 			HPFaudioFilter.setParameters(HPFafp);
 			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
 		}
 		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
-			BPFaudioFilter.setSampleRate(args.sampleRate);
 			BPFaudioFilter.setParameters(BPFafp);
 			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
 		}
 		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
-			BSFaudioFilter.setSampleRate(args.sampleRate);
 			BSFaudioFilter.setParameters(BSFafp);
 			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
@@ -94,6 +99,15 @@ struct LavenderModuleWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(Vec(55, 117), module, Lavender::INPUT_CVQ));
 		addParam(createParam<RPJKnob>(Vec(8, 175), module, Lavender::PARAM_WET));
 		addParam(createParam<RPJKnob>(Vec(55, 175), module, Lavender::PARAM_DRY));
+	}
+
+		void appendContextMenu(Menu *menu) override {
+		Lavender * module = dynamic_cast<Lavender*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
 	}
 
 };
