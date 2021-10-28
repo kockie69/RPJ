@@ -15,8 +15,13 @@ Easter::Easter() {
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
-	audioFilter.reset(44100);
+	audioFilter.reset(APP->engine->getSampleRate());
 	afp.algorithm = filterAlgorithm::kResonA;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void Easter::onSampleRateChange() {
+	audioFilter.reset(APP->engine->getSampleRate());
 }
 
 void Easter::process(const ProcessArgs &args) {
@@ -43,6 +48,7 @@ void Easter::process(const ProcessArgs &args) {
 		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
+		afp.bqa = bqa;
 
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 		audioFilter.setParameters(afp);
@@ -82,18 +88,31 @@ struct EasterModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(55, 250), module, Easter::PARAM_DRY));
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		Easter * module = dynamic_cast<Easter*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
 
 json_t *Easter::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_RESONATOR_TYPE_KEY, json_integer(static_cast<int>(afp.algorithm)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
 	return rootJ;
 }
 
 void Easter::dataFromJson(json_t *rootJ) {
 	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_RESONATOR_TYPE_KEY);
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nAlgorithmJ) {
 		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+	if (nBiquadAlgorithmJ) {
+		bqa=static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

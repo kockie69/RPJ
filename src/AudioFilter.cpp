@@ -5,8 +5,7 @@ bool AudioFilter::reset(double _sampleRate) {
 	BiquadParameters bqp = biquad.getParameters();
 
 	// --- you can try both forms - do you hear a difference?
-	bqp.biquadCalcType = biquadAlgorithm::kTransposeCanonical; //<- this is the default operation
-	//	bqp.biquadCalcType = biquadAlgorithm::kDirect; //<- this is the direct form that implements the biquad directly
+	bqp.biquadCalcType = audioFilterParameters.bqa; 
 	biquad.setParameters(bqp);
 
 	sampleRate = _sampleRate;
@@ -34,7 +33,8 @@ void AudioFilter::setParameters(const AudioFilterParameters& parameters) {
 		audioFilterParameters.fc != parameters.fc ||
 		audioFilterParameters.Q != parameters.Q ||
 		audioFilterParameters.dry != parameters.dry ||
-		audioFilterParameters.wet != parameters.wet)
+		audioFilterParameters.wet != parameters.wet ||
+		audioFilterParameters.bqa != parameters.bqa)
 	{
 		// --- save new params
 		audioFilterParameters = parameters;

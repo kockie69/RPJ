@@ -10,18 +10,21 @@ DryLand::DryLand() {
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "DRY");
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
-
-	LPFaudioFilter.reset(14100);
-	HPFaudioFilter.reset(14100);
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.algorithm=filterAlgorithm::kLPF1;
 	HPFafp.algorithm=filterAlgorithm::kHPF1;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void DryLand::onSampleRateChange() {
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 }
 
 void DryLand::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
-		LPFaudioFilter.setSampleRate(args.sampleRate);
-		HPFaudioFilter.setSampleRate(args.sampleRate);
 
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
@@ -30,7 +33,8 @@ void DryLand::process(const ProcessArgs &args) {
  		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
-	
+		LPFafp.bqa = HPFafp.bqa = bqa;
+
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
 			LPFaudioFilter.setParameters(LPFafp);
 			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
@@ -66,6 +70,28 @@ struct DryLandModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(55, 145), module, DryLand::PARAM_DRY));
 	}
 
+
+	void appendContextMenu(Menu *menu) override {
+		DryLand * module = dynamic_cast<DryLand*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *DryLand::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void DryLand::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelDryLand = createModel<DryLand, DryLandModuleWidget>("DryLand");

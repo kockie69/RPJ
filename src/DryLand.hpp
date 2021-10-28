@@ -32,10 +32,14 @@ struct DryLand : Module {
 	};
 
 		DryLand();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioFilter LPFaudioFilter;
 		AudioFilter HPFaudioFilter;
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override; 
 		AudioFilterParameters LPFafp,HPFafp;
+		biquadAlgorithm bqa;
 };
 
 

@@ -2,7 +2,7 @@
 
 const double kSmallestPositiveFloatValue = 1.175494351e-38;         /* min positive value */
 const double kSmallestNegativeFloatValue = -1.175494351e-38;         /* min negative value */
-
+const char* const JSON_BIQUAD_ALGORYTHM="Biquad Algorithm";
 
 enum biquadAlgorithm { kDirect, kCanonical, kTransposeDirect, kTransposeCanonical }; //  4 types of biquad calculations, constants (k)
 
