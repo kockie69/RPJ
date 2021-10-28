@@ -40,6 +40,8 @@ struct Lavender : Module {
 	};
 
 		Lavender();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
 		void process(const ProcessArgs &) override;
 		void onSampleRateChange() override;

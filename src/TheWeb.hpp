@@ -40,10 +40,14 @@ struct TheWeb : Module {
 	};
 
 		TheWeb();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
+		biquadAlgorithm bqa;
 };
 
 

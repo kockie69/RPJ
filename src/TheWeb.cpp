@@ -17,14 +17,22 @@ TheWeb::TheWeb() {
 	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
-	LPFaudioFilter.reset(44100);
-	HPFaudioFilter.reset(44100);
-	BPFaudioFilter.reset(44100);
-	BSFaudioFilter.reset(44100);
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.algorithm=filterAlgorithm::kButterLPF2;
 	HPFafp.algorithm=filterAlgorithm::kButterHPF2;
 	BPFafp.algorithm=filterAlgorithm::kButterBPF2;
 	BSFafp.algorithm=filterAlgorithm::kButterBSF2;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void TheWeb::onSampleRateChange() {
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 }
 
 void TheWeb::process(const ProcessArgs &args) {
@@ -46,6 +54,7 @@ void TheWeb::process(const ProcessArgs &args) {
 		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * cvq;
 		LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
+		LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
 
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
 			LPFaudioFilter.setSampleRate(args.sampleRate);
@@ -100,6 +109,27 @@ struct TheWebModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(55, 175), module, TheWeb::PARAM_DRY));
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		TheWeb * module = dynamic_cast<TheWeb*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *TheWeb::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void TheWeb::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelTheWeb = createModel<TheWeb, TheWebModuleWidget>("TheWeb");

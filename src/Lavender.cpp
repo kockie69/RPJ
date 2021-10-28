@@ -101,7 +101,7 @@ struct LavenderModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(55, 175), module, Lavender::PARAM_DRY));
 	}
 
-		void appendContextMenu(Menu *menu) override {
+	void appendContextMenu(Menu *menu) override {
 		Lavender * module = dynamic_cast<Lavender*>(this->module);
 
 		menu->addChild(new MenuSeparator());
@@ -109,7 +109,19 @@ struct LavenderModuleWidget : ModuleWidget {
 		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
 
 	}
-
 };
+
+json_t *Lavender::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void Lavender::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelLavender = createModel<Lavender, LavenderModuleWidget>("Lavender");
