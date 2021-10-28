@@ -1,12 +1,12 @@
-# DryLand / First order LPF/HPF filter <a name="dryland"></a>
-![dryland image](./dryland.png)
+# Lavender / Second order LPF/HPF/BPF/BSF filter <a name="lavender"></a>
+![lavender image](./lavender.png)
 
-DryLand is a module that delivers a first order Low-pass and High-pass filter. The filter is normalized so that the maximum gain is 0.0 dB, and there is no resonant peaking.
+Lavender is a second order Low-pass, High-pass, Band-pass and Band-stop filter. The DC gain is normalized to 0.0 dB resulting in peak gains that are greater than unity. A Q of 20  produces a peak gain of ~25 dB or a raw gain of ~18; at this gain, a signal can easily be clipped. 
 
 ## Controls
-**Cutoff** knob controls the center frequency of the filters.
+**Cutoff** knob controls the corner frequency of the filters.
 
-The **Resonance** knob of course controls the resonance and acts like other filters. 
+For the LPF and HPF the **Resonance** knob is the quality factor controlling the resonant peaking. For the BPF and the BSF it is the quality factor controlling width of peak or notch = 1/Bandwidth.
 
 With the **Wet** knob you control the amount of processed sound/signal that will be mixed at the output.
 
