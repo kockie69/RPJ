@@ -38,11 +38,15 @@ struct Gazpacho : Module {
 	};
 
 		Gazpacho();
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override; 
 		AudioFilter LPFaudioFilter;
 		AudioFilter HPFaudioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp;
+		biquadAlgorithm bqa;
 };
 
 

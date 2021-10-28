@@ -1,7 +1,7 @@
-# DryLand / First order LPF/HPF filter <a name="dryland"></a>
-![dryland image](./dryland.png)
+# Gazpacho / 2nd Order Linkwitz-Riley LPF and HPF <a name="gazpacho"></a>
+![gazpacho image](./gazpacho.png)
 
-DryLand is a module that delivers a first order Low-pass and High-pass filter. The filter is normalized so that the maximum gain is 0.0 dB, and there is no resonant peaking.
+Gazpacho is a module that delivers a 2nd Order Linkwitz-Riley Low-pass and High-pass filter. These filters are designed to have an attenuation of −6 dB at the corner frequency rather than the standard −3 dB. Their outputs sum exactly  and the resulting response is flat. They are often used in crossovers.
 
 ## Controls
 **Cutoff** knob controls the center frequency of the filters.

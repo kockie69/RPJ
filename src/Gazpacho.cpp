@@ -16,10 +16,16 @@ Gazpacho::Gazpacho() {
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
-	LPFaudioFilter.reset(44100);
-	HPFaudioFilter.reset(44100);
-	LPFafp.algorithm=filterAlgorithm::kLWRLPF2;
-	HPFafp.algorithm=filterAlgorithm::kLWRHPF2;
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFafp.algorithm=filterAlgorithm::kLPF1;
+	HPFafp.algorithm=filterAlgorithm::kHPF1;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void Gazpacho::onSampleRateChange() {
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 }
 
 void Gazpacho::process(const ProcessArgs &args) {
@@ -35,6 +41,7 @@ void Gazpacho::process(const ProcessArgs &args) {
  		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
+		LPFafp.bqa = HPFafp.bqa = bqa;
 
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
 			LPFaudioFilter.setParameters(LPFafp);
@@ -71,6 +78,28 @@ struct GazpachoModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(55, 155), module, Gazpacho::PARAM_DRY));
 	}
 
+	
+	void appendContextMenu(Menu *menu) override {
+		Gazpacho * module = dynamic_cast<Gazpacho*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *Gazpacho::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void Gazpacho::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelGazpacho = createModel<Gazpacho, GazpachoModuleWidget>("Gazpacho");
