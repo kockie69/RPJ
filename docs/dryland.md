@@ -1,7 +1,7 @@
 # DryLand / First order LPF/HPF filter <a name="easter"></a>
 ![dryland image](./dryland.png)
 
-DryLand is a module that delivers a first order Low-pass and High-pass filter. 
+DryLand is a module that delivers a first order Low-pass and High-pass filter. The filter is normalized so that the maximum gain is 0.0 dB, and there is no resonant peaking.
 
 ## Controls
 Cutoff knob controls the center frequency of the filters.
