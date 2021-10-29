@@ -8,12 +8,23 @@ LadyNina::LadyNina() {
 
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_BOOSTCUT_DB,  -20.f, 20.f, 0.f, "dB","Boost/Cut");
+	configParam(PARAM_BOOSTCUT_DB,  -20.f, 20.f, 0.f, "Boost/Cut"," dB");
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_LP;
 	HPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_HP;
 	BPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_BP;
 	BSFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_BS;
 	nlp=gain=osc=match=false;
+}
+
+void LadyNina::onSampleRateChange() {
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 }
 
 void LadyNina::process(const ProcessArgs &args) {
@@ -41,6 +52,7 @@ void LadyNina::process(const ProcessArgs &args) {
 		LPFafp.enableNLP = HPFafp.enableNLP = BPFafp.enableNLP = BSFafp.enableNLP = nlp;
 		LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
 		LPFafp.matchAnalogNyquistLPF = match;
+
 		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
 			LPFaudioFilter.setParameters(LPFafp);
 			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
@@ -64,26 +76,6 @@ void LadyNina::process(const ProcessArgs &args) {
 	}
 }
 
-/* Context Menu Item for changing the Gain Compensation setting */
-void nGainCompensationMenuItem::onAction(const event::Action &e) {
-	module->gain=Gain;
-}
-
-/* Context Menu Item for changing the NLP setting */
-void nNLPMenuItem::onAction(const event::Action &e) {
-	module->nlp=NLP;
-}
-
-/* Context Menu Item for changing the Self Oscilation setting */
-void nOscMenuItem::onAction(const event::Action &e) {
-	module->osc=Osc;
-}
-
-/* Context Menu Item for changing the Match Analog gain at Nyquist setting */
-void nMatchMenuItem::onAction(const event::Action &e) {
-	module->match=Match;
-}
-
 struct LadyNinaModuleWidget : ModuleWidget {
 	LadyNinaModuleWidget(LadyNina* module) {
 
@@ -103,7 +95,6 @@ struct LadyNinaModuleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, LadyNina::OUTPUT_BPFMAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, LadyNina::OUTPUT_BSFMAIN));
 
-
 		addParam(createParam<RPJKnob>(Vec(8, 60), module, LadyNina::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, LadyNina::INPUT_CVFC));
 		addParam(createParam<RPJKnob>(Vec(8, 115), module, LadyNina::PARAM_Q));
@@ -115,34 +106,12 @@ struct LadyNinaModuleWidget : ModuleWidget {
 	void appendContextMenu(Menu *menu) override {
 		LadyNina *module = dynamic_cast<LadyNina*>(this->module);
 
-		menu->addChild(new MenuEntry);
-		nGainCompensationMenuItem *nGainItem = new nGainCompensationMenuItem();
-		nGainItem->text = "Enable Gain Compensation";
-		nGainItem->module = module;
-		nGainItem->Gain = !module->gain;
-		nGainItem->rightText = CHECKMARK(!nGainItem->Gain);
-		menu->addChild(nGainItem);
+		menu->addChild(new MenuSeparator());
 
-		nNLPMenuItem *nNLPItem = new nNLPMenuItem();
-		nNLPItem->text = "Enable NLP";
-		nNLPItem->module = module;
-		nNLPItem->NLP = !module->nlp;
-		nNLPItem->rightText = CHECKMARK(!nNLPItem->NLP);
-		menu->addChild(nNLPItem);
-
-		nOscMenuItem *nOscItem = new nOscMenuItem();
-		nOscItem->text = "Enable Self Oscilation";
-		nOscItem->module = module;
-		nOscItem->Osc = !module->osc;
-		nOscItem->rightText = CHECKMARK(!nOscItem->Osc);
-		menu->addChild(nOscItem);
-
-		nMatchMenuItem *nMatchItem = new nMatchMenuItem();
-		nMatchItem->text = "Match gain at Nyquist for LPF";
-		nMatchItem->module = module;
-		nMatchItem->Match = !module->match;
-		nMatchItem->rightText = CHECKMARK(!nMatchItem->Match);
-		menu->addChild(nMatchItem);
+		menu->addChild(rack::createBoolPtrMenuItem("Enable Gain Compensation", "", &module->gain));
+		menu->addChild(rack::createBoolPtrMenuItem("Enable NLP", "", &module->nlp));
+		menu->addChild(rack::createBoolPtrMenuItem("Enable Self Oscilation", "", &module->osc));
+		menu->addChild(rack::createBoolPtrMenuItem("Match gain at Nyquist for LPF", "", &module->match));		
 	}
 };
 
