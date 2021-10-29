@@ -6,9 +6,13 @@
 SugarMice::SugarMice() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
-	sampleRate=0;
+	sampleRate=APP->engine->getSampleRate();
 	fc=0;
 	warp=false;
+}
+
+void SugarMice::onSampleRateChange() {
+	wdfButterLPF3.reset(APP->engine->getSampleRate());
 }
 
 void SugarMice::process(const ProcessArgs &args) {
@@ -18,11 +22,6 @@ void SugarMice::process(const ProcessArgs &args) {
 			wdfButterLPF3.setFilterFc(params[PARAM_FC].getValue());
 			fc = params[PARAM_FC].getValue();
 			warp = wdfButterLPF3.getUsePostWarping();
-		}
-		
-		if (args.sampleRate!=sampleRate) {
-			sampleRate = args.sampleRate;
-			wdfButterLPF3.reset(sampleRate);
 		}
 
 		float out = wdfButterLPF3.processAudioSample(inputs[INPUT_MAIN].getVoltage());

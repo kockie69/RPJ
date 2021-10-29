@@ -28,6 +28,7 @@ struct SugarMice : Module {
 
 		SugarMice();
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 		WDFTunableButterLPF3 wdfButterLPF3;
 		double sampleRate, fc;
 		bool warp;
