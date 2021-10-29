@@ -11,6 +11,11 @@ Essence::Essence() {
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kCQParaEQ;
+	audioFilter.reset(APP->engine->getSampleRate());
+}
+
+void Essence::onSampleRateChange() {
+	audioFilter.reset(APP->engine->getSampleRate());
 }
 
 void Essence::process(const ProcessArgs &args) {
@@ -36,6 +41,7 @@ void Essence::process(const ProcessArgs &args) {
 		afp.dry=0;
 		afp.wet=1;
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
+		afp.bqa = bqa;
 		audioFilter.setParameters(afp);
 
 		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
@@ -65,6 +71,27 @@ struct EssenceModuleWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(Vec(55, 202), module, Essence::INPUT_CVB));	
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		Essence * module = dynamic_cast<Essence*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *Essence::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void Essence::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelEssence = createModel<Essence, EssenceModuleWidget>("Essence");

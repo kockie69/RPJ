@@ -37,7 +37,11 @@ struct Essence : Module {
 		Essence();
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override; 
 		AudioFilterParameters afp;
+		biquadAlgorithm bqa;
 };
 
 
