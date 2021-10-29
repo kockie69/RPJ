@@ -6,7 +6,7 @@ Shelving filters are used in many tone controls, especially when there are only 
 ## Controls
 **Cutoff** knob controls the shelving frequency of the filters.
 
-The **Boost/Cut** knob controls the gain/attanuation.
+The **Boost/Cut** knob controls the LF or HF shelf gain/attenuation in dB.
 
 From the menu the Biquadric **structure** can be selected that will be used for the filter arithmetic. There are 4 options to select from: Direct, Canonical, TransposeDirect and TransposeCanonical.
 

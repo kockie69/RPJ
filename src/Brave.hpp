@@ -37,8 +37,12 @@ struct Brave : Module {
 		Brave();
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override; 
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
+		biquadAlgorithm bqa;
 };
 
 struct FilterNameDisplay : TransparentWidget {
