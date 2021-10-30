@@ -16,8 +16,8 @@ inline void boundValue(double& value, double minValue, double maxValue)
 }
 
 AudioDelay::AudioDelay() {
-	LPFaudioFilter.reset(14100);
-	HPFaudioFilter.reset(14100);
+	LPFaudioFilter.reset(APP->engine->getSampleRate());
+	HPFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.algorithm=filterAlgorithm::kLPF1;
 	HPFafp.algorithm=filterAlgorithm::kHPF1;
 } /* C-TOR */
@@ -279,7 +279,25 @@ void AudioDelay::createDelayBuffers(double _sampleRate, double _bufferLength_mSe
 	delayBuffer_R.createCircularBuffer(bufferLength);
 }
 
-AudioDelayParameters::AudioDelayParameters() {}
+AudioDelayParameters::AudioDelayParameters() {
+	algorithm = delayAlgorithm::kNormal; ///< delay algorithm
+	strAlgorithm = "Normal";
+
+	wetLevel_dB = -3.0;	///< wet output level in dB
+	dryLevel_dB = -3.0;	///< dry output level in dB
+	feedback_Pct = 0.0;	///< feedback as a % value
+
+	updateType = delayUpdateType::kLeftAndRight;///< update algorithm
+	leftDelay_mSec = 0.0;	///< left delay time
+	centreDelay_mSec = 0.0;	///< left delay time
+	rightDelay_mSec = 0.0;	///< right delay time
+	delayRatio_Pct = 100.0;	///< dela ratio: right length = (delayRatio)*(left length)
+
+	lpfFc = 100.0;
+	hpfFc = 100.0;
+	useLPF = true;
+	useHPF = true;
+}
 
 template <typename T>
 CircularBuffer<T>::CircularBuffer() {}		/* C-TOR */

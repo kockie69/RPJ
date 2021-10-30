@@ -47,6 +47,7 @@ struct CircularRide : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 
         dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioDelayParameters adp;

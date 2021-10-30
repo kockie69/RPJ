@@ -19,8 +19,12 @@ CircularRide::CircularRide() {
     configParam(PARAM_TYPE, 0.f, 1.f,0.f, "Delay Update Type");
 	configParam(PARAM_LPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_HPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
-	audioDelay.reset(44100);
-    audioDelay.createDelayBuffers(44100,2000);
+	audioDelay.reset(APP->engine->getSampleRate());
+    audioDelay.createDelayBuffers(APP->engine->getSampleRate(),2000);
+}
+
+void CircularRide::onSampleRateChange() {
+	audioDelay.reset(APP->engine->getSampleRate());
 }
 
 void CircularRide::process(const ProcessArgs &args) {
@@ -84,8 +88,8 @@ struct CircularRideModuleWidget : ModuleWidget {
 			addChild(ad);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 290), module, CircularRide::INPUT_LEFT));
-        addInput(createInput<PJ301MPort>(Vec(10, 320), module, CircularRide::INPUT_RIGHT));
+		addInput(createInput<PJ301MPort>(Vec(89, 290), module, CircularRide::INPUT_LEFT));
+        addInput(createInput<PJ301MPort>(Vec(89, 320), module, CircularRide::INPUT_RIGHT));
 		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
         addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
 		
@@ -106,20 +110,10 @@ struct CircularRideModuleWidget : ModuleWidget {
 	void appendContextMenu(Menu *menu) override {
 		CircularRide *module = dynamic_cast<CircularRide*>(this->module);
 
-		menu->addChild(new MenuEntry);
-		nLPFMenuItem *nLPFItem = new nLPFMenuItem();
-		nLPFItem->text = "Enable Low Pass Filter";
-		nLPFItem->module = module;
-		nLPFItem->EnableLPF = !module->enableLPF;
-		nLPFItem->rightText = CHECKMARK(!nLPFItem->EnableLPF);
-		menu->addChild(nLPFItem);
+		menu->addChild(new MenuSeparator());
 
-		nHPFMenuItem *nHPFItem = new nHPFMenuItem();
-		nHPFItem->text = "Enable High Pass Filter";
-		nHPFItem->module = module;
-		nHPFItem->EnableHPF = !module->enableHPF;
-		nHPFItem->rightText = CHECKMARK(!nHPFItem->EnableHPF);
-		menu->addChild(nHPFItem);
+		menu->addChild(rack::createBoolPtrMenuItem("Enable Low Pass Filter", "", &module->enableLPF));
+		menu->addChild(rack::createBoolPtrMenuItem("Enable High Pass Filter", "", &module->enableHPF));
 	}
 };
 
@@ -251,16 +245,6 @@ void CircularRide::dataFromJson(json_t *rootJ) {
 	if (nHPFJ) {
 		enableHPF=json_boolean_value(nHPFJ);
 	}
-}
-
-/* Context Menu Item for changing the Gain Compensation setting */
-void nLPFMenuItem::onAction(const event::Action &e) {
-	module->enableLPF=EnableLPF;
-}
-
-/* Context Menu Item for changing the Gain Compensation setting */
-void nHPFMenuItem::onAction(const event::Action &e) {
-	module->enableHPF=EnableHPF;
 }
 
 Model * modelCircularRide = createModel<CircularRide, CircularRideModuleWidget>("CircularRide");

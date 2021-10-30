@@ -50,21 +50,21 @@ struct AudioDelayParameters
 	/** all FXObjects parameter objects require overloaded= operator so remember to add new entries if you add new variables. */
 	
 	// --- individual parameters
-	delayAlgorithm algorithm = delayAlgorithm::kNormal; ///< delay algorithm
-	std::string strAlgorithm = "Normal";
+	delayAlgorithm algorithm; ///< delay algorithm
+	std::string strAlgorithm;
 
-	double wetLevel_dB = -3.0;	///< wet output level in dB
-	double dryLevel_dB = -3.0;	///< dry output level in dB
-	double feedback_Pct = 0.0;	///< feedback as a % value
+	double wetLevel_dB;	///< wet output level in dB
+	double dryLevel_dB;	///< dry output level in dB
+	double feedback_Pct;	///< feedback as a % value
 
-	delayUpdateType updateType = delayUpdateType::kLeftAndRight;///< update algorithm
-	double leftDelay_mSec = 0.0;	///< left delay time
-	double centreDelay_mSec = 0.0;	///< left delay time
-	double rightDelay_mSec = 0.0;	///< right delay time
-	double delayRatio_Pct = 100.0;	///< dela ratio: right length = (delayRatio)*(left length)
+	delayUpdateType updateType;///< update algorithm
+	double leftDelay_mSec;	///< left delay time
+	double centreDelay_mSec;	///< left delay time
+	double rightDelay_mSec;	///< right delay time
+	double delayRatio_Pct;	///< dela ratio: right length = (delayRatio)*(left length)
 
-	double lpfFc, hpfFc = 100.0;
-	bool useLPF, useHPF = true;
+	double lpfFc, hpfFc;
+	bool useLPF, useHPF;
 };
 
 struct AudioDelay

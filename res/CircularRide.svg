@@ -85,8 +85,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.9720632"
-     inkscape:cx="19.372068"
-     inkscape:cy="334.55329"
+     inkscape:cx="-51.380378"
+     inkscape:cy="293.98664"
      inkscape:document-units="mm"
      inkscape:current-layer="g13383"
      showgrid="true"
@@ -95,7 +95,7 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
-     inkscape:window-height="1001"
+     inkscape:window-height="991"
      inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
@@ -544,54 +544,6 @@
                    id="path2015" />
               </g>
               <g
-                 aria-label="Left"
-                 id="text2027"
-                 style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                 transform="translate(72.488679,6.3188565)">
-                <path
-                   d="m -381.70296,257.12427 h 2.5836 v 0.58786 h -3.30626 v -5.45177 h 0.72266 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2053" />
-                <path
-                   d="m -376.72672,257.78701 q -0.82376,0 -1.34048,-0.53918 -0.51672,-0.54293 -0.51672,-1.44906 v -0.12731 q 0,-0.60284 0.22841,-1.07463 0.23215,-0.47553 0.64402,-0.74138 0.41563,-0.26959 0.89865,-0.26959 0.79005,0 1.22814,0.52046 0.43809,0.52047 0.43809,1.49025 v 0.28832 h -2.7446 q 0.015,0.59909 0.34822,0.96978 0.33699,0.36695 0.85371,0.36695 0.36695,0 0.62156,-0.14978 0.25462,-0.14977 0.44558,-0.3969 l 0.42311,0.32951 q -0.50923,0.78256 -1.52769,0.78256 z m -0.0861,-3.63201 q -0.41937,0 -0.70394,0.30704 -0.28457,0.30329 -0.35197,0.85371 h 2.02944 v -0.0524 q -0.03,-0.52796 -0.28457,-0.81627 -0.25462,-0.29206 -0.68896,-0.29206 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2055" />
-                <path
-                   d="m -374.00458,257.71213 v -3.51594 h -0.64029 v -0.53544 h 0.64029 v -0.41563 q 0,-0.65151 0.34822,-1.00723 0.34823,-0.35571 0.98476,-0.35571 0.23964,0 0.47554,0.0637 l -0.0375,0.56165 q -0.17598,-0.0337 -0.37443,-0.0337 -0.33699,0 -0.52047,0.19845 -0.18347,0.1947 -0.18347,0.56165 v 0.42686 h 0.86494 v 0.53544 h -0.86494 v 3.51594 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2057" />
-                <path
-                   d="m -370.74326,252.67973 v 0.98102 h 0.75636 v 0.53544 h -0.75636 v 2.51245 q 0,0.24339 0.1011,0.36695 0.1011,0.11982 0.34448,0.11982 0.11982,0 0.3295,-0.0449 v 0.56165 q -0.27334,0.0749 -0.5317,0.0749 -0.46429,0 -0.70019,-0.28082 -0.23589,-0.28083 -0.23589,-0.79755 v -2.51245 h -0.73764 v -0.53544 h 0.73764 v -0.98102 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2059" />
-              </g>
-              <g
-                 aria-label="Right"
-                 id="text2027-3"
-                 style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                 transform="translate(-85.239811,39.371337)">
-                <path
-                   d="m -224.82444,260.11981 h -1.28056 v 2.20542 h -0.72266 v -5.45177 h 1.80477 q 0.92111,0 1.41537,0.41937 0.49799,0.41936 0.49799,1.22065 0,0.50923 -0.27708,0.88741 -0.27333,0.37818 -0.76384,0.5654 l 1.28056,2.314 v 0.0449 h -0.77133 z m -1.28056,-0.58787 h 1.10458 q 0.53544,0 0.84997,-0.27708 0.31827,-0.27708 0.31827,-0.74138 0,-0.50548 -0.3033,-0.77508 -0.29954,-0.26959 -0.86868,-0.27333 h -1.10084 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2062" />
-                <path
-                   d="m -221.45827,262.32523 h -0.6927 v -4.05139 h 0.6927 z m -0.74887,-5.12601 q 0,-0.1685 0.1011,-0.28457 0.10484,-0.11608 0.30704,-0.11608 0.20219,0 0.30703,0.11608 0.10484,0.11607 0.10484,0.28457 0,0.16849 -0.10484,0.28082 -0.10484,0.11233 -0.30703,0.11233 -0.2022,0 -0.30704,-0.11233 -0.1011,-0.11233 -0.1011,-0.28082 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2064" />
-                <path
-                   d="m -220.51469,260.26584 q 0,-0.94732 0.43808,-1.50523 0.43809,-0.56165 1.16075,-0.56165 0.74138,0 1.157,0.52421 l 0.0337,-0.44933 h 0.6328 v 3.95403 q 0,0.78632 -0.46805,1.23938 -0.46429,0.45307 -1.25061,0.45307 -0.43809,0 -0.85745,-0.18722 -0.41937,-0.18722 -0.64029,-0.51298 l 0.35946,-0.41562 q 0.44558,0.55042 1.08961,0.55042 0.50548,0 0.78631,-0.28457 0.28457,-0.28457 0.28457,-0.80129 v -0.34822 q -0.41562,0.47927 -1.13454,0.47927 -0.71142,0 -1.15326,-0.57288 -0.43808,-0.57289 -0.43808,-1.56139 z m 0.69644,0.0786 q 0,0.68521 0.28083,1.07837 0.28083,0.38941 0.78631,0.38941 0.65526,0 0.9623,-0.59535 v -1.84971 q -0.31827,-0.58037 -0.95481,-0.58037 -0.50549,0 -0.79006,0.39316 -0.28457,0.39315 -0.28457,1.16449 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2066" />
-                <path
-                   d="m -215.35499,258.76435 q 0.46056,-0.56539 1.19819,-0.56539 1.28432,0 1.29555,1.44906 v 2.67721 h -0.69271 v -2.68096 q -0.004,-0.43808 -0.20219,-0.64777 -0.19471,-0.20968 -0.61033,-0.20968 -0.33699,0 -0.59161,0.17973 -0.25461,0.17973 -0.3969,0.47179 v 2.88689 h -0.6927 v -5.75132 h 0.6927 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2068" />
-                <path
-                   d="m -210.88424,257.29283 v 0.98101 h 0.75636 v 0.53545 h -0.75636 v 2.51245 q 0,0.24338 0.1011,0.36695 0.1011,0.11982 0.34448,0.11982 0.11982,0 0.3295,-0.0449 v 0.56166 q -0.27333,0.0749 -0.53169,0.0749 -0.4643,0 -0.7002,-0.28082 -0.23589,-0.28083 -0.23589,-0.79755 v -2.51245 h -0.73764 v -0.53545 h 0.73764 v -0.98101 z"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                   id="path2070" />
-              </g>
-              <g
                  aria-label="Left+Ratio"
                  id="text2108"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.66842px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
@@ -692,19 +644,11 @@
                  x="-256.02805"
                  y="239.79153"
                  style="stroke-width:1.51317" />
-              <path
-                 style="fill:none;stroke:#ffffff;stroke-width:1.30468px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="m -366.55932,268.8102 h 140.47304"
-                 id="path981" />
-              <path
-                 style="fill:none;stroke:#ffffff;stroke-width:1.29334px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                 d="M -366.04611,306.23727 H -228.0034"
-                 id="path981-2" />
               <g
                  aria-label="In"
                  id="text2954"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;line-height:1.25;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
-                 transform="translate(0,-3.0803766)">
+                 transform="translate(102.41171,-3.080377)">
                 <path
                    d="m -387.54114,255.76785 h -1.43782 v -10.90353 h 1.43782 z"
                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.3368px;font-family:Roboto;-inkscape-font-specification:'Roboto, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.775704"
