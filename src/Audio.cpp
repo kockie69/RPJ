@@ -133,7 +133,6 @@ void Audio::processAudioSample() {
 	
 	if (fileLoaded) {
 
-
 		if (pause || stop) {
 			if (stop) 
 				// Determine if we are going up or down

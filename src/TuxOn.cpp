@@ -47,6 +47,7 @@ TuxOn::TuxOn() {
 	playBufferCopy[0].resize(0);
 	playBufferCopy[1].resize(0);
 	zoom=0;
+	adp.playMode=REPEAT;
 }
 
 json_t *TuxOn::dataToJson() {
@@ -218,14 +219,14 @@ void TuxOn::process(const ProcessArgs &args) {
 	if (params[PARAM_RWD].getValue())
 		audio.rewind(stepSize());
 
-	if (startTrigger.process((bool)params[PARAM_START].getValue()) || cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 0.1f, 2.f, 0.f, 1.f))) {
+	if (startTrigger.process((bool)params[PARAM_START].getValue()) || (cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 0.1f, 2.f, 0.f, 1.f)) && inputs[INPUT_STARTSTOP].isConnected())) {
 		if (audio.fileLoaded) {
 			audio.start();
 			buttonToDisplay=START;	
 		}
 	}
 
-	if (pauseTrigger.process((bool)params[PARAM_PAUSE].getValue()) || cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 2.f, 0.1f, 0.f, 1.f))) {
+	if (pauseTrigger.process((bool)params[PARAM_PAUSE].getValue()) || (cvPlayStopTrigger.process(rescale(inputs[INPUT_STARTSTOP].getVoltage(), 2.f, 0.1f, 0.f, 1.f)) && inputs[INPUT_STARTSTOP].isConnected())) {
 		if (audio.getPlay()) {
 			audio.setPause(true);
 			buttonToDisplay=PAUSE;
