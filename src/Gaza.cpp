@@ -12,7 +12,11 @@ Gaza::Gaza() {
     configParam(PARAM_THRES, -20.f, 0.f,-6.f, "Threshold");
     configParam(PARAM_SENS, 0.5f, 5.f,1.f, "Sensitivity");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
-	envelopeFollower.reset(14400);
+	envelopeFollower.reset(APP->engine->getSampleRate());
+}
+
+void Gaza::onSampleRateChange() {
+	envelopeFollower.reset(APP->engine->getSampleRate());
 }
 
 void Gaza::process(const ProcessArgs &args) {

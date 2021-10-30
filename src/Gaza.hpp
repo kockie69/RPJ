@@ -33,6 +33,7 @@ struct Gaza : Module {
 		Gaza();
 		EnvelopeFollower envelopeFollower;
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 		EnvelopeFollowerParameters efp;
 };
 
