@@ -37,6 +37,7 @@ struct Estonia : Module {
 		Estonia();
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override;
 		AudioFilter audioFilter;
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;

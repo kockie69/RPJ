@@ -14,6 +14,11 @@ Estonia::Estonia() {
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kLowShelf;
+	audioFilter.reset(APP->engine->getSampleRate());
+}
+
+void Estonia::onSampleRateChange() {
+	audioFilter.reset(APP->engine->getSampleRate());
 }
 
 void Estonia::process(const ProcessArgs &args) {
@@ -26,7 +31,6 @@ void Estonia::process(const ProcessArgs &args) {
 	audioFilter.setParameters(afp);
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
-		audioFilter.setSampleRate(args.sampleRate);
 	
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
