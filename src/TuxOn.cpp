@@ -89,7 +89,8 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 
 	if (nfileNameJ) {
 		fileName=(char *)json_string_value(nfileNameJ);
-		selectAndLoadFile();
+		if (fileName!="")
+			selectAndLoadFile();
 	}
 	if (nzoomJ) {
 		zoom=json_integer_value(nzoomJ);
@@ -184,8 +185,14 @@ void TuxOn::selectAndLoadFile(void) {
 	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
 	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
 	
-	if (fileName=="")
-		fileName = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+	if (fileName=="") {
+		char* pathC  = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+		if (!pathC) {
+        	// Fail silently
+    		return;
+		}
+		else fileName.assign(pathC);
+    }
 	if (fileName!="") {
 		if (audio.loadSample(fileName))
 		{
@@ -243,12 +250,22 @@ void TuxOn::process(const ProcessArgs &args) {
 	if (ejectTrigger.process((bool)params[PARAM_EJECT].getValue())) {
 		buttonToDisplay=EJECT;
 
+		std::string oldFileName = fileName;
+		std::string oldFileDesc = fileDesc;
+
 		fileDesc="        --- EJECTING SONG ---";
 		audio.ejectSong();
 		fileName = "";
 		fileDesc="No WAV, FLAC or MP3 file loaded.";
-
+		setDisplay();
 		selectAndLoadFile();
+		if (fileName == "") {
+			fileName = oldFileName;
+			fileDesc = oldFileDesc;
+			audio.fileLoaded=true;
+			audio.setPlay(true);
+			setDisplay();
+		}
 		buttonToDisplay=BLACK;
 	}
 

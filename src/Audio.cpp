@@ -104,8 +104,8 @@ bool Audio::loadSample(std::string path) {
 void Audio::ejectSong(void) {
 	fileLoaded=false;
 	setPlay(false);
-	playBuffer[0].empty();
-	playBuffer[1].empty();	
+//	playBuffer[0].empty();
+//	playBuffer[1].empty();	
 }
 
 bool Audio::withinBoundery() {
