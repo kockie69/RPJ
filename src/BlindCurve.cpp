@@ -10,8 +10,11 @@ BlindCurve::BlindCurve() {
     configParam(PARAM_ATK, 1.f, 250.0f,20.f, "Attack"," mSec");
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
 	configParam<DetectModeQuantity>(PARAM_MODE, 0.f, 2.f, 0.f, "Detect Mode");
+	audioDetector.reset(APP->engine->getSampleRate());
+}
 
-	audioDetector.reset(14400);
+void BlindCurve::onSampleRateChange() {
+	audioDetector.reset(APP->engine->getSampleRate());
 }
 
 void BlindCurve::process(const ProcessArgs &args) {
@@ -25,7 +28,7 @@ void BlindCurve::process(const ProcessArgs &args) {
 		adp.detect_dB = false;
 		audioDetector.setParameters(adp);
 		float out = audioDetector.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out * 5);
+		outputs[OUTPUT_MAIN].setVoltage(out);
 	}
 }
 
@@ -53,7 +56,6 @@ struct BlindCurveModuleWidget : ModuleWidget {
 			addParam(w);
 		}
 	}
-
 };
 
 std::string DetectModeQuantity::getDisplayValueString() {

@@ -28,6 +28,7 @@ struct BlindCurve : Module {
 		NUM_LIGHTS,
 	};
 		BlindCurve();
+		void onSampleRateChange() override;
 		AudioDetector audioDetector;
 		void process(const ProcessArgs &) override;
 		AudioDetectorParameters adp;
