@@ -11,8 +11,18 @@ Montreal::Montreal() {
 	configBypass(INPUT_MAIN, OUTPUT_HPF);
 	configBypass(INPUT_MAIN, OUTPUT_BPF);
 	configBypass(INPUT_MAIN, OUTPUT_BSF);
-	sampleRate=0;
+	wdfIdealRLCLPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCHPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCBPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCBSF.reset(APP->engine->getSampleRate());
 	wdfp.fc=0;
+}
+
+void Montreal::onSampleRateChange() {
+	wdfIdealRLCLPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCHPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCBPF.reset(APP->engine->getSampleRate());
+	wdfIdealRLCBSF.reset(APP->engine->getSampleRate());
 }
 
 void Montreal::process(const ProcessArgs &args) {
@@ -20,15 +30,6 @@ void Montreal::process(const ProcessArgs &args) {
 	if ((outputs[OUTPUT_LPF].isConnected() || 
 		outputs[OUTPUT_HPF].isConnected() || outputs[OUTPUT_BPF].isConnected() || 
 		outputs[OUTPUT_BSF].isConnected()) && inputs[INPUT_MAIN].isConnected()) {
-
-
-		if (args.sampleRate!=sampleRate) {
-				sampleRate = args.sampleRate;
-				wdfIdealRLCLPF.reset(sampleRate);
-				wdfIdealRLCHPF.reset(sampleRate);
-				wdfIdealRLCBPF.reset(sampleRate);
-				wdfIdealRLCBSF.reset(sampleRate);
-		}
 		
 		if (params[PARAM_FC].getValue() != wdfp.fc || params[PARAM_Q].getValue() !=  wdfp.Q)  {
 			

@@ -32,6 +32,7 @@ struct Montreal : Module {
 
 		Montreal();
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 		WDFIdealRLCLPF wdfIdealRLCLPF;
 		WDFIdealRLCHPF wdfIdealRLCHPF;
 		WDFIdealRLCBPF wdfIdealRLCBPF;
