@@ -5,37 +5,49 @@
 
 SugarMice::SugarMice() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	sampleRate=APP->engine->getSampleRate();
-	fc=0;
+	fc = 1000;
 	warp=false;
+	for (int i = 0;i<4;i++)
+		wdfButterLPF3[i].reset(APP->engine->getSampleRate());
 }
 
 void SugarMice::onSampleRateChange() {
-	wdfButterLPF3.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++)
+		wdfButterLPF3[i].reset(APP->engine->getSampleRate());
+}
+
+void SugarMice::processChannel(Input& in, Output& out) {
+		
+		// Get input
+		int channels = std::max(in.getChannels(), 1);
+		simd::float_4 v[4];
+		for (int c = 0; c < channels; c += 4) {
+			v[c/4] = simd::float_4::load(in.getVoltages(c));
+		}
+		
+		out.setChannels(channels);
+		simd::float_4 output;
+		for (int c = 0; c < channels; c += 4) {
+			output = wdfButterLPF3[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
 }
 
 void SugarMice::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
-		if (params[PARAM_FC].getValue() != fc || wdfButterLPF3.getUsePostWarping() != warp) {
-			wdfButterLPF3.setFilterFc(params[PARAM_FC].getValue());
-			fc = params[PARAM_FC].getValue();
-			warp = wdfButterLPF3.getUsePostWarping();
+		if (params[PARAM_FC].getValue() != fc || wdfButterLPF3[0].getUsePostWarping() != warp) {
+			for (int i = 0;i < 4;i++) { 
+				wdfButterLPF3[i].setFilterFc(pow(2048,params[PARAM_FC].getValue()) * 10);
+				fc = params[PARAM_FC].getValue();
+				wdfButterLPF3[i].setUsePostWarping(warp);
+			}
 		}
-
-		float out = wdfButterLPF3.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
-
-
-/* Context Menu Item for changing the warping settings */
-void nWarpSelectionMenuItem::onAction(const event::Action &e) {
-	module->wdfButterLPF3.setUsePostWarping(Warp);
-}
-
-
 
 struct SugarMiceModuleWidget : ModuleWidget {
 	SugarMiceModuleWidget(SugarMice* module) {
@@ -58,13 +70,7 @@ struct SugarMiceModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuEntry);
 
-
-		nWarpSelectionMenuItem *nWarpItem = new nWarpSelectionMenuItem();
-		nWarpItem->text = "Enable Warping";
-		nWarpItem->module = module;
-		nWarpItem->Warp = !module->wdfButterLPF3.getUsePostWarping();
-		nWarpItem->rightText = CHECKMARK(!nWarpItem->Warp);
-		menu->addChild(nWarpItem);
+		menu->addChild(rack::createBoolPtrMenuItem("Enable Warping", "", &module->warp));
 	}
 };
 

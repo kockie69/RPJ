@@ -77,13 +77,13 @@
       "slug": "SugarMice",
       "name": "SugarMice",
       "description": "3rd order Butterworth low-pass ladder filter.",
-      "tags": ["VCF"]
+      "tags": ["VCF","Polyphonic"]
     },
     {
       "slug": "Montreal",
       "name": "Montreal",
       "description": "Ideal 2nd Order RLC Filters LPF, HPF, BPF and BSF",
-      "tags": ["VCF"]
+      "tags": ["VCF","Polyphonic"]
     },
     {
       "slug": "BlindCurve",

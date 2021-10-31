@@ -1,7 +1,7 @@
 # Sugar Mice / 3rd Order Butterworth LPF <a name="sugarmice"></a>
 ![sugarmice image](./sugarmice.png)
 
-Sugar Mice is a Wave digital filter (WDF). WDFs are designed to simulate analog electronic circuits. The idea behind WDFs is to simulate the signal flow through analog circuit components: Resistors (R),  Capacitors (C), and Inductors (L).
+Sugar Mice is a Polyphonic Wave digital filter (WDF). WDFs are designed to simulate analog electronic circuits. The idea behind WDFs is to simulate the signal flow through analog circuit components: Resistors (R),  Capacitors (C), and Inductors (L).
 
 Sugar Mice is a 3rd Order Butterworth low pass ladder filter. 
 

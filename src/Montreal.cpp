@@ -5,24 +5,70 @@
 
 Montreal::Montreal() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
+	fc = 1000;
 	configBypass(INPUT_MAIN, OUTPUT_LPF);
 	configBypass(INPUT_MAIN, OUTPUT_HPF);
 	configBypass(INPUT_MAIN, OUTPUT_BPF);
 	configBypass(INPUT_MAIN, OUTPUT_BSF);
-	wdfIdealRLCLPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCHPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCBPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCBSF.reset(APP->engine->getSampleRate());
-	wdfp.fc=0;
+	for (int i = 0;i<4;i++) {
+		wdfIdealRLCLPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCHPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCBPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCBSF[i].reset(APP->engine->getSampleRate());
+	}
+	wdfp.fc=1000;
 }
 
 void Montreal::onSampleRateChange() {
-	wdfIdealRLCLPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCHPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCBPF.reset(APP->engine->getSampleRate());
-	wdfIdealRLCBSF.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		wdfIdealRLCLPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCHPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCBPF[i].reset(APP->engine->getSampleRate());
+		wdfIdealRLCBSF[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Montreal::processChannel(Input& in, Output& lpfOut, Output& hpfOut, Output& bpfOut, Output& bsfOut) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+	}
+		
+
+	simd::float_4 output;
+	if (outputs[OUTPUT_LPF].isConnected()) {
+		lpfOut.setChannels(channels);
+		for (int c = 0; c < channels; c += 4) {
+			output = wdfIdealRLCLPF[c/4].processAudioSample(v[c/4]);
+			output.store(lpfOut.getVoltages(c));
+		}
+	}
+	if (outputs[OUTPUT_HPF].isConnected()) {
+		hpfOut.setChannels(channels);
+		for (int c = 0; c < channels; c += 4) {
+			output = wdfIdealRLCHPF[c/4].processAudioSample(v[c/4]);
+			output.store(hpfOut.getVoltages(c));
+		}
+	}
+	if (outputs[OUTPUT_BPF].isConnected()) {
+		bpfOut.setChannels(channels);
+		for (int c = 0; c < channels; c += 4) {
+			output = wdfIdealRLCBPF[c/4].processAudioSample(v[c/4]);
+			output.store(bpfOut.getVoltages(c));
+		}
+	}
+	if (outputs[OUTPUT_BSF].isConnected()) {
+		bsfOut.setChannels(channels);
+		for (int c = 0; c < channels; c += 4) {
+			output = wdfIdealRLCBSF[c/4].processAudioSample(v[c/4]);
+			output.store(bsfOut.getVoltages(c));
+		}
+	}
 }
 
 void Montreal::process(const ProcessArgs &args) {
@@ -32,23 +78,16 @@ void Montreal::process(const ProcessArgs &args) {
 		outputs[OUTPUT_BSF].isConnected()) && inputs[INPUT_MAIN].isConnected()) {
 		
 		if (params[PARAM_FC].getValue() != wdfp.fc || params[PARAM_Q].getValue() !=  wdfp.Q)  {
-			
-			wdfp.fc=params[PARAM_FC].getValue();
+			wdfp.fc=pow(2048,params[PARAM_FC].getValue()) * 10;
 			wdfp.Q=params[PARAM_Q].getValue();
-			wdfIdealRLCLPF.setParameters(wdfp);
-			wdfIdealRLCHPF.setParameters(wdfp);
-			wdfIdealRLCBPF.setParameters(wdfp);
-			wdfIdealRLCBSF.setParameters(wdfp);
+			for (int i = 0;i < 4;i++) { 
+				wdfIdealRLCLPF[i].setParameters(wdfp);
+				wdfIdealRLCHPF[i].setParameters(wdfp);
+				wdfIdealRLCBPF[i].setParameters(wdfp);
+				wdfIdealRLCBSF[i].setParameters(wdfp);
+			}
+			processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_LPF],outputs[OUTPUT_HPF],outputs[OUTPUT_BPF],outputs[OUTPUT_BSF]);
 		}
-
-		if (outputs[OUTPUT_LPF].isConnected())
-			outputs[OUTPUT_LPF].setVoltage(wdfIdealRLCLPF.processAudioSample(inputs[INPUT_MAIN].getVoltage()));
-		if (outputs[OUTPUT_HPF].isConnected())
-			outputs[OUTPUT_HPF].setVoltage(wdfIdealRLCHPF.processAudioSample(inputs[INPUT_MAIN].getVoltage()));
-		if (outputs[OUTPUT_BPF].isConnected())
-			outputs[OUTPUT_BPF].setVoltage(wdfIdealRLCBPF.processAudioSample(inputs[INPUT_MAIN].getVoltage()));
-		if (outputs[OUTPUT_BSF].isConnected())
-			outputs[OUTPUT_BSF].setVoltage(wdfIdealRLCBSF.processAudioSample(inputs[INPUT_MAIN].getVoltage()));
 	}
 }
 

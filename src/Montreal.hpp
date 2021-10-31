@@ -33,12 +33,14 @@ struct Montreal : Module {
 		Montreal();
 		void process(const ProcessArgs &) override;
 		void onSampleRateChange() override;
-		WDFIdealRLCLPF wdfIdealRLCLPF;
-		WDFIdealRLCHPF wdfIdealRLCHPF;
-		WDFIdealRLCBPF wdfIdealRLCBPF;
-		WDFIdealRLCBSF wdfIdealRLCBSF;
+		void processChannel(Input&, Output&, Output&, Output&, Output&);
+		WDFIdealRLCLPF wdfIdealRLCLPF[4];
+		WDFIdealRLCHPF wdfIdealRLCHPF[4];
+		WDFIdealRLCBPF wdfIdealRLCBPF[4];
+		WDFIdealRLCBSF wdfIdealRLCBSF[4];
 		double sampleRate;
 		WDFParameters wdfp;
+		float fc;
 };
 
 

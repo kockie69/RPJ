@@ -1,7 +1,7 @@
 # Montreal / Ideal 2nd Order RLC Filters <a name="montreal"></a>
 ![montreal image](./montreal.png)
 
-Montreal is a set of ideal RLC filters that form the basis for many  important analog EQ designs. 
+Montreal is a set of Polyphonic ideal RLC filters that form the basis for many important analog EQ designs. 
 
 ## Controls
 For the LPF and BPF, **Cutoff** is the cutoff frequency, while for BPF and BSF, it is the center frequency.

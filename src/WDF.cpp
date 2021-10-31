@@ -7,10 +7,10 @@ void IComponentAdaptor::initialize(double _R1) {}
 void IComponentAdaptor::initializeAdaptorChain() {}
 
 /** set input value into component port  */
-void IComponentAdaptor::setInput(double _in) {}
+void IComponentAdaptor::setInput(rack::simd::float_4 _in) {}
 
 /** get output value from component port  */
-double IComponentAdaptor::getOutput() { return 0.0; }
+rack::simd::float_4 IComponentAdaptor::getOutput() { return 0.0; }
 
 // --- for adaptors
 /** ADAPTOR: set input port 1  */
@@ -92,28 +92,28 @@ void WdfResistor::updateComponentResistance()  { componentResistance = component
 void WdfResistor::reset(double _sampleRate)  { setSampleRate(_sampleRate);  zRegister = 0.0; }
 
 /** set input value into component; NOTE: resistor is dead-end energy sink so this function does nothing */
-void WdfResistor::setInput(double in)  {}
+void WdfResistor::setInput(rack::simd::float_4 in)  {}
 
 /** get output value; NOTE: a WDF resistor produces no reflected output */
-double WdfResistor::getOutput()  { return 0.0; }
+rack::simd::float_4 WdfResistor::getOutput()  { return 0.0; }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfResistor::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfResistor::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfResistor::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfResistor::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfResistor::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfResistor::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfResistor::setInput1(double _in1)  {}
+void WdfResistor::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfResistor::setInput2(double _in2)  {}
+void WdfResistor::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfResistor::setInput3(double _in3)  {}
+void WdfResistor::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfCapacitor::WdfCapacitor(double _componentValue) { componentValue = _componentValue; }
 WdfCapacitor::WdfCapacitor() { }
@@ -152,28 +152,28 @@ void WdfCapacitor::updateComponentResistance()
 void WdfCapacitor::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister = 0.0; }
 
 /** set input value into component; NOTE: capacitor sets value into register*/
-void WdfCapacitor::setInput(double in)  { zRegister = in; }
+void WdfCapacitor::setInput(rack::simd::float_4 in)  { zRegister = in; }
 
 /** get output value; NOTE: capacitor produces reflected output */
-double WdfCapacitor::getOutput()  { return zRegister; }	// z^-1
+rack::simd::float_4 WdfCapacitor::getOutput()  { return zRegister; }	// z^-1
 
 /** get output1 value; only one capacitor output (not used) */
-double WdfCapacitor::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfCapacitor::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one capacitor output (not used) */
-double WdfCapacitor::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfCapacitor::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one capacitor output (not used) */
-double WdfCapacitor::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfCapacitor::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfCapacitor::setInput1(double _in1)  {}
+void WdfCapacitor::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfCapacitor::setInput2(double _in2)  {}
+void WdfCapacitor::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfCapacitor::setInput3(double _in3)  {}
+void WdfCapacitor::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfInductor::WdfInductor(double _componentValue) { componentValue = _componentValue; }
 WdfInductor::WdfInductor() { }
@@ -209,28 +209,28 @@ void WdfInductor::updateComponentResistance()  { componentResistance = 2.0*compo
 void WdfInductor::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister = 0.0; }
 
 /** set input value into component; NOTE: inductor sets value into storage register */
-void WdfInductor::setInput(double in)  { zRegister = in; }
+void WdfInductor::setInput(rack::simd::float_4 in)  { zRegister = in; }
 
 /** get output value; NOTE: a WDF inductor produces reflected output that is inverted */
-double WdfInductor::getOutput()  { return -zRegister; } // -z^-1
+rack::simd::float_4 WdfInductor::getOutput()  { return -zRegister; } // -z^-1
 
 /** get output1 value; only one resistor output (not used) */
-double WdfInductor::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfInductor::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfInductor::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfInductor::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfInductor::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfInductor::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfInductor::setInput1(double _in1)  {}
+void WdfInductor::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfInductor::setInput2(double _in2)  {}
+void WdfInductor::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfInductor::setInput3(double _in3)  {}
+void WdfInductor::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfSeriesLC::WdfSeriesLC() {}
 WdfSeriesLC::WdfSeriesLC(double _componentValue_L, double _componentValue_C) {
@@ -293,35 +293,35 @@ double WdfSeriesLC::getComponentValue_C() { return componentValue_C; }
 void WdfSeriesLC::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component; NOTE: K is calculated here */
-void WdfSeriesLC::setInput(double in) 
+void WdfSeriesLC::setInput(rack::simd::float_4 in) 
 {
 	double YC = 1.0 / RC;
 	double K = (1.0 - RL*YC) / (1.0 + RL*YC);
-	double N1 = K*(in - zRegister_L);
+	rack::simd::float_4 N1 = K*(in - zRegister_L);
 	zRegister_L = N1 + zRegister_C;
 	zRegister_C = in;
 }
 
 /** get output value; NOTE: utput is located in zReg_L */
-double WdfSeriesLC::getOutput()  { return zRegister_L; }
+rack::simd::float_4 WdfSeriesLC::getOutput()  { return zRegister_L; }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfSeriesLC::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesLC::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfSeriesLC::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesLC::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfSeriesLC::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesLC::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfSeriesLC::setInput1(double _in1)  {}
+void WdfSeriesLC::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfSeriesLC::setInput2(double _in2)  {}
+void WdfSeriesLC::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfSeriesLC::setInput3(double _in3)  {}
+void WdfSeriesLC::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfParallelLC::WdfParallelLC() {}
 WdfParallelLC::WdfParallelLC(double _componentValue_L, double _componentValue_C)
@@ -384,35 +384,35 @@ double WdfParallelLC::getComponentValue_C() { return componentValue_C; }
 void WdfParallelLC::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component; NOTE: K is calculated here */
-void WdfParallelLC::setInput(double in) 
+void WdfParallelLC::setInput(rack::simd::float_4 in) 
 {
 	double YL = 1.0 / RL;
 	double K = (YL*RC - 1.0) / (YL*RC + 1.0);
-	double N1 = K*(in - zRegister_L);
+	rack::simd::float_4 N1 = K*(in - zRegister_L);
 	zRegister_L = N1 + zRegister_C;
 	zRegister_C = in;
 }
 
 /** get output value; NOTE: output is located in -zReg_L */
-double WdfParallelLC::getOutput()  { return -zRegister_L; }
+rack::simd::float_4 WdfParallelLC::getOutput()  { return -zRegister_L; }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfParallelLC::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelLC::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfParallelLC::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelLC::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfParallelLC::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelLC::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfParallelLC::setInput1(double _in1)  {}
+void WdfParallelLC::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfParallelLC::setInput2(double _in2)  {}
+void WdfParallelLC::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfParallelLC::setInput3(double _in3) {}
+void WdfParallelLC::setInput3(rack::simd::float_4 _in3) {}
 
 WdfSeriesRL::WdfSeriesRL() {}
 WdfSeriesRL::WdfSeriesRL(double _componentValue_R, double _componentValue_L) {
@@ -470,34 +470,34 @@ double WdfSeriesRL::getComponentValue_R() { return componentValue_R; }
 void WdfSeriesRL::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component */
-void WdfSeriesRL::setInput(double in)  { zRegister_L = in; }
+void WdfSeriesRL::setInput(rack::simd::float_4 in)  { zRegister_L = in; }
 
 /** get output value; NOTE: see FX book for details */
-double WdfSeriesRL::getOutput() {
-	double NL = -zRegister_L;
-	double out = NL*(1.0 - K) - K*zRegister_C;
+rack::simd::float_4 WdfSeriesRL::getOutput() {
+	rack::simd::float_4 NL = -zRegister_L;
+	rack::simd::float_4 out = NL*(1.0 - K) - K*zRegister_C;
 	zRegister_C = out;
 
 	return out;
 }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfSeriesRL::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRL::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfSeriesRL::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRL::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfSeriesRL::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRL::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfSeriesRL::setInput1(double _in1)  {}
+void WdfSeriesRL::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfSeriesRL::setInput2(double _in2)  {}
+void WdfSeriesRL::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfSeriesRL::setInput3(double _in3)  {}
+void WdfSeriesRL::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfParallelRL::WdfParallelRL() {}
 WdfParallelRL::WdfParallelRL(double _componentValue_R, double _componentValue_L)	{
@@ -561,34 +561,34 @@ double WdfParallelRL::getComponentValue_R() { return componentValue_R; }
 void WdfParallelRL::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component */
-void WdfParallelRL::setInput(double in)  { zRegister_L = in; }
+void WdfParallelRL::setInput(rack::simd::float_4 in)  { zRegister_L = in; }
 
 /** get output value; NOTE: see FX book for details */
-double WdfParallelRL::getOutput() 
+rack::simd::float_4 WdfParallelRL::getOutput() 
 {
-	double NL = -zRegister_L;
-	double out = NL*(1.0 - K) + K*zRegister_C;
+	rack::simd::float_4 NL = -zRegister_L;
+	rack::simd::float_4 out = NL*(1.0 - K) + K*zRegister_C;
 	zRegister_C = out;
 	return out;
 }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfParallelRL::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRL::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfParallelRL::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRL::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfParallelRL::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRL::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfParallelRL::setInput1(double _in1)  {}
+void WdfParallelRL::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfParallelRL::setInput2(double _in2)  {}
+void WdfParallelRL::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfParallelRL::setInput3(double _in3)  {}
+void WdfParallelRL::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfSeriesRC::WdfSeriesRC() {}
 WdfSeriesRC::WdfSeriesRC(double _componentValue_R, double _componentValue_C)
@@ -652,34 +652,34 @@ double WdfSeriesRC::getComponentValue_C() { return componentValue_C; }
 void WdfSeriesRC::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component */
-void WdfSeriesRC::setInput(double in)  { zRegister_L = in; }
+void WdfSeriesRC::setInput(rack::simd::float_4 in)  { zRegister_L = in; }
 
 /** get output value; NOTE: see FX book for details */
-double WdfSeriesRC::getOutput() 
+rack::simd::float_4 WdfSeriesRC::getOutput() 
 {
-	double NL = zRegister_L;
-	double out = NL*(1.0 - K) + K*zRegister_C;
+	rack::simd::float_4 NL = zRegister_L;
+	rack::simd::float_4 out = NL*(1.0 - K) + K*zRegister_C;
 	zRegister_C = out;
 	return out;
 }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfSeriesRC::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRC::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfSeriesRC::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRC::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfSeriesRC::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfSeriesRC::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfSeriesRC::setInput1(double _in1)  {}
+void WdfSeriesRC::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfSeriesRC::setInput2(double _in2)  {}
+void WdfSeriesRC::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfSeriesRC::setInput3(double _in3)  {}
+void WdfSeriesRC::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfParallelRC::WdfParallelRC() {}
 WdfParallelRC::WdfParallelRC(double _componentValue_R, double _componentValue_C)
@@ -743,34 +743,34 @@ double WdfParallelRC::getComponentValue_C() { return componentValue_C; }
 void WdfParallelRC::reset(double _sampleRate)  { setSampleRate(_sampleRate); zRegister_L = 0.0; zRegister_C = 0.0; }
 
 /** set input value into component; */
-void WdfParallelRC::setInput(double in)  { zRegister_L = in; }
+void WdfParallelRC::setInput(rack::simd::float_4 in)  { zRegister_L = in; }
 
 /** get output value; NOTE: output is located in zRegister_C */
-double WdfParallelRC::getOutput() 
+rack::simd::float_4 WdfParallelRC::getOutput() 
 {
-	double NL = zRegister_L;
-	double out = NL*(1.0 - K) - K*zRegister_C;
+	rack::simd::float_4 NL = zRegister_L;
+	rack::simd::float_4 out = NL*(1.0 - K) - K*zRegister_C;
 	zRegister_C = out;
 	return out;
 }
 
 /** get output1 value; only one resistor output (not used) */
-double WdfParallelRC::getOutput1()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRC::getOutput1()  { return  getOutput(); }
 
 /** get output2 value; only one resistor output (not used) */
-double WdfParallelRC::getOutput2()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRC::getOutput2()  { return  getOutput(); }
 
 /** get output3 value; only one resistor output (not used) */
-double WdfParallelRC::getOutput3()  { return  getOutput(); }
+rack::simd::float_4 WdfParallelRC::getOutput3()  { return  getOutput(); }
 
 /** set input1 value; not used for components */
-void WdfParallelRC::setInput1(double _in1)  {}
+void WdfParallelRC::setInput1(rack::simd::float_4 _in1)  {}
 
 /** set input2 value; not used for components */
-void WdfParallelRC::setInput2(double _in2)  {}
+void WdfParallelRC::setInput2(rack::simd::float_4 _in2)  {}
 
 /** set input3 value; not used for components */
-void WdfParallelRC::setInput3(double _in3)  {}
+void WdfParallelRC::setInput3(rack::simd::float_4 _in3)  {}
 
 WdfComponentInfo::WdfComponentInfo() { }
 
@@ -978,7 +978,7 @@ void WdfSeriesAdaptor::initialize(double _R1)
 }
 
 /** push audio input sample into incident wave input*/
-void WdfSeriesAdaptor::setInput1(double _in1) 
+void WdfSeriesAdaptor::setInput1(rack::simd::float_4 _in1) 
 {
 	// --- save
 	in1 = _in1;
@@ -997,7 +997,7 @@ void WdfSeriesAdaptor::setInput1(double _in1)
 }
 
 /** push audio input sample into reflected wave input */
-void WdfSeriesAdaptor::setInput2(double _in2) 	
+void WdfSeriesAdaptor::setInput2(rack::simd::float_4 _in2) 	
 {
 	// --- save
 	in2 = _in2;
@@ -1018,16 +1018,16 @@ void WdfSeriesAdaptor::setInput2(double _in2)
 }
 
 /** set input 3 always connects to component */
-void WdfSeriesAdaptor::setInput3(double _in3)  { }
+void WdfSeriesAdaptor::setInput3(rack::simd::float_4 _in3)  { }
 
 /** get OUT1 = reflected output pin on Port 1 */
-double WdfSeriesAdaptor::getOutput1()  { return out1; }
+rack::simd::float_4 WdfSeriesAdaptor::getOutput1()  { return out1; }
 
 /** get OUT2 = incident (normal) output pin on Port 2 */
-double WdfSeriesAdaptor::getOutput2()  { return out2; }
+rack::simd::float_4 WdfSeriesAdaptor::getOutput2()  { return out2; }
 
 /** get OUT3 always connects to component */
-double WdfSeriesAdaptor::getOutput3()  { return out3; }
+rack::simd::float_4 WdfSeriesAdaptor::getOutput3()  { return out3; }
 
 WdfSeriesTerminatedAdaptor::WdfSeriesTerminatedAdaptor() {}
 WdfSeriesTerminatedAdaptor::~WdfSeriesTerminatedAdaptor() {}
@@ -1065,7 +1065,7 @@ void WdfSeriesTerminatedAdaptor::initialize(double _R1)
 }
 
 /** push audio input sample into incident wave input*/
-void WdfSeriesTerminatedAdaptor::setInput1(double _in1) 
+void WdfSeriesTerminatedAdaptor::setInput1(rack::simd::float_4 _in1) 
 {
 	// --- save
 	in1 = _in1;
@@ -1074,7 +1074,7 @@ void WdfSeriesTerminatedAdaptor::setInput1(double _in1)
 	if (getPort3_CompAdaptor())
 		N2 = getPort3_CompAdaptor()->getOutput();
 
-	double N3 = in1 + N2;
+	rack::simd::float_4 N3 = in1 + N2;
 
 	// --- calc out2 y(n)
 	out2 = -B3*N3;
@@ -1096,19 +1096,19 @@ void WdfSeriesTerminatedAdaptor::setInput1(double _in1)
 
 /** push audio input sample into reflected wave input
 	for terminated adaptor, this is dead end, just store it */
-void WdfSeriesTerminatedAdaptor::setInput2(double _in2)  { in2 = _in2;}
+void WdfSeriesTerminatedAdaptor::setInput2(rack::simd::float_4 _in2)  { in2 = _in2;}
 
 /** set input 3 always connects to component */
-void WdfSeriesTerminatedAdaptor::setInput3(double _in3)  { in3 = _in3;}
+void WdfSeriesTerminatedAdaptor::setInput3(rack::simd::float_4 _in3)  { in3 = _in3;}
 
 /** get OUT1 = reflected output pin on Port 1 */
-double WdfSeriesTerminatedAdaptor::getOutput1()  { return out1; }
+rack::simd::float_4 WdfSeriesTerminatedAdaptor::getOutput1()  { return out1; }
 
 /** get OUT2 = incident (normal) output pin on Port 2 */
-double WdfSeriesTerminatedAdaptor::getOutput2()  { return out2; }
+rack::simd::float_4 WdfSeriesTerminatedAdaptor::getOutput2()  { return out2; }
 
 /** get OUT3 always connects to component */
-double WdfSeriesTerminatedAdaptor::getOutput3()  { return out3; }
+rack::simd::float_4 WdfSeriesTerminatedAdaptor::getOutput3()  { return out3; }
 
 WdfParallelAdaptor::WdfParallelAdaptor() {}
 WdfParallelAdaptor::~WdfParallelAdaptor() {}
@@ -1148,7 +1148,7 @@ void WdfParallelAdaptor::initialize(double _R1)
 }
 
 /** push audio input sample into incident wave input*/
-void WdfParallelAdaptor::setInput1(double _in1) 
+void WdfParallelAdaptor::setInput1(rack::simd::float_4 _in1) 
 {
 	// --- save
 	in1 = _in1;
@@ -1167,7 +1167,7 @@ void WdfParallelAdaptor::setInput1(double _in1)
 }
 
 /** push audio input sample into reflected wave input*/
-void WdfParallelAdaptor::setInput2(double _in2) 
+void WdfParallelAdaptor::setInput2(rack::simd::float_4 _in2) 
 {
 	// --- save
 	in2 = _in2;
@@ -1188,16 +1188,16 @@ void WdfParallelAdaptor::setInput2(double _in2)
 }
 
 /** set input 3 always connects to component */
-void WdfParallelAdaptor::WdfParallelAdaptor::setInput3(double _in3)  { }
+void WdfParallelAdaptor::WdfParallelAdaptor::setInput3(rack::simd::float_4 _in3)  { }
 
 	/** get OUT1 = reflected output pin on Port 1 */
-double WdfParallelAdaptor::getOutput1()  { return out1; }
+rack::simd::float_4 WdfParallelAdaptor::getOutput1()  { return out1; }
 
 /** get OUT2 = incident (normal) output pin on Port 2 */
-double WdfParallelAdaptor::getOutput2()  { return out2; }
+rack::simd::float_4 WdfParallelAdaptor::getOutput2()  { return out2; }
 
 /** get OUT3 always connects to component */
-double WdfParallelAdaptor::getOutput3()  { return out3; }
+rack::simd::float_4 WdfParallelAdaptor::getOutput3()  { return out3; }
 
 WdfParallelTerminatedAdaptor::WdfParallelTerminatedAdaptor() {}
 WdfParallelTerminatedAdaptor::~WdfParallelTerminatedAdaptor() {}
@@ -1221,8 +1221,8 @@ void WdfParallelTerminatedAdaptor::initialize(double _R1)
 	R1 = _R1;
 
 	double G1 = 1.0 / R1;
-	if (terminalResistance <= 0.0)
-		terminalResistance = 1e-15;
+
+	terminalResistance = rack::simd::ifelse(terminalResistance <= 0.f, 1e-15, terminalResistance);
 
 	double G2 = 1.0 / terminalResistance;
 	double componentConductance = 0.0;
@@ -1241,7 +1241,7 @@ void WdfParallelTerminatedAdaptor::initialize(double _R1)
 }
 
 /** push audio input sample into incident wave input*/
-void WdfParallelTerminatedAdaptor::setInput1(double _in1) 
+void WdfParallelTerminatedAdaptor::setInput1(rack::simd::float_4 _in1) 
 {
 	// --- save
 	in1 = _in1;
@@ -1269,19 +1269,19 @@ void WdfParallelTerminatedAdaptor::setInput1(double _in1)
 }
 
 /** push audio input sample into reflected wave input; this is a dead end for terminated adaptorsthis is a dead end for terminated adaptors  */
-void WdfParallelTerminatedAdaptor::setInput2(double _in2)  { in2 = _in2;}
+void WdfParallelTerminatedAdaptor::setInput2(rack::simd::float_4 _in2)  { in2 = _in2;}
 
 /** set input 3 always connects to component */
-void WdfParallelTerminatedAdaptor::setInput3(double _in3)  { }
+void WdfParallelTerminatedAdaptor::setInput3(rack::simd::float_4 _in3)  { }
 
 /** get OUT1 = reflected output pin on Port 1 */
-double WdfParallelTerminatedAdaptor::getOutput1()  { return out1; }
+rack::simd::float_4 WdfParallelTerminatedAdaptor::getOutput1()  { return out1; }
 
 /** get OUT2 = incident (normal) output pin on Port 2 */
-double WdfParallelTerminatedAdaptor::getOutput2()  { return out2; }
+rack::simd::float_4 WdfParallelTerminatedAdaptor::getOutput2()  { return out2; }
 
 /** get OUT3 always connects to component */
-double WdfParallelTerminatedAdaptor::getOutput3()  { return out3; }
+rack::simd::float_4 WdfParallelTerminatedAdaptor::getOutput3()  { return out3; }
 
 WDFButterLPF3::WDFButterLPF3(void) { createWDF(); }	/* C-TOR */
 WDFButterLPF3::~WDFButterLPF3(void) {}	/* D-TOR */
@@ -1307,7 +1307,7 @@ bool WDFButterLPF3::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFButterLPF3::processAudioSample(double xn)
+rack::simd::float_4 WDFButterLPF3::processAudioSample(double xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_L1.setInput1(xn);
@@ -1365,7 +1365,7 @@ bool WDFTunableButterLPF3::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFTunableButterLPF3::processAudioSample(double xn)
+rack::simd::float_4 WDFTunableButterLPF3::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_L1.setInput1(xn);
@@ -1438,7 +1438,7 @@ bool WDFBesselBSF3::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFBesselBSF3::processAudioSample(double xn)
+rack::simd::float_4 WDFBesselBSF3::processAudioSample(double xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_L1C1.setInput1(xn);
@@ -1497,13 +1497,13 @@ bool WDFConstKBPF6::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFConstKBPF6::processAudioSample(double xn)
+rack::simd::float_4 WDFConstKBPF6::processAudioSample(double xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_L1C1.setInput1(xn);
 
 	// --- output is at terminated L6C6 output2
-	double output = parallelTerminatedAdaptor_L6C6.getOutput2();
+	rack::simd::float_4 output = parallelTerminatedAdaptor_L6C6.getOutput2();
 
 	return output;
 }
@@ -1575,7 +1575,7 @@ bool WDFIdealRLCLPF::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFIdealRLCLPF::processAudioSample(double xn)
+rack::simd::float_4 WDFIdealRLCLPF::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_RL.setInput1(xn);
@@ -1666,7 +1666,7 @@ bool WDFIdealRLCHPF::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFIdealRLCHPF::processAudioSample(double xn)
+rack::simd::float_4 WDFIdealRLCHPF::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_RC.setInput1(xn);
@@ -1757,7 +1757,7 @@ bool WDFIdealRLCBPF::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFIdealRLCBPF::processAudioSample(double xn)
+rack::simd::float_4 WDFIdealRLCBPF::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_LC.setInput1(xn);
@@ -1848,7 +1848,7 @@ bool WDFIdealRLCBSF::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double WDFIdealRLCBSF::processAudioSample(double xn)
+rack::simd::float_4 WDFIdealRLCBSF::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- push audio sample into series L1
 	seriesAdaptor_R.setInput1(xn);
