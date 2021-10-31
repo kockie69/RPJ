@@ -6,7 +6,7 @@
 Easter::Easter() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
@@ -44,7 +44,7 @@ void Easter::process(const ProcessArgs &args) {
 		if (inputs[INPUT_CVQ].isConnected())
 			cvq = abs(inputs[INPUT_CVQ].getVoltage() / 10.0);
  	
-		afp.fc = params[PARAM_FC].getValue() * cvfc;
+		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
