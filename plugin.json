@@ -107,7 +107,7 @@
       "slug": "DrillingHoles",
       "name": "DrillingHoles",
       "description": "Normalizer",
-      "tags": ["Utility","Switch"]
+      "tags": ["Utility","Switch","Polyphonic"]
     },
     {
       "slug": "TuxOn",

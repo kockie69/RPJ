@@ -7,24 +7,23 @@ const int MODULE_WIDTH=6;
 struct DrillingHoles : Module {
 
 	enum ParamIds {
-		PARAM_FC,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
-		INPUT_A,
-		INPUT_B,
-		INPUT_C,
-		INPUT_D,
-		INPUT_E,
-		INPUT_F,
+		POLYINPUT_A,
+		POLYINPUT_B,
+		POLYINPUT_C,
+		POLYINPUT_D,
+		POLYINPUT_E,
+		POLYINPUT_F,
 		NUM_INPUTS,
 	};
 
 	enum OutputIds {
-		OUTPUT_1,
-		OUTPUT_2,
-		OUTPUT_3,
+		POLYOUTPUT_1,
+		POLYOUTPUT_2,
+		POLYOUTPUT_3,
 		NUM_OUTPUTS,
 	};
 
@@ -33,5 +32,6 @@ struct DrillingHoles : Module {
 	};
 		DrillingHoles();
 		void process(const ProcessArgs &) override;
+		void processChannel(Input&, Input&, Output&);
 };
 

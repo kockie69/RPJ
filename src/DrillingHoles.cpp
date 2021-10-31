@@ -6,11 +6,24 @@ DrillingHoles::DrillingHoles() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 }
 
+void DrillingHoles::processChannel(Input& inA, Input& inB, Output& out) {
+	// Get input
+	int channels = std::max(inA.getChannels(), inB.getChannels());
+	out.setChannels(channels);
+	simd::float_4 v1[4],v2[4];
+	for (int c = 0; c < channels; c += 4) {
+		v1[c / 4] = simd::float_4::load(inA.getVoltages(c));
+		v2[c / 4] = simd::float_4::load(inB.getVoltages(c));
+
+		inB.isConnected() ? v2[c / 4].store(out.getVoltages(c)) : v1[c / 4].store(out.getVoltages(c));
+	}
+}
+
 void DrillingHoles::process(const ProcessArgs &args) {
 
 	for (int i=0; i<3;i++)
-		if (outputs[OUTPUT_1+i].isConnected() && (inputs[INPUT_A+(2*i)].isConnected() || inputs[INPUT_B+(2*i)].isConnected())) 
-			inputs[INPUT_B+(2*i)].isConnected() ? outputs[OUTPUT_1+i].setVoltage(inputs[INPUT_B+(2*i)].getVoltage()) : outputs[OUTPUT_1+i].setVoltage(inputs[INPUT_A+(2*i)].getVoltage());
+		if (outputs[POLYOUTPUT_1+i].isConnected() && (inputs[POLYINPUT_A+(2*i)].isConnected() || inputs[POLYINPUT_B+(2*i)].isConnected())) 
+			processChannel(inputs[POLYINPUT_A+(2*i)],inputs[POLYINPUT_B+(2*i)],outputs[POLYOUTPUT_1+i]);
 }
 
 struct DrillingHolesModuleWidget : ModuleWidget {
@@ -24,17 +37,17 @@ struct DrillingHolesModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);			
 
-		addInput(createInput<PJ301MPort>(Vec(10, 55), module, DrillingHoles::INPUT_A));
-		addInput(createInput<PJ301MPort>(Vec(10, 95), module, DrillingHoles::INPUT_B));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 95), module, DrillingHoles::OUTPUT_1));
+		addInput(createInput<PJ301MPort>(Vec(10, 55), module, DrillingHoles::POLYINPUT_A));
+		addInput(createInput<PJ301MPort>(Vec(10, 95), module, DrillingHoles::POLYINPUT_B));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 95), module, DrillingHoles::POLYOUTPUT_1));
 
-		addInput(createInput<PJ301MPort>(Vec(10, 155), module, DrillingHoles::INPUT_C));
-		addInput(createInput<PJ301MPort>(Vec(10, 195), module, DrillingHoles::INPUT_D));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 195), module, DrillingHoles::OUTPUT_2));
+		addInput(createInput<PJ301MPort>(Vec(10, 155), module, DrillingHoles::POLYINPUT_C));
+		addInput(createInput<PJ301MPort>(Vec(10, 195), module, DrillingHoles::POLYINPUT_D));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 195), module, DrillingHoles::POLYOUTPUT_2));
 
-		addInput(createInput<PJ301MPort>(Vec(10, 255), module, DrillingHoles::INPUT_E));
-		addInput(createInput<PJ301MPort>(Vec(10, 295), module, DrillingHoles::INPUT_F));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 295), module, DrillingHoles::OUTPUT_3));
+		addInput(createInput<PJ301MPort>(Vec(10, 255), module, DrillingHoles::POLYINPUT_E));
+		addInput(createInput<PJ301MPort>(Vec(10, 295), module, DrillingHoles::POLYINPUT_F));
+		addOutput(createOutput<PJ301MPort>(Vec(55, 295), module, DrillingHoles::POLYOUTPUT_3));
 	}
 };
 
