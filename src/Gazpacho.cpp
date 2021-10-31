@@ -5,8 +5,7 @@
 
 Gazpacho::Gazpacho() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
@@ -38,7 +37,7 @@ void Gazpacho::process(const ProcessArgs &args) {
 		if (inputs[INPUT_CVFC].isConnected())
 			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0);
  	
- 		LPFafp.fc = HPFafp.fc = params[PARAM_FC].getValue() * cvfc;
+ 		LPFafp.fc = HPFafp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
 		LPFafp.bqa = HPFafp.bqa = bqa;
