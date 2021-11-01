@@ -6,13 +6,13 @@
 LadyNina::LadyNina() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB,  -20.f, 20.f, 0.f, "Boost/Cut"," dB");
 	LPFaudioFilter.reset(APP->engine->getSampleRate());
 	HPFaudioFilter.reset(APP->engine->getSampleRate());
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	BPFaudioFilter.reset(APP->engine->getSampleRate());
+	BSFaudioFilter.reset(APP->engine->getSampleRate());
 	LPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_LP;
 	HPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_HP;
 	BPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_BP;
@@ -33,21 +33,14 @@ void LadyNina::process(const ProcessArgs &args) {
 		outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) &&
 		inputs[INPUT_MAIN].isConnected()) {
 
-		float cvfc = 1.f;
-		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-	
-		float cvq = 1.f;
-		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
- 	
-	 	float cvbcdb = 1.f;
-		if (inputs[INPUT_CVBCDB].isConnected())
-			cvq = inputs[INPUT_CVBCDB].getVoltage();
+		float cvfc = inputs[INPUT_CVFC].isConnected() ? inputs[INPUT_CVFC].getVoltage() : 1.f;
+		float cvq = inputs[INPUT_CVQ].isConnected() ? inputs[INPUT_CVQ].getVoltage() : 1.f;
 
- 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
-		LPFafp.filterOutputGain_dB = HPFafp.filterOutputGain_dB = BPFafp.filterOutputGain_dB = BSFafp.filterOutputGain_dB = params[PARAM_BOOSTCUT_DB].getValue() * rescale(cvbcdb,-10,10,0,1);
+	 	float cvbcdb = inputs[INPUT_CVBCDB].isConnected() ? inputs[INPUT_CVBCDB].getVoltage() : 1.f;
+
+ 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * cvq;
+		LPFafp.filterOutputGain_dB = HPFafp.filterOutputGain_dB = BPFafp.filterOutputGain_dB = BSFafp.filterOutputGain_dB = params[PARAM_BOOSTCUT_DB].getValue() * cvbcdb;
 		LPFafp.enableGainComp = HPFafp.enableGainComp = BPFafp.enableGainComp = BSFafp.enableGainComp = gain;
 		LPFafp.enableNLP = HPFafp.enableNLP = BPFafp.enableNLP = BSFafp.enableNLP = nlp;
 		LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
