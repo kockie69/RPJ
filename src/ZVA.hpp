@@ -170,7 +170,7 @@ public:
 
 protected:
 	ZVAFilterParameters zvaFilterParameters;	///< object parameters
-	double sampleRate = 44100.0;				///< current sample rate
+	double sampleRate = APP->engine->getSampleRate();				///< current sample rate
 
 	// --- state storage
 	double integrator_z[2];						///< state variables

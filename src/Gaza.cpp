@@ -5,7 +5,7 @@
 Gaza::Gaza() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 10000.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
     configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
     configParam(PARAM_ATK, 1.f, 250.0f,20.f, "Attack"," mSec");
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
@@ -25,7 +25,7 @@ void Gaza::process(const ProcessArgs &args) {
 
 		efp.attackTime_mSec = params[PARAM_ATK].getValue();
 		efp.releaseTime_mSec = params[PARAM_REL].getValue();
-		efp.fc = params[PARAM_FC].getValue();
+		efp.fc = pow(2048,params[PARAM_FC].getValue()) * 10;
         efp.Q = params[PARAM_Q].getValue();
         efp.sensitivity = params[PARAM_SENS].getValue();
         efp.threshold_dB = params[PARAM_THRES].getValue();
