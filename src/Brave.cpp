@@ -23,24 +23,15 @@ void Brave::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected()) {
 	
-		float cvfc = 1.f;
-		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-
-		float cvq = 1.f;
-		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
-	
-		float cvb = 1.f;
-		if (inputs[INPUT_CVB].isConnected())
-			cvb = inputs[INPUT_CVB].getVoltage();
+		float cvfc = inputs[INPUT_CVFC].isConnected() ? inputs[INPUT_CVFC].getVoltage() : 1.f;
+		float cvq = inputs[INPUT_CVQ].isConnected() ? inputs[INPUT_CVQ].getVoltage() : 1.f;
+		float cvb = inputs[INPUT_CVB].isConnected() ? inputs[INPUT_CVB].isConnected() : 1.f;
  	
 		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() *cvb;
 
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-		//afp.bqa = bqa;
 
 		audioFilter.setParameters(afp);
 
