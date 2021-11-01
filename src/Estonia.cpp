@@ -6,7 +6,7 @@
 Estonia::Estonia() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
@@ -32,16 +32,11 @@ void Estonia::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
 	
-		float cvfc = 1.f;
-		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-	
-		float cvb = 1.f;
-		if (inputs[INPUT_CVB].isConnected())
-			cvb = inputs[INPUT_CVB].getVoltage();
+		float cvfc = inputs[INPUT_CVFC].isConnected() ? abs(inputs[INPUT_CVFC].getVoltage() / 10) : 1.f;
+		float cvb = inputs[INPUT_CVB].isConnected() ? abs(inputs[INPUT_CVB].getVoltage() / 10) : 1.f;
  	
-		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * rescale(cvb,-10,10,0,1);
+		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * cvb;
 	
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 		audioFilter.setParameters(afp);
