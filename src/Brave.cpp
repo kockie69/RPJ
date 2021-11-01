@@ -5,7 +5,7 @@
 Brave::Brave() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
@@ -22,7 +22,6 @@ void Brave::onSampleRateChange() {
 void Brave::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected()) {
-		audioFilter.setSampleRate(args.sampleRate);
 	
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
@@ -36,12 +35,12 @@ void Brave::process(const ProcessArgs &args) {
 		if (inputs[INPUT_CVB].isConnected())
 			cvb = inputs[INPUT_CVB].getVoltage();
  	
-		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
-		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * rescale(cvb,-10,10,0,1);
+		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		afp.Q = params[PARAM_Q].getValue() * cvq;
+		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() *cvb;
 
 		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-		afp.bqa = bqa;
+		//afp.bqa = bqa;
 
 		audioFilter.setParameters(afp);
 
