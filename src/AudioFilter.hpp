@@ -28,7 +28,6 @@ struct AudioFilterParameters
 
 	// --- individual parameters
 	filterAlgorithm algorithm = filterAlgorithm::kMatchLP2A; ///< filter algorithm
-	std::string strAlgorithm = "kMatchLP2A";
 
 	double fc = 100.0; ///< filter cutoff or center frequency (Hz)
 	double Q = 0.707; ///< filter Q
@@ -55,7 +54,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double);
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4);
 
 	/** --- sample rate change necessarily requires recalculation */
 	void setSampleRate(double);
@@ -71,11 +70,6 @@ public:
 
 	/** --- helper for Harma filters (phaser) */
 	double getS_value();
-
-std::string filterAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
-		"ButterLPF2", "ButterHPF2", "ButterBPF2", "ButterBSF2", "MMALPF2", "MMALPF2B", "LowShelf",
-		"HiShelf", "NCQParaEQ", "CQParaEQ", "LWRLPF2", "LWRHPF2", "APF1", "APF2", "ResonA", "ResonB",
-		"MatchLP2A", "MatchLP2B", "MatchBP2A", "MatchBP2B", "ImpInvLP1", "ImpInvLP2" };
 
 protected:
 	// --- our calculator

@@ -1,7 +1,7 @@
 # Brave / 2nd Order Parametric EQ Filter: Non-Constant-Q <a name="brave"></a>
 ![brave image](./brave.png)
 
-Parametric EQs allow you to adjust the center frequency, Q, and boost or cut, creating any arbitrary  bumps or notches in the frequency response. The PEQ filter (also known as a peaking filter) is designed  to generate symmetrical boost/cut responses. A true digital PEQ not only has independent controls,  but also each control only varies one coefficient in the filter. The PEQs in this section afford the same  frequency response but adjustments in any parameter require a recalculation of all the coefficients.
+Brave is a Polyphonic EQ Filter. Parametric EQs allow you to adjust the center frequency, Q, and boost or cut, creating any arbitrary  bumps or notches in the frequency response. The PEQ filter (also known as a peaking filter) is designed  to generate symmetrical boost/cut responses. A true digital PEQ not only has independent controls,  but also each control only varies one coefficient in the filter. The PEQs in this section afford the same  frequency response but adjustments in any parameter require a recalculation of all the coefficients.
 
 Brave, our first PEQ design is non-constant-Q, which means the bandwidth varies depending on the boost/  cut value. Many highly revered analog PEQs are non-constant-Q, and some believe them to be more  “musical” than the constant-Q variety.
 

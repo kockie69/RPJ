@@ -15,23 +15,53 @@ Gazpacho::Gazpacho() {
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	LPFafp.algorithm=filterAlgorithm::kLPF1;
 	HPFafp.algorithm=filterAlgorithm::kHPF1;
 	bqa=biquadAlgorithm::kDirect;
 }
 
 void Gazpacho::onSampleRateChange() {
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Gazpacho::processChannel(Input& in, Output& lpfOut, Output& hpfOut) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+	}
+
+	simd::float_4 output;
+	lpfOut.setChannels(channels);
+	hpfOut.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (lpfOut.isConnected()) {
+			LPFaudioFilter[c/4].setParameters(LPFafp);
+			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);	
+			output.store(lpfOut.getVoltages(c));
+		}
+		if (hpfOut.isConnected()) {
+			HPFaudioFilter[c/4].setParameters(HPFafp);
+			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(hpfOut.getVoltages(c));
+		}
+	}
 }
 
 void Gazpacho::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
-		LPFaudioFilter.setSampleRate(args.sampleRate);
-		HPFaudioFilter.setSampleRate(args.sampleRate);
 
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
@@ -42,16 +72,8 @@ void Gazpacho::process(const ProcessArgs &args) {
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
 		LPFafp.bqa = HPFafp.bqa = bqa;
 
-		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setParameters(LPFafp);
-			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
-		}
-		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setParameters(HPFafp);
-			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-		}
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN]);
+
 	}
 }
 

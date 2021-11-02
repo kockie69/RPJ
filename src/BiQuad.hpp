@@ -32,7 +32,7 @@ struct Biquad {
 	Biquad() {}		/* C-TOR */
 	~Biquad() {}	/* D-TOR */
 
-    bool checkFloatUnderflow(double&);
+    bool checkFloatUnderflow(rack::simd::float_4&);
 
 	// --- IAudioSignalProcessor FUNCTIONS --- //
 	//
@@ -47,7 +47,7 @@ struct Biquad {
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double xn);
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 xn);
 
 	/** get parameters: note use of custom structure for passing param data */
 	/**
@@ -70,7 +70,7 @@ struct Biquad {
 	double* getCoefficients();
 
 	/** get the state array for read/write access to the array (used only in direct form oscillator) */
-	double* getStateArray();
+	rack::simd::float_4* getStateArray();
 
 	/** get the structure G (gain) value for Harma filters; see 2nd Ed FX book */
 	double getG_value();
@@ -83,7 +83,7 @@ protected:
 	double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 	/** array of state (z^-1) registers */
-	double stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
+	rack::simd::float_4 stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
 
 	/** type of calculation (algorithm  structure) */
 	BiquadParameters parameters;

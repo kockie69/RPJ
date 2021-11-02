@@ -10,41 +10,63 @@ DryLand::DryLand() {
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "DRY");
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+
+	for (int i = 0; i < 4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	LPFafp.algorithm=filterAlgorithm::kLPF1;
 	HPFafp.algorithm=filterAlgorithm::kHPF1;
 	bqa=biquadAlgorithm::kDirect;
 }
 
 void DryLand::onSampleRateChange() {
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0; i < 4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void DryLand::processChannel(Input& in, Output& lpfOut, Output& hpfOut) {
+	
+	simd::float_4 output;
+	
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+	}
+
+	lpfOut.setChannels(channels);
+	for (int c = 0; c < channels; c += 4) {
+		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
+			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(lpfOut.getVoltages(c));
+		}
+		hpfOut.setChannels(channels);
+		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
+			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(hpfOut.getVoltages(c));
+		}
+	}
 }
 
 void DryLand::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
 
-		float cvfc = 1.f;
-		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0f);
+		float cvfc = inputs[INPUT_CVFC].isConnected() ? abs(inputs[INPUT_CVFC].getVoltage() / 10.0f) : 1.f;
  	
  		LPFafp.fc = HPFafp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
 		LPFafp.bqa = HPFafp.bqa = bqa;
-
-		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setParameters(LPFafp);
-			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
+		for (int i = 0;i < 4;i++) { 
+			LPFaudioFilter[i].setParameters(LPFafp);
+			HPFaudioFilter[i].setParameters(HPFafp);
 		}
-		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setParameters(HPFafp);
-			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-		}
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN]);
 	}
 }
 

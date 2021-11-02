@@ -43,19 +43,19 @@ bool AudioDelay::reset(double _sampleRate)
 	return true;
 }
 
-double AudioDelay::processAudioSample(double xn)
+rack::simd::float_4 AudioDelay::processAudioSample(double xn)
 {
 	// --- read delay
-	double yn = delayBuffer_L.readBuffer(delayInSamples_L);
+	rack::simd::float_4 yn = delayBuffer_L.readBuffer(delayInSamples_L);
 
 	// --- create input for delay buffer
-	double dn = xn + (parameters.feedback_Pct / 100.0) * yn;
+	rack::simd::float_4 dn = xn + (parameters.feedback_Pct / 100.0) * yn;
 
 	// --- write to delay buffer
 	delayBuffer_L.writeBuffer(dn);
 
 	// --- form mixture out = dry*xn + wet*yn
-	double output = dryMix*xn + wetMix*yn;
+	rack::simd::float_4 output = dryMix*xn + wetMix*yn;
 
 	return output;
 }
@@ -69,7 +69,7 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	uint32_t inputChannels,
 	uint32_t outputChannels)
 {
-	// --- make sure we have input and outputs
+/*	// --- make sure we have input and outputs
 	if (inputChannels == 0 || outputChannels == 0)
 		return false;
 
@@ -158,20 +158,20 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 		LPFafp.wet = HPFafp.wet = 1;
 
 		// Check if LPF is enabled
-		float LPFOut = (parameters.feedback_Pct / 100.0) * ynC; 
+		rack::simd::float_4 LPFOut = (parameters.feedback_Pct / 100.0) * ynC; 
 		if (parameters.useLPF) {
 			LPFaudioFilter.setParameters(LPFafp);
 			LPFOut = LPFaudioFilter.processAudioSample(LPFOut);
 		}
 
 		// Check if HPF is enabled 
-		float HPFOut = LPFOut;
+		rack::simd::float_4 HPFOut = LPFOut;
 		if (parameters.useHPF) {
 			HPFaudioFilter.setParameters(HPFafp);
 			HPFOut = HPFaudioFilter.processAudioSample(HPFOut);
 		}
 
-		double dnC = xnL + xnR + HPFOut;
+		rack::simd::float_4 dnC = xnL + xnR + HPFOut;
 
 		// --- write to LEFT delay buffer with LEFT channel info
 		delayBuffer_L.writeBuffer(xnL);
@@ -207,7 +207,7 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 
 	// --- set right channel
 	outputFrame[1] = (float)outputR;
-
+*/
 	return true;
 }
 
@@ -368,7 +368,7 @@ T CircularBuffer<T>::readBuffer(int delayInSamples)//, bool readBeforeWrite = tr
 
 /** read an arbitrary location that includes a fractional sample */
 template <typename T>
-T CircularBuffer<T>::readBuffer(double delayInFractionalSamples)
+T CircularBuffer<T>::readBuffer(rack::simd::float_4 delayInFractionalSamples)
 {
 	// --- truncate delayInFractionalSamples and read the int part
 	T y1 = readBuffer((int)delayInFractionalSamples);

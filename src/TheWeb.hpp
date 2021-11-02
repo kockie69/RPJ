@@ -40,9 +40,10 @@ struct TheWeb : Module {
 	};
 
 		TheWeb();
+		void processChannel(Input&, Output&, Output&, Output&, Output&);
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
-		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
+		AudioFilter LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
 		void process(const ProcessArgs &) override;
 		void onSampleRateChange() override;
 		dsp::SchmittTrigger upTrigger,downTrigger;

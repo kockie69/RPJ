@@ -1,7 +1,7 @@
 # Essence / 2nd Order Parametric EQ Filter: Constant-Q <a name="essence"></a>
 ![essence image](./essence.png)
 
-Parametric EQs allow you to adjust the center frequency, Q, and boost or cut, creating any arbitrary  bumps or notches in the frequency response. The PEQ filter (also known as a peaking filter) is designed  to generate symmetrical boost/cut responses. A true digital PEQ not only has independent controls,  but also each control only varies one coefficient in the filter. The PEQs in this section afford the same  frequency response but adjustments in any parameter require a recalculation of all the coefficients.
+Essence is a Polyphonic Parametric EQ. It allows you to adjust the center frequency, Q, and boost or cut, creating any arbitrary  bumps or notches in the frequency response. The PEQ filter (also known as a peaking filter) is designed  to generate symmetrical boost/cut responses. A true digital PEQ not only has independent controls,  but also each control only varies one coefficient in the filter. The PEQs in this section afford the same  frequency response but adjustments in any parameter require a recalculation of all the coefficients.
 
 Essence creates an almost perfect constant-Q PEQ filter and with only a small error for low boost (or cut) values.
 

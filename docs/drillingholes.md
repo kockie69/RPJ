@@ -1,7 +1,7 @@
 # Drilling Holes / Switch <a name="drillingholes"></a>
 ![drillingholes image](./drillingholes.png)
 
-Drilling Holes is a simple polyphonic utility that gives you 3 blocks where you can connect 2 inputs and one output. If the lower input is connected, that signal will always be fed to the output. If the lower is empty, the upper input will be directed to the output. 
+Drilling Holes is a simple Polyphonic utility that gives you 3 blocks where you can connect 2 inputs and one output. If the lower input is connected, that signal will always be fed to the output. If the lower is empty, the upper input will be directed to the output. 
 
 ## Controls
 This module has no controls.

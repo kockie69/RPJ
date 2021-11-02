@@ -12,11 +12,33 @@ Brave::Brave() {
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kNCQParaEQ;
-	audioFilter.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
 }
 
 void Brave::onSampleRateChange() {
-	audioFilter.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Brave::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioFilter[c/4].setParameters(afp);
+			output = audioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void Brave::process(const ProcessArgs &args) {
@@ -31,12 +53,7 @@ void Brave::process(const ProcessArgs &args) {
 		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() *cvb;
 
-		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-
-		audioFilter.setParameters(afp);
-
-		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
 

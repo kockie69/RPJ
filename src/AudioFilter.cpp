@@ -817,7 +817,7 @@ bool AudioFilter::calculateFilterCoeffs()
 	return false;
 }
 
-double AudioFilter::processAudioSample(double xn)
+rack::simd::float_4 AudioFilter::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- let biquad do the grunt-work
 	//

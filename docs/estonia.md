@@ -1,7 +1,7 @@
 # Estonia / 1st Order Shelving Filters <a name="estonia"></a>
 ![estonia image](./estonia.png)
 
-Shelving filters are used in many tone controls, especially when there are only two (bass and treble)  which are almost always implemented as shelf types. The filters specify a shelving frequency and gain or attenuation value.
+Estonia is a Polyphonic shelving filter. Shelving filters are used in many tone controls, especially when there are only two (bass and treble)  which are almost always implemented as shelf types. The filters specify a shelving frequency and gain or attenuation value.
 
 ## Controls
 **Cutoff** knob controls the shelving frequency of the filters.

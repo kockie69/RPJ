@@ -3,6 +3,12 @@
 #include "ctrl/RPJButtons.hpp"
 #include "ctrl/RPJKnobs.hpp"
 
+
+std::string EstoniaAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
+		"ButterLPF2", "ButterHPF2", "ButterBPF2", "ButterBSF2", "MMALPF2", "MMALPF2B", "LowShelf",
+		"HiShelf", "NCQParaEQ", "CQParaEQ", "LWRLPF2", "LWRHPF2", "APF1", "APF2", "ResonA", "ResonB",
+		"MatchLP2A", "MatchLP2B", "MatchBP2A", "MatchBP2B", "ImpInvLP1", "ImpInvLP2" };
+
 Estonia::Estonia() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
@@ -14,12 +20,36 @@ Estonia::Estonia() {
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kLowShelf;
-	audioFilter.reset(APP->engine->getSampleRate());
+	strAlgorithm = "LowShelf";
+	for (int i = 0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
 }
 
 void Estonia::onSampleRateChange() {
-	audioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
 }
+
+void Estonia::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioFilter[c/4].setParameters(afp);
+			output = audioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
+}
+
 
 void Estonia::process(const ProcessArgs &args) {
 
@@ -27,8 +57,7 @@ void Estonia::process(const ProcessArgs &args) {
 		afp.algorithm = filterAlgorithm::kHiShelf;	
 	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
 		afp.algorithm = filterAlgorithm::kLowShelf;
-	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-	audioFilter.setParameters(afp);
+	strAlgorithm = EstoniaAlgorithmTxt[static_cast<int>(afp.algorithm)];
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
 	
@@ -38,11 +67,7 @@ void Estonia::process(const ProcessArgs &args) {
 		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * cvb;
 	
-		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-		audioFilter.setParameters(afp);
-		
-		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
 
@@ -58,7 +83,7 @@ struct EstoniaModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
+			EstoniaFilterNameDisplay * fnd = new EstoniaFilterNameDisplay(Vec(39,30));
 			fnd->module = module;
 			addChild(fnd);
 		}
@@ -73,7 +98,6 @@ struct EstoniaModuleWidget : ModuleWidget {
 		addParam(createParam<RPJKnob>(Vec(8, 173), module, Estonia::PARAM_BOOSTCUT_DB));
 		addInput(createInput<PJ301MPort>(Vec(55, 175), module, Estonia::INPUT_CVB));	
 	}
-
 };
 
 json_t *Estonia::dataToJson() {

@@ -1,9 +1,9 @@
 #include "BiQuad.hpp"
 
-bool Biquad::checkFloatUnderflow(double& value)
+bool Biquad::checkFloatUnderflow(rack::simd::float_4& value)
 {
 	bool retValue = false;
-	if (value > 0.0 && value < kSmallestPositiveFloatValue)
+	/*if (value > 0.0 && value < kSmallestPositiveFloatValue)
 	{
 		value = 0;
 		retValue = true;
@@ -12,6 +12,17 @@ bool Biquad::checkFloatUnderflow(double& value)
 	{
 		value = 0;
 		retValue = true;
+	}*/
+	for (int i=0;i<4;i++) {
+		if (value[i] > 0.0 && value[i] < kSmallestPositiveFloatValue) {
+			value[i]=0;
+			retValue = true;
+		}
+		else if (value[i] < 0.0 && value[i] < kSmallestNegativeFloatValue)
+		{
+			value[i]=0;
+			retValue = true;
+		}
 	}
 	return retValue;
 }
@@ -39,7 +50,7 @@ double* Biquad::getCoefficients() {
 	return &coeffArray[0];
 }
 
-double* Biquad::getStateArray() {
+rack::simd::float_4* Biquad::getStateArray() {
 	// --- read/write access to the array (used only in direct form oscillator)
 	return &stateArray[0];
 }
@@ -53,10 +64,10 @@ double Biquad::getG_value() {
     return coeffArray[a0]; 
 }
 
-double Biquad::processAudioSample(double xn) {
+rack::simd::float_4 Biquad::processAudioSample(rack::simd::float_4 xn) {
 	if (parameters.biquadCalcType  == biquadAlgorithm::kDirect) {
 		// --- 1)  form output y(n) = a0*x(n) + a1*x(n-1) + a2*x(n-2) - b1*y(n-1) - b2*y(n-2)
-		double yn = coeffArray[a0] * xn + 
+		rack::simd::float_4 yn = coeffArray[a0] * xn + 
 					coeffArray[a1] * stateArray[x_z1] +
 					coeffArray[a2] * stateArray[x_z2] -
 					coeffArray[b1] * stateArray[y_z1] -
@@ -79,10 +90,10 @@ double Biquad::processAudioSample(double xn) {
 		// --- 1)  form output y(n) = a0*w(n) + m_f_a1*stateArray[x_z1] + m_f_a2*stateArray[x_z2][x_z2];
 		//
 		// --- w(n) = x(n) - b1*stateArray[x_z1] - b2*stateArray[x_z2]
-		double wn = xn - coeffArray[b1] * stateArray[x_z1] - coeffArray[b2] * stateArray[x_z2];
+		rack::simd::float_4 wn = xn - coeffArray[b1] * stateArray[x_z1] - coeffArray[b2] * stateArray[x_z2];
 
 		// --- y(n):
-		double yn = coeffArray[a0] * wn + coeffArray[a1] * stateArray[x_z1] + coeffArray[a2] * stateArray[x_z2];
+		rack::simd::float_4 yn = coeffArray[a0] * wn + coeffArray[a1] * stateArray[x_z1] + coeffArray[a2] * stateArray[x_z2];
 
 		// --- 2) underflow check
 		checkFloatUnderflow(yn);
@@ -99,10 +110,10 @@ double Biquad::processAudioSample(double xn) {
 		// --- 1)  form output y(n) = a0*w(n) + stateArray[x_z1]
 		//
 		// --- w(n) = x(n) + stateArray[y_z1]
-		double wn = xn + stateArray[y_z1];
+		rack::simd::float_4 wn = xn + stateArray[y_z1];
 
 		// --- y(n) = a0*w(n) + stateArray[x_z1]
-		double yn = coeffArray[a0] * wn + stateArray[x_z1];
+		rack::simd::float_4 yn = coeffArray[a0] * wn + stateArray[x_z1];
 
 		// --- 2) underflow check
 		checkFloatUnderflow(yn);
@@ -120,7 +131,7 @@ double Biquad::processAudioSample(double xn) {
 	else if (parameters.biquadCalcType == biquadAlgorithm::kTransposeCanonical)
 	{
 		// --- 1)  form output y(n) = a0*x(n) + stateArray[x_z1]
-		double yn = coeffArray[a0] * xn + stateArray[x_z1];
+		rack::simd::float_4 yn = coeffArray[a0] * xn + stateArray[x_z1];
 
 		// --- 2) underflow check
 		checkFloatUnderflow(yn);

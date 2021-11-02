@@ -1,7 +1,7 @@
 # The Web / Second order Butterworth LPF/HPF/BPF/BSF filter <a name="theweb"></a>
 ![theweb image](./theweb.png)
 
-The Web is a second order Butterworth Low-pass, High-pass, Band-pass and Band-stop filter. Butterworth LPFs and HPFs are specialized versions of the ordinary 2nd order HPF. Their Q values are  fixed at 0.707, which is the largest value it can assume before peaking in the frequency response is observed.  The frequency responses are essentially identical to the general 2nd order filters with a Q of 0.707. 
+The Web is a Polyphonic second order Butterworth Low-pass, High-pass, Band-pass and Band-stop filter. Butterworth LPFs and HPFs are specialized versions of the ordinary 2nd order HPF. Their Q values are  fixed at 0.707, which is the largest value it can assume before peaking in the frequency response is observed.  The frequency responses are essentially identical to the general 2nd order filters with a Q of 0.707. 
 
 Butterworth BPFs and BSFs have an adjustable bandwidth that is related to Q. The frequency  responses are essentially identical to the general 2nd order BPFs and BSFs. 
 

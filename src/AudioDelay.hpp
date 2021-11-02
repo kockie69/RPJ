@@ -27,7 +27,7 @@ public:
 
 
 	/** read an arbitrary location that includes a fractional sample */
-	T readBuffer(double );
+	T readBuffer(rack::simd::float_4 );
 
 	/** enable or disable interpolation; usually used for diagnostics or in algorithms that require strict integer samples times */
 	void setInterpolate(bool );
@@ -82,7 +82,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double);
+	virtual rack::simd::float_4 processAudioSample(double);
 	
 	/** return true: this object can also process frames */
 	virtual bool canProcessAudioFrame();
@@ -125,9 +125,9 @@ private:
 	bool enableLPF, enableHPF = true;
 
 	// --- delay buffer of doubles
-	CircularBuffer<double> delayBuffer_L;	///< LEFT delay buffer of doubles
-	CircularBuffer<double> delayBuffer_C;	///< LEFT delay buffer of doubles
-	CircularBuffer<double> delayBuffer_R;	///< RIGHT delay buffer of doubles
+	CircularBuffer<rack::simd::float_4> delayBuffer_L;	///< LEFT delay buffer of doubles
+	CircularBuffer<rack::simd::float_4> delayBuffer_C;	///< LEFT delay buffer of doubles
+	CircularBuffer<rack::simd::float_4> delayBuffer_R;	///< RIGHT delay buffer of doubles
 
 	AudioFilter LPFaudioFilter;
 	AudioFilter HPFaudioFilter;

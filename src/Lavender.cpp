@@ -17,10 +17,12 @@ Lavender::Lavender() {
 	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
 	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
-	BPFaudioFilter.reset(APP->engine->getSampleRate());
-	BSFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		BPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		BSFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	LPFafp.algorithm=filterAlgorithm::kLPF2;
 	HPFafp.algorithm=filterAlgorithm::kHPF2;
 	BPFafp.algorithm=filterAlgorithm::kBPF2;
@@ -29,10 +31,52 @@ Lavender::Lavender() {
 }
 
 void Lavender::onSampleRateChange() {
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Lavender::processChannel(Input& in, Output& lpfOut, Output& hpfOut, Output& bpfOut, Output& bsfOut) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+	}
+	
+	simd::float_4 output;
+	lpfOut.setChannels(channels);
+	hpfOut.setChannels(channels);
+	bpfOut.setChannels(channels);
+	bsfOut.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (lpfOut.isConnected()) {
+			LPFaudioFilter[c/4].setParameters(LPFafp);
+			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(lpfOut.getVoltages(c));
+		}
+		if (hpfOut.isConnected()) {
+			HPFaudioFilter[c/4].setParameters(HPFafp);
+			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(hpfOut.getVoltages(c));
+		}
+		if (bpfOut.isConnected()) {
+			BPFaudioFilter[c/4].setParameters(BPFafp);
+			output = BPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bpfOut.getVoltages(c));
+		}
+		if (bsfOut.isConnected()) {
+			BSFaudioFilter[c/4].setParameters(BSFafp);
+			output = BSFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bsfOut.getVoltages(c));
+		}
+	}
 }
 
 void Lavender::process(const ProcessArgs &args) {
@@ -52,26 +96,7 @@ void Lavender::process(const ProcessArgs &args) {
 		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
 		LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
 
-		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setParameters(LPFafp);
-			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
-			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
-		}
-		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setParameters(HPFafp);
-			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-		}
-		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
-			BPFaudioFilter.setParameters(BPFafp);
-			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
-		}
-		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
-			BSFaudioFilter.setParameters(BSFafp);
-			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
-		}
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
 	}
 }
 

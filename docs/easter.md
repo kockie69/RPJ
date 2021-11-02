@@ -1,7 +1,7 @@
 # Easter / Resonance filter <a name="easter"></a>
 ![easter image](./easter.png)
 
-Easter is a resonance filter module that delivers 2 different resonators. A resonator is a Band pass filter (BPF) that can be made to have a very narrow peak. 
+Easter is a Polyphonic resonance filter module that delivers 2 different resonators. A resonator is a Band pass filter (BPF) that can be made to have a very narrow peak. 
 
 One of the resonators delivered is a standard type (ResonA) and the other is a Smith-Angell resonator (ResonB). 
 
