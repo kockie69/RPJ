@@ -9,6 +9,8 @@ const char *JSON_DELAY_ALGORITHM_KEY="Algorithm";
 const char *JSON_ENABLE_LPF_KEY="LPF";
 const char *JSON_ENABLE_HPF_KEY="HPF";
 
+std::string delayAlgorithmTxt[static_cast<int>(delayAlgorithm::numDelayAlgorithms)] = { "Normal", "PingPong", "LCRDelay", "TapDelay"};
+
 struct CircularRide : Module {
 
 	enum ParamIds {
@@ -47,13 +49,15 @@ struct CircularRide : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
+		void processChannel(Input&, Input&, Output&, Output&);
 		void onSampleRateChange() override;
 
         dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioDelayParameters adp;
-		AudioDelay audioDelay;
+		AudioDelay audioDelay[4];
 		bool enableLPF = true;
 		bool enableHPF = true;
+		std::string strAlgorithm;
 };
 
 struct DetectAlgorithmQuantity : public rack::engine::ParamQuantity {

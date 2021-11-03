@@ -51,7 +51,6 @@ struct AudioDelayParameters
 	
 	// --- individual parameters
 	delayAlgorithm algorithm; ///< delay algorithm
-	std::string strAlgorithm;
 
 	double wetLevel_dB;	///< wet output level in dB
 	double dryLevel_dB;	///< dry output level in dB
@@ -82,14 +81,14 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual rack::simd::float_4 processAudioSample(double);
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4);
 	
 	/** return true: this object can also process frames */
 	virtual bool canProcessAudioFrame();
 
 	/** process STEREO audio delay in frames */
-	virtual bool processAudioFrame(const float* ,		/* ptr to one frame of data: pInputFrame[0] = left, pInputFrame[1] = right, etc...*/
-		float* ,
+	virtual bool processAudioFrame(rack::simd::float_4* ,		/* ptr to one frame of data: pInputFrame[0] = left, pInputFrame[1] = right, etc...*/
+		rack::simd::float_4* ,
 		uint32_t ,
 		uint32_t );
 

@@ -19,12 +19,42 @@ CircularRide::CircularRide() {
     configParam(PARAM_TYPE, 0.f, 1.f,0.f, "Delay Update Type");
 	configParam(PARAM_LPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_HPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
-	audioDelay.reset(APP->engine->getSampleRate());
-    audioDelay.createDelayBuffers(APP->engine->getSampleRate(),2000);
+	for (int i=0;i<4;i++) {
+		audioDelay[i].reset(APP->engine->getSampleRate());
+		audioDelay[i].createDelayBuffers(APP->engine->getSampleRate(),2000);
+	}
+	strAlgorithm = "Normal";
 }
 
 void CircularRide::onSampleRateChange() {
-	audioDelay.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		audioDelay[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void CircularRide::processChannel(Input& inl, Input& inr, Output& outl, Output& outr) {
+		
+	// Get input
+	int channels = std::max(inl.getChannels(), inr.getChannels());
+	rack::simd::float_4 xnL,xnR;
+	rack::simd::float_4 i[2];
+    rack::simd::float_4 o[2] = {0.0, 0.0};
+	outl.setChannels(channels);
+	outr.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		if (outl.isConnected() || outr.isConnected()) {
+			audioDelay[c/4].setParameters(adp);
+			xnL = simd::float_4::load(inl.getVoltages(c));
+    		xnR = simd::float_4::load(inr.getVoltages(c));
+			i[0] = xnL;
+			i[1] = xnR;
+			audioDelay[c/4].processAudioFrame(i,o,2,2);
+
+			o[0].store(outl.getVoltages(c));
+			o[1].store(outr.getVoltages(c));
+		}
+	}
 }
 
 void CircularRide::process(const ProcessArgs &args) {
@@ -37,11 +67,9 @@ void CircularRide::process(const ProcessArgs &args) {
 		if (static_cast<int>(adp.algorithm) - 1 >= 0)
 			adp.algorithm = static_cast<delayAlgorithm>(static_cast<int>(adp.algorithm) - 1);
 	
-	adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
-	audioDelay.setParameters(adp);
+	strAlgorithm = delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
 	
 	if ((outputs[OUTPUT_LEFT].isConnected() || outputs[OUTPUT_RIGHT].isConnected()) && (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected())) {
-		adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
         adp.delayRatio_Pct = params[PARAM_RATIO].getValue();;
         adp.dryLevel_dB = params[PARAM_DRY].getValue();
 		adp.feedback_Pct  = params[PARAM_FEEDBACK].getValue();
@@ -54,18 +82,8 @@ void CircularRide::process(const ProcessArgs &args) {
 		adp.hpfFc = params[PARAM_HPFFC].getValue();
 		adp.useLPF = enableLPF;
 		adp.useHPF = enableHPF;
-		audioDelay.setParameters(adp);
 
-        float xnL = inputs[INPUT_LEFT].getVoltage();
-        float xnR = inputs[INPUT_RIGHT].getVoltage();
-
-        float i[2] = {xnL, xnR};
-        float o[2] = {0.0, 0.0};
-
-		audioDelay.processAudioFrame(i,o,2,2);
-
-		outputs[OUTPUT_LEFT].setVoltage(o[0]);
-        outputs[OUTPUT_RIGHT].setVoltage(o[1]);
+		processChannel(inputs[INPUT_LEFT], inputs[INPUT_RIGHT],outputs[OUTPUT_LEFT], outputs[OUTPUT_RIGHT] );
 	}
 }
 
@@ -162,7 +180,7 @@ void AlgorithmDisplay::drawLayer(const DrawArgs &args,int layer) {
 
 		if (module == NULL) return;
 
-		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioDelay.getParameters().strAlgorithm[0]);
+		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
 		TransparentWidget::draw(args);
 		drawBackground(args);

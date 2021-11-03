@@ -43,7 +43,7 @@ bool AudioDelay::reset(double _sampleRate)
 	return true;
 }
 
-rack::simd::float_4 AudioDelay::processAudioSample(double xn)
+rack::simd::float_4 AudioDelay::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- read delay
 	rack::simd::float_4 yn = delayBuffer_L.readBuffer(delayInSamples_L);
@@ -64,12 +64,12 @@ rack::simd::float_4 AudioDelay::processAudioSample(double xn)
 bool AudioDelay::canProcessAudioFrame() { return true; }
 
 /** process STEREO audio delay in frames */
-bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame of data: pInputFrame[0] = left, pInputFrame[1] = right, etc...*/
-	float* outputFrame,
+bool AudioDelay::processAudioFrame(rack::simd::float_4* inputFrame,		/* ptr to one frame of data: pInputFrame[0] = left, pInputFrame[1] = right, etc...*/
+	rack::simd::float_4* outputFrame,
 	uint32_t inputChannels,
 	uint32_t outputChannels)
 {
-/*	// --- make sure we have input and outputs
+	// --- make sure we have input and outputs
 	if (inputChannels == 0 || outputChannels == 0)
 		return false;
 
@@ -84,7 +84,7 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	if (outputChannels == 1)
 	{
 		// --- process left channel only
-		outputFrame[0] = (float)processAudioSample(inputFrame[0]);
+		outputFrame[0] = processAudioSample(inputFrame[0]);
 		return true;
 	}
 
@@ -93,26 +93,26 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	// --- pick up inputs
 	//
 	// --- LEFT channel
-	double outputL, outputR;
-	double xnL = inputFrame[0];
+	rack::simd::float_4 outputL, outputR;
+	rack::simd::float_4 xnL = inputFrame[0];
 
 	// --- RIGHT channel (duplicate left input if mono-in)
-	double xnR = inputChannels > 1 ? inputFrame[1] : xnL;
+	rack::simd::float_4 xnR = inputChannels > 1 ? inputFrame[1] : xnL;
 
 	// --- read delay LEFT
-	double ynL = delayBuffer_L.readBuffer(delayInSamples_L);
+	rack::simd::float_4 ynL = delayBuffer_L.readBuffer(delayInSamples_L);
 
 	// --- read delay LEFT
-	double ynC = delayBuffer_C.readBuffer(delayInSamples_C);
+	rack::simd::float_4 ynC = delayBuffer_C.readBuffer(delayInSamples_C);
 
 	// --- read delay RIGHT
-	double ynR = delayBuffer_R.readBuffer(delayInSamples_R);
+	rack::simd::float_4 ynR = delayBuffer_R.readBuffer(delayInSamples_R);
 
 	// --- create input for delay buffer with LEFT channel info
-	double dnL = xnL + (parameters.feedback_Pct / 100.0) * ynL;
+	rack::simd::float_4 dnL = xnL + (parameters.feedback_Pct / 100.0) * ynL;
 
 	// --- create input for delay buffer with RIGHT channel info
-	double dnR = xnR + (parameters.feedback_Pct / 100.0) * ynR;
+	rack::simd::float_4 dnR = xnR + (parameters.feedback_Pct / 100.0) * ynR;
 
 	// --- decode
 	if (parameters.algorithm == delayAlgorithm::kNormal)
@@ -203,11 +203,11 @@ bool AudioDelay::processAudioFrame(const float* inputFrame,		/* ptr to one frame
 	}
 
 	// --- set left channel
-	outputFrame[0] = (float)outputL;
+	outputFrame[0] = outputL;
 
 	// --- set right channel
-	outputFrame[1] = (float)outputR;
-*/
+	outputFrame[1] = outputR;
+
 	return true;
 }
 
@@ -281,7 +281,6 @@ void AudioDelay::createDelayBuffers(double _sampleRate, double _bufferLength_mSe
 
 AudioDelayParameters::AudioDelayParameters() {
 	algorithm = delayAlgorithm::kNormal; ///< delay algorithm
-	strAlgorithm = "Normal";
 
 	wetLevel_dB = -3.0;	///< wet output level in dB
 	dryLevel_dB = -3.0;	///< dry output level in dB

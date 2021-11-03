@@ -101,7 +101,7 @@
       "slug": "CircularRide",
       "name": "CircularRide",
       "description": "Stereo Delay",
-      "tags": ["Delay"]
+      "tags": ["Delay","Polyphonic"]
     },
     {
       "slug": "DrillingHoles",

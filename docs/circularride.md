@@ -1,7 +1,7 @@
 # Circularride / Audio dtetector <a name="circularride"></a>
 ![circularride image](./circularride.png)
 
-Circularride is a Stereo Delay with at the moment 3 delay algorithms (more to come). The algorithms can be selected using the small buttons next to the display at the top. The maximum delay time for the module is sat at 2 seconds and the user can adjust the delay time, feedback, and wet/dry mix. 
+Circularride is a Polyphonic Stereo Delay with at the moment 4 delay algorithms (more to come). The algorithms can be selected using the small buttons next to the display at the top. The maximum delay time for the module is sat at 2 seconds and the user can adjust the delay time, feedback, and wet/dry mix. 
 
 The supported algorithms (at the moment) are:
 **Normal**, this is a stereo delay which has 2 digital delay lines (DDL). This stereo delay with feedback simply combines two DDLs with wet/dry mix capabilities along with  a single feedback control that governs both left and right feedback values. The knobs that are active in this mode are **Left** and **Right** for setting the delay times, **feedback** (which controls both left and right) and **dry** and **wet** (also controls left and right). 
