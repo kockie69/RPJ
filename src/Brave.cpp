@@ -52,7 +52,8 @@ void Brave::process(const ProcessArgs &args) {
 		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
 		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() *cvb;
-
+		afp.bqa = bqa;
+		
 		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
