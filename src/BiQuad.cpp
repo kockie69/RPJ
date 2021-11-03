@@ -1,30 +1,13 @@
 #include "BiQuad.hpp"
 
+using rack::simd::ifelse;
+
 bool Biquad::checkFloatUnderflow(rack::simd::float_4& value)
 {
 	bool retValue = false;
-	/*if (value > 0.0 && value < kSmallestPositiveFloatValue)
-	{
-		value = 0;
-		retValue = true;
-	}
-	else if (value < 0.0 && value > kSmallestNegativeFloatValue)
-	{
-		value = 0;
-		retValue = true;
-	}*/
-	for (int i=0;i<4;i++) {
-		if (value[i] > 0.0 && value[i] < kSmallestPositiveFloatValue) {
-			value[i]=0;
-			retValue = true;
-		}
-		else if (value[i] < 0.0 && value[i] < kSmallestNegativeFloatValue)
-		{
-			value[i]=0;
-			retValue = true;
-		}
-	}
-	return retValue;
+	rack::simd::float_4 tmpValue = ifelse(value > 0.f, ifelse(value < kSmallestPositiveFloatValue,0.f,value), ifelse(value > kSmallestNegativeFloatValue,0.f,value));
+	value = tmpValue;
+	return retValue = !(bool)rack::simd::movemask(value);
 }
 
 
