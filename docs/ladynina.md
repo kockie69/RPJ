@@ -5,6 +5,8 @@ Zavalishin (2012) proposed a bunch of new filter algorithms in the excellent (an
 
 Lady Nina is simulating the analog state Variable filter  (SVF). This well-studied topology is a multi-filter design that produces 2nd order LPF, HPF, BPF, and  BSF responses from one topology, and there are numerous analog circuit variations. The digital version  is sometimes called the “Chamberlin Filter” due to its appearance in Chamberlin’s seminal book  Musical Applications of Microprocessors from 1985.
 
+Lady Nina is now Polyphonic, just like most of our modules.
+
 ## Controls
 The **Cutoff** knob controls the cutoff frequency of the filters.
 

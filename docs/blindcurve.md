@@ -1,7 +1,7 @@
 # Blindcurve / Audio dtetector <a name="blindcurve"></a>
 ![blindcurve image](./blindcurve.png)
 
-Blindcurve is an audio- or envelope detector. An envelope detector is sometimes referred to as an envelope follower in musical environments. It is used to detect the amplitude variations of an incoming signal to produce a control signal that resembles those variations. Blindcurve lets you control the  attack or rise time and decay or release time properties. 
+Blindcurve is a Polyphonic audio- or envelope detector. An envelope detector is sometimes referred to as an envelope follower in musical environments. It is used to detect the amplitude variations of an incoming signal to produce a control signal that resembles those variations. Blindcurve lets you control the  attack or rise time and decay or release time properties. 
 
 In some audio processing processes, such as signal compressor or automatic wah effect, the characteristic of attack/rise time and decay/release time might produce some benefits and need to be controlled to produce various unique results.
 

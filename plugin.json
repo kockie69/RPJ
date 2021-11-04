@@ -71,7 +71,7 @@
       "slug": "LadyNina",
       "name": "LadyNina",
       "description": "LadyNina is a 2nd order SFV (LPF, HPF, BPF, BSF)",
-      "tags": ["VCF"]
+      "tags": ["VCF","Polyphonic"]
     },
     {
       "slug": "SugarMice",
@@ -89,13 +89,13 @@
       "slug": "BlindCurve",
       "name": "BlindCurve",
       "description": "Audio Detector",
-      "tags": ["Envelope Follower"]
+      "tags": ["Envelope Follower","Polyphonic"]
     },
     {
       "slug": "Gaza",
       "name": "Gaza",
       "description": "Envelope Follower",
-      "tags": ["Envelope Follower"]
+      "tags": ["Envelope Follower","Polyphonic"]
     },
     {
       "slug": "CircularRide",
