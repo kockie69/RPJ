@@ -370,7 +370,7 @@ template <typename T>
 T CircularBuffer<T>::readBuffer(rack::simd::float_4 delayInFractionalSamples)
 {
 	// --- truncate delayInFractionalSamples and read the int part
-	T y1 = readBuffer((int)delayInFractionalSamples);
+	T y1 = readBuffer(delayInFractionalSamples);
 
 	// --- if no interpolation, just return value
 	if (!interpolate) return y1;
@@ -378,7 +378,7 @@ T CircularBuffer<T>::readBuffer(rack::simd::float_4 delayInFractionalSamples)
 	// --- else do interpolation
 	//
 	// --- read the sample at n+1 (one sample OLDER)
-	T y2 = readBuffer((int)delayInFractionalSamples + 1);
+	T y2 = readBuffer(delayInFractionalSamples + 1);
 
 	// --- get fractional part
 	double fraction = delayInFractionalSamples - (int)delayInFractionalSamples;
