@@ -76,7 +76,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 
 protected:

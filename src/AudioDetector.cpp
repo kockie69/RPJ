@@ -9,20 +9,12 @@
 \param value - the value to check for underflow
 \return true if overflowed, false otherwise
 */
-inline bool checkFloatUnderflow(double& value)
+inline bool checkFloatUnderflow(rack::simd::float_4& value)
 {
 	bool retValue = false;
-	if (value > 0.0 && value < kSmallestPositiveFloatValue)
-	{
-		value = 0;
-		retValue = true;
-	}
-	else if (value < 0.0 && value > kSmallestNegativeFloatValue)
-	{
-		value = 0;
-		retValue = true;
-	}
-	return retValue;
+	rack::simd::float_4 tmpValue = ifelse(value > 0.f, ifelse(value < kSmallestPositiveFloatValue,0.f,value), ifelse(value > kSmallestNegativeFloatValue,0.f,value));
+	value = tmpValue;
+	return retValue = !(bool)rack::simd::movemask(value);
 }
 
 /**
@@ -83,10 +75,10 @@ bool AudioDetector::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double AudioDetector::processAudioSample(double xn)
+rack::simd::float_4 AudioDetector::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- all modes do Full Wave Rectification
-	double input = fabs(xn);
+	rack::simd::float_4 input = rack::simd::fabs(xn);
 
 	// --- square it for MS and RMS
 	if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_MS ||
@@ -94,13 +86,10 @@ double AudioDetector::processAudioSample(double xn)
 		input *= input;
 
 	// --- to store current
-	double currEnvelope = 0.0;
+	rack::simd::float_4 currEnvelope = 0.0;
 
 	// --- do the detection with attack or release applied
-	if (input > lastEnvelope)
-		currEnvelope = attackTime * (lastEnvelope - input) + input;
-	else
-		currEnvelope = releaseTime * (lastEnvelope - input) + input;
+	currEnvelope = rack::simd::ifelse(input > lastEnvelope,attackTime * (lastEnvelope - input) + input,releaseTime * (lastEnvelope - input) + input);
 
 	// --- we are recursive so need to check underflow
 	checkFloatUnderflow(currEnvelope);
@@ -124,7 +113,8 @@ double AudioDetector::processAudioSample(double xn)
 		return currEnvelope;
 
 	// --- setup for log( )
-	if (currEnvelope <= 0)
+	rack::simd::float_4 mask = rack::simd::operator<=(currEnvelope,0.f);
+	if ((bool)rack::simd::movemask(mask))
 	{
 		return -96.0;
 	}

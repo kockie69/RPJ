@@ -22,7 +22,7 @@ inline double sgn(double xn)
 \param saturation  - the saturation control
 \return the waveshaped output value
 */
-inline double softClipWaveShaper(double xn, double saturation)
+inline rack::simd::float_4 softClipWaveShaper(rack::simd::float_4 xn, double saturation)
 {
 	// --- un-normalized soft clipper from Reiss book
 	return sgn(xn)*(1.0 - exp(-fabs(saturation*xn)));
@@ -160,7 +160,9 @@ ZVAFilterParameters ZVAFilter::getParameters()
 */
 void ZVAFilter::setParameters(const ZVAFilterParameters& params)
 {
-	if (params.fc != zvaFilterParameters.fc ||
+	rack::simd::float_4 mask = rack::simd::operator!=(params.fc,zvaFilterParameters.fc);
+
+	if ((bool)rack::simd::movemask(mask) ||
 		params.Q != zvaFilterParameters.Q ||
 		params.selfOscillate != zvaFilterParameters.selfOscillate ||
 		params.matchAnalogNyquistLPF != zvaFilterParameters.matchAnalogNyquistLPF)
@@ -180,7 +182,7 @@ bool ZVAFilter::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double ZVAFilter::processAudioSample(double xn)
+rack::simd::float_4 ZVAFilter::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- with gain comp enabled, we reduce the input by
 	//     half the gain in dB at resonant peak
@@ -204,10 +206,10 @@ double ZVAFilter::processAudioSample(double xn)
 		filterAlgorithm == vaFilterAlgorithm::kAPF1)
 	{
 		// --- create vn node
-		double vn = (xn - integrator_z[0])*alpha;
+		rack::simd::float_4 vn = (xn - integrator_z[0])*alpha;
 
 		// --- form LP output
-		double lpf = ((xn - integrator_z[0])*alpha) + integrator_z[0];
+		rack::simd::float_4 lpf = ((xn - integrator_z[0])*alpha) + integrator_z[0];
 
 		// double sn = integrator_z[0];
 
@@ -215,10 +217,10 @@ double ZVAFilter::processAudioSample(double xn)
 		integrator_z[0] = vn + lpf;
 
 		// --- form the HPF = INPUT = LPF
-		double hpf = xn - lpf;
+		rack::simd::float_4 hpf = xn - lpf;
 
 		// --- form the APF = LPF - HPF
-		double apf = lpf - hpf;
+		rack::simd::float_4 apf = lpf - hpf;
 
 		// --- set the outputs
 		if (filterAlgorithm == vaFilterAlgorithm::kLPF1)
@@ -239,21 +241,21 @@ double ZVAFilter::processAudioSample(double xn)
 	}
 
 	// --- form the HP output first
-	double hpf = alpha0*(xn - rho*integrator_z[0] - integrator_z[1]);
+	rack::simd::float_4 hpf = alpha0*(xn - rho*integrator_z[0] - integrator_z[1]);
 
 	// --- BPF Out
-	double bpf = alpha*hpf + integrator_z[0];
+	rack::simd::float_4 bpf = alpha*hpf + integrator_z[0];
 	if (zvaFilterParameters.enableNLP)
 		bpf = softClipWaveShaper(bpf, 1.0);
 
 	// --- LPF Out
-	double lpf = alpha*bpf + integrator_z[1];
+	rack::simd::float_4 lpf = alpha*bpf + integrator_z[1];
 
 	// --- BSF Out
-	double bsf = hpf + lpf;
+	rack::simd::float_4 bsf = hpf + lpf;
 
 	// --- finite gain at Nyquist; slight error at VHF
-	double sn = integrator_z[0];
+	rack::simd::float_4 sn = integrator_z[0];
 
 	// update memory
 	integrator_z[0] = alpha*hpf + bpf;
@@ -282,16 +284,16 @@ double ZVAFilter::processAudioSample(double xn)
 /** recalculate the filter coefficients*/
 void ZVAFilter::calculateFilterCoeffs()
 {
-	double fc = zvaFilterParameters.fc;
+	rack::simd::float_4 fc = zvaFilterParameters.fc;
 	double Q = zvaFilterParameters.Q;
 	vaFilterAlgorithm filterAlgorithm = zvaFilterParameters.filterAlgorithm;
 
 	// --- normal Zavalishin SVF calculations here
 	//     prewarp the cutoff- these are bilinear-transform filters
-	double wd = 2*M_PI*fc;
+	rack::simd::float_4 wd = 2*M_PI*fc;
 	double T = 1.0 / sampleRate;
-	double wa = (2.0 / T)*tan(wd*T / 2.0);
-	double g = wa*T / 2.0;
+	rack::simd::float_4 wa = (2.0 / T)*tan(wd*T / 2.0);
+	rack::simd::float_4 g = wa*T / 2.0;
 
 	// --- for 1st order filters:
 	if (filterAlgorithm == vaFilterAlgorithm::kLPF1 ||
@@ -310,7 +312,7 @@ void ZVAFilter::calculateFilterCoeffs()
 		rho = 2.0*R + g;
 
 		// --- sigma for analog matching version
-		double f_o = (sampleRate / 2.0) / fc;
+		rack::simd::float_4 f_o = (sampleRate / 2.0) / fc;
 		analogMatchSigma = 1.0 / (alpha*f_o*f_o);
 	}
 }

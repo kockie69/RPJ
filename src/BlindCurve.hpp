@@ -29,8 +29,9 @@ struct BlindCurve : Module {
 	};
 		BlindCurve();
 		void onSampleRateChange() override;
-		AudioDetector audioDetector;
+		AudioDetector audioDetector[4];
 		void process(const ProcessArgs &) override;
+		void processChannel(Input&, Output&);
 		AudioDetectorParameters adp;
 };
 

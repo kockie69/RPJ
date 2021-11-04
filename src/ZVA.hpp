@@ -103,7 +103,7 @@ struct ZVAFilterParameters
 
 	// --- individual parameters
 	vaFilterAlgorithm filterAlgorithm = vaFilterAlgorithm::kSVF_LP;	///< va filter algorithm
-	double fc = 1000.0;						///< va filter fc
+	rack::simd::float_4 fc = 1000.0;						///< va filter fc
 	double Q = 0.707;						///< va filter Q
 	double filterOutputGain_dB = 0.0;		///< va filter gain (normally unused)
 	bool enableGainComp = false;			///< enable gain compensation (see book)
@@ -158,7 +158,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 	/** recalculate the filter coefficients*/
 	void calculateFilterCoeffs();
 
@@ -173,15 +173,15 @@ protected:
 	double sampleRate = APP->engine->getSampleRate();				///< current sample rate
 
 	// --- state storage
-	double integrator_z[2];						///< state variables
+	rack::simd::float_4 integrator_z[2];						///< state variables
 
 	// --- filter coefficients
-	double alpha0 = 0.0;		///< input scalar, correct delay-free loop
-	double alpha = 0.0;			///< alpha is (wcT/2)
-	double rho = 0.0;			///< p = 2R + g (feedback)
+	rack::simd::float_4 alpha0 = 0.0;		///< input scalar, correct delay-free loop
+	rack::simd::float_4 alpha = 0.0;			///< alpha is (wcT/2)
+	rack::simd::float_4 rho = 0.0;			///< p = 2R + g (feedback)
 
 	double beta = 0.0;			///< beta value, not used
 
 	// --- for analog Nyquist matching
-	double analogMatchSigma = 0.0; ///< analog matching Sigma value (see book)
+	rack::simd::float_4 analogMatchSigma = 0.0; ///< analog matching Sigma value (see book)
 };

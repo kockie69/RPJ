@@ -1,12 +1,12 @@
 #include "EnvelopeFollower.hpp"
 
-inline void boundValue(double& value, double minValue, double maxValue)
+inline void boundValue(rack::simd::float_4& value, double minValue, double maxValue)
 {
 	value = fmin(value, maxValue);
 	value = fmax(value, minValue);
 }
 
-inline double doUnipolarModulationFromMin(double unipolarModulatorValue, double minValue, double maxValue)
+inline rack::simd::float_4 doUnipolarModulationFromMin(rack::simd::float_4 unipolarModulatorValue, double minValue, double maxValue)
 {
 	// --- UNIPOLAR bound
 	boundValue(unipolarModulatorValue, 0.0, 1.0);
@@ -100,24 +100,25 @@ bool EnvelopeFollower::canProcessAudioFrame() { return false; }
 \param xn input
 \return the processed sample
 */
-double EnvelopeFollower::processAudioSample(double xn)
+rack::simd::float_4 EnvelopeFollower::processAudioSample(rack::simd::float_4 xn)
 {
 	// --- calc threshold
 	double threshValue = pow(10.0, parameters.threshold_dB / 20.0);
 
 	// --- detect the signal
-	double detect_dB = detector.processAudioSample(xn);
-	double detectValue = pow(10.0, detect_dB / 20.0);
-	double deltaValue = detectValue - threshValue;
+	rack::simd::float_4 detect_dB = detector.processAudioSample(xn);
+	rack::simd::float_4 detectValue = rack::simd::pow(10.0, detect_dB / 20.0);
+	rack::simd::float_4 deltaValue = detectValue - threshValue;
 
 	ZVAFilterParameters filterParams = filter.getParameters();
 	filterParams.fc = parameters.fc;
 
 	// --- if above the threshold, modulate the filter fc
-	if (deltaValue > 0.0)// || delta_dB > 0.0)
+	rack::simd::float_4 mask = rack::simd::operator>(deltaValue,0.f);// || delta_dB > 0.0)
+	if (rack::simd::movemask(mask))
 	{
 		// --- fc Computer
-		double modulatorValue = 0.0;
+		rack::simd::float_4 modulatorValue = 0.0;
 
 		// --- best results are with linear values when detector is in dB mode
 		modulatorValue = (deltaValue * parameters.sensitivity);

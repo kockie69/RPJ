@@ -12,11 +12,33 @@ Gaza::Gaza() {
     configParam(PARAM_THRES, -20.f, 0.f,-6.f, "Threshold");
     configParam(PARAM_SENS, 0.5f, 5.f,1.f, "Sensitivity");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
-	envelopeFollower.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		envelopeFollower[i].reset(APP->engine->getSampleRate());
+	}
 }
 
 void Gaza::onSampleRateChange() {
-	envelopeFollower.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		envelopeFollower[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Gaza::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			envelopeFollower[c/4].setParameters(efp);
+			output = envelopeFollower[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void Gaza::process(const ProcessArgs &args) {
@@ -29,10 +51,9 @@ void Gaza::process(const ProcessArgs &args) {
         efp.Q = params[PARAM_Q].getValue();
         efp.sensitivity = params[PARAM_SENS].getValue();
         efp.threshold_dB = params[PARAM_THRES].getValue();
-		envelopeFollower.setParameters(efp);
-		float out = envelopeFollower.processAudioSample(inputs[INPUT_MAIN].getVoltage());
 		
-        outputs[OUTPUT_MAIN].setVoltage(out);
+		processChannel(inputs[INPUT_MAIN], outputs[OUTPUT_MAIN]);
+
 	}
 }
 

@@ -10,11 +10,33 @@ BlindCurve::BlindCurve() {
     configParam(PARAM_ATK, 1.f, 250.0f,20.f, "Attack"," mSec");
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
 	configParam<DetectModeQuantity>(PARAM_MODE, 0.f, 2.f, 0.f, "Detect Mode");
-	audioDetector.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		audioDetector[i].reset(APP->engine->getSampleRate());
+	}
 }
 
 void BlindCurve::onSampleRateChange() {
-	audioDetector.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		audioDetector[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void BlindCurve::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioDetector[c/4].setParameters(adp);
+			output = audioDetector[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void BlindCurve::process(const ProcessArgs &args) {
@@ -26,9 +48,8 @@ void BlindCurve::process(const ProcessArgs &args) {
 		adp.detectMode = static_cast<int>(params[PARAM_MODE].getValue());
 		adp.clampToUnityMax = true;
 		adp.detect_dB = false;
-		audioDetector.setParameters(adp);
-		float out = audioDetector.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		
+		processChannel(inputs[INPUT_MAIN], outputs[OUTPUT_MAIN]);
 	}
 }
 

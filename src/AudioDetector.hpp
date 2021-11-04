@@ -58,7 +58,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** get parameters: note use of custom structure for passing param data */
 	/**
@@ -80,7 +80,7 @@ protected:
 	double attackTime = 0.0;	///< attack time coefficient
 	double releaseTime = 0.0;	///< release time coefficient
 	double sampleRate = 44100;	///< stored sample rate
-	double lastEnvelope = 0.0;	///< output register
+	rack::simd::float_4 lastEnvelope = 0.0;	///< output register
 
 	/** set our internal atack time coefficients based on times and sample rate */
 	void setAttackTime(double, bool = false);

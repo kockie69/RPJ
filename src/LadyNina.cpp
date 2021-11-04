@@ -9,10 +9,12 @@ LadyNina::LadyNina() {
 	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB,  -20.f, 20.f, 0.f, "Boost/Cut"," dB");
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
-	BPFaudioFilter.reset(APP->engine->getSampleRate());
-	BSFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	LPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_LP;
 	HPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_HP;
 	BPFafp.filterAlgorithm=vaFilterAlgorithm::kSVF_BP;
@@ -21,10 +23,48 @@ LadyNina::LadyNina() {
 }
 
 void LadyNina::onSampleRateChange() {
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
-	LPFaudioFilter.reset(APP->engine->getSampleRate());
-	HPFaudioFilter.reset(APP->engine->getSampleRate());
+	for (int i=0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void LadyNina::processChannel(Input& in, Output& lpfout, Output& hpfout, Output& bpfout, Output& bsfout) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	lpfout.setChannels(channels);
+	hpfout.setChannels(channels);
+	bpfout.setChannels(channels);
+	bsfout.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (lpfout.isConnected()) {
+			LPFaudioFilter[c/4].setParameters(LPFafp);
+			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(lpfout.getVoltages(c));
+		}
+		if (hpfout.isConnected()) {
+			HPFaudioFilter[c/4].setParameters(HPFafp);
+			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(hpfout.getVoltages(c));
+		}
+		if (bpfout.isConnected()) {
+			BPFaudioFilter[c/4].setParameters(BPFafp);
+			output = BPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bpfout.getVoltages(c));
+		}
+		if (bsfout.isConnected()) {
+			BSFaudioFilter[c/4].setParameters(BSFafp);
+			output = BSFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bsfout.getVoltages(c));
+		}
+	}
 }
 
 void LadyNina::process(const ProcessArgs &args) {
@@ -46,26 +86,8 @@ void LadyNina::process(const ProcessArgs &args) {
 		LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
 		LPFafp.matchAnalogNyquistLPF = match;
 
-		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setParameters(LPFafp);
-			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
-			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
-		}
-		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setParameters(HPFafp);
-			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-		}
-		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
-			BPFaudioFilter.setParameters(BPFafp);
-			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
-		}
-		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
-			BSFaudioFilter.setParameters(BSFafp);
-			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
-		}
+		processChannel(inputs[INPUT_MAIN], outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
+
 	}
 }
 
