@@ -381,7 +381,7 @@ T CircularBuffer<T>::readBuffer(rack::simd::float_4 delayInFractionalSamples)
 	T y2 = readBuffer(delayInFractionalSamples + 1);
 
 	// --- get fractional part
-	double fraction = delayInFractionalSamples - (int)delayInFractionalSamples;
+	T fraction = delayInFractionalSamples - delayInFractionalSamples;
 
 	// --- do the interpolation (you could try different types here)
 	return doLinearInterpolation(y1, y2, fraction);
