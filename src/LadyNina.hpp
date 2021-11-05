@@ -45,7 +45,7 @@ struct LadyNina : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override;
-		ZVAFilter LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
+		ZVAFilter<rack::simd::float_4> LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
 		void process(const ProcessArgs &) override;
 		void processChannel(Input&, Output&, Output&, Output&, Output&);
 		ZVAFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;

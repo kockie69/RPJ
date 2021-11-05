@@ -3,6 +3,23 @@
 
 const double kMaxFilterFrequency = 20480.0; // 10 octaves above 20 Hz
 
+template <typename T>
+inline void boundValue(T& value, double minValue, double maxValue)
+{
+	value = fmin(value, maxValue);
+	value = fmax(value, minValue);
+}
+
+template <typename T>
+inline T doUnipolarModulationFromMin(T unipolarModulatorValue, double minValue, double maxValue)
+{
+	// --- UNIPOLAR bound
+	boundValue(unipolarModulatorValue, 0.0, 1.0);
+
+	// --- modulate from minimum value upwards
+	return unipolarModulatorValue*(maxValue - minValue) + minValue;
+}
+
 /**
 \struct EnvelopeFollowerParameters
 \ingroup FX-Objects
@@ -47,42 +64,127 @@ Control I/F:
 \version Revision : 1.0
 \date Date : 2018 / 09 / 7
 */
+template <typename T>
 struct EnvelopeFollower
 {
 public:
-	EnvelopeFollower();	/* C-TOR */
-	~EnvelopeFollower();		/* D-TOR */
 
-	/** reset members to initialized state */
-	virtual bool reset(double );
+EnvelopeFollower() {
+	// --- setup the filter
+	ZVAFilterParameters filterParams;
+	filterParams.filterAlgorithm = vaFilterAlgorithm::kSVF_LP;
+	filterParams.fc = 1000.0;
+	filterParams.enableGainComp = true;
+	filterParams.enableNLP = true;
+	filterParams.matchAnalogNyquistLPF = true;
+	filter.setParameters(filterParams);
 
-	/** get parameters: note use of custom structure for passing param data */
-	/**
-	\return EnvelopeFollowerParameters custom data structure
-	*/
-	EnvelopeFollowerParameters getParameters();
+	// --- setup the detector
+	AudioDetectorParameters adParams;
+	adParams.attackTime_mSec = -1.0;
+	adParams.releaseTime_mSec = -1.0;
+	adParams.detectMode = TLD_AUDIO_DETECT_MODE_RMS;
+	adParams.detect_dB = true;
+	adParams.clampToUnityMax = false;
+	detector.setParameters(adParams);
 
-	/** set parameters: note use of custom structure for passing param data */
-	/**
-	\param EnvelopeFollowerParameters custom data structure
-	*/
-	void setParameters(const EnvelopeFollowerParameters& );
+}		/* C-TOR */
 
-	/** return false: this object only processes samples */
-	virtual bool canProcessAudioFrame();
+~EnvelopeFollower() {}		/* D-TOR */
 
-	/** process input x(n) through the envelope follower to produce return value y(n) */
-	/**
-	\param xn input
-	\return the processed sample
-	*/
-	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
+/** reset members to initialized state */
+
+bool reset(double _sampleRate)
+{		
+	filter.reset(_sampleRate);
+	detector.reset(_sampleRate);
+	return true;
+}
+
+/** get parameters: note use of custom structure for passing param data */
+/**
+\return EnvelopeFollowerParameters custom data structure
+*/
+
+EnvelopeFollowerParameters getParameters() { return parameters; }
+
+/** set parameters: note use of custom structure for passing param data */
+/**
+\param EnvelopeFollowerParameters custom data structure
+*/
+
+void setParameters(const EnvelopeFollowerParameters& params)
+{
+	ZVAFilterParameters filterParams = filter.getParameters();
+	AudioDetectorParameters adParams = detector.getParameters();
+
+	if (params.fc != parameters.fc || params.Q != parameters.Q)
+	{
+		filterParams.fc = params.fc;
+		filterParams.Q = params.Q;
+		filter.setParameters(filterParams);
+	}
+	if (params.attackTime_mSec != parameters.attackTime_mSec ||
+		params.releaseTime_mSec != parameters.releaseTime_mSec)
+	{
+		adParams.attackTime_mSec = params.attackTime_mSec;
+		adParams.releaseTime_mSec = params.releaseTime_mSec;
+		detector.setParameters(adParams);
+	}
+
+	// --- save
+	parameters = params;
+}
+
+/** return false: this object only processes samples */
+
+bool canProcessAudioFrame() { return false; }
+
+/** process input x(n) through the envelope follower to produce return value y(n) */
+/**
+\param xn input
+\return the processed sample
+*/
+
+T processAudioSample(T xn)
+{
+	// --- calc threshold
+	double threshValue = pow(10.0, parameters.threshold_dB / 20.0);
+
+	// --- detect the signal
+	T detect_dB = detector.processAudioSample(xn);
+	T detectValue = rack::simd::pow(10.0, detect_dB / 20.0);
+	T deltaValue = detectValue - threshValue;
+
+	ZVAFilterParameters filterParams = filter.getParameters();
+	filterParams.fc = parameters.fc;
+
+	// --- if above the threshold, modulate the filter fc
+	T mask = rack::simd::operator>(deltaValue,0.f);// || delta_dB > 0.0)
+	if (rack::simd::movemask(mask))
+	{
+		// --- fc Computer
+		T modulatorValue = 0.0;
+
+		// --- best results are with linear values when detector is in dB mode
+		modulatorValue = (deltaValue * parameters.sensitivity);
+
+		// --- calculate modulated frequency
+		filterParams.fc = doUnipolarModulationFromMin(modulatorValue, parameters.fc, kMaxFilterFrequency);
+	}
+
+	// --- update with new modulated frequency
+	filter.setParameters(filterParams);
+
+	// --- perform the filtering operation
+	return filter.processAudioSample(xn);
+}
 
 
 protected:
 	EnvelopeFollowerParameters parameters; ///< object parameters
 
 	// --- 1 filter and 1 detector
-	ZVAFilter filter;		///< filter to modulate
-	AudioDetector<rack::simd::float_4> detector; ///< detector to track input signal
+	ZVAFilter<T> filter;		///< filter to modulate
+	AudioDetector<T> detector; ///< detector to track input signal
 };
