@@ -34,8 +34,8 @@ struct DryLand : Module {
 		DryLand();
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
-		AudioFilter LPFaudioFilter[4];
-		AudioFilter HPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> LPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> HPFaudioFilter[4];
 		void process(const ProcessArgs &) override;
 		void processChannel(Input&, Output&, Output&);
 		void onSampleRateChange() override; 

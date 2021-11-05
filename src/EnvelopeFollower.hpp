@@ -84,5 +84,5 @@ protected:
 
 	// --- 1 filter and 1 detector
 	ZVAFilter filter;		///< filter to modulate
-	AudioDetector detector; ///< detector to track input signal
+	AudioDetector<rack::simd::float_4> detector; ///< detector to track input signal
 };

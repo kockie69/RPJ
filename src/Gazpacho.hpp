@@ -42,8 +42,8 @@ struct Gazpacho : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override; 
-		AudioFilter LPFaudioFilter[4];
-		AudioFilter HPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> LPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> HPFaudioFilter[4];
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp;

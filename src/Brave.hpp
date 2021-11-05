@@ -35,7 +35,7 @@ struct Brave : Module {
 	};
 
 		Brave();
-		AudioFilter audioFilter[4];
+		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
 		void processChannel(Input&, Output&);
 		json_t *dataToJson() override;

@@ -54,7 +54,7 @@ struct CircularRide : Module {
 
         dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioDelayParameters adp;
-		AudioDelay audioDelay[4];
+		AudioDelay<rack::simd::float_4> audioDelay[4];
 		bool enableLPF = true;
 		bool enableHPF = true;
 		std::string strAlgorithm;

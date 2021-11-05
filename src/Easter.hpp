@@ -40,7 +40,7 @@ struct Easter : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override;
-		AudioFilter audioFilter[4];
+		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
 		void processChannel(Input&, Output&);
 		dsp::SchmittTrigger upTrigger,downTrigger;
