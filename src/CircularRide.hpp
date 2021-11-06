@@ -49,6 +49,7 @@ struct CircularRide : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
+		template <typename T>
 		void processChannel(Input&, Input&, Output&, Output&);
 		void onSampleRateChange() override;
 

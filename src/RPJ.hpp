@@ -20,6 +20,8 @@ extern Model *modelGaza;
 extern Model *modelCircularRide;
 extern Model *modelDrillingHoles;
 extern Model *modelTuxOn;
+extern Model *modelBridgeIn;
+extern Model *modelBridgeOut;
 
 struct RPJTextLabel : TransparentWidget {
 

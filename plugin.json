@@ -114,6 +114,18 @@
       "name": "TuxOn",
       "description": "Audio player",
       "tags": ["Utility"]
+    },
+    {
+      "slug": "BridgeIn",
+      "name": "BridgeIn",
+      "description": "Bridge input module",
+      "tags": ["Utility"]
+    },
+    {
+      "slug": "BridgeOut",
+      "name": "BridgeOut",
+      "description": "Bridge output module",
+      "tags": ["Utility"]
     }
   ]
 }

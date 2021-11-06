@@ -124,7 +124,7 @@ public:
 
 protected:
 	// --- our calculator
-	Biquad<rack::simd::float_4> biquad; ///< the biquad object
+	Biquad<T> biquad; ///< the biquad object
 
 	// --- array to hold coeffs (we need them too)
 	double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; ///< our local copy of biquad coeffs

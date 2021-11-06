@@ -32,13 +32,14 @@ void CircularRide::onSampleRateChange() {
 	}
 }
 
+template <typename T>
 void CircularRide::processChannel(Input& inl, Input& inr, Output& outl, Output& outr) {
 		
 	// Get input
 	int channels = std::max(inl.getChannels(), inr.getChannels());
-	rack::simd::float_4 xnL,xnR;
-	rack::simd::float_4 i[2];
-    rack::simd::float_4 o[2] = {0.0, 0.0};
+	T xnL,xnR;
+	T i[2];
+    T o[2] = {0.0, 0.0};
 	outl.setChannels(channels);
 	outr.setChannels(channels);
 
@@ -83,7 +84,7 @@ void CircularRide::process(const ProcessArgs &args) {
 		adp.useLPF = enableLPF;
 		adp.useHPF = enableHPF;
 
-		processChannel(inputs[INPUT_LEFT], inputs[INPUT_RIGHT],outputs[OUTPUT_LEFT], outputs[OUTPUT_RIGHT] );
+		processChannel<rack::simd::float_4>(inputs[INPUT_LEFT], inputs[INPUT_RIGHT],outputs[OUTPUT_LEFT], outputs[OUTPUT_RIGHT] );
 	}
 }
 
