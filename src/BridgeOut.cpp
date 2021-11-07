@@ -5,13 +5,16 @@ BridgeOut::BridgeOut() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	connected = false;
 	id = 0;
-	menuId = 0;
+	sourceId = 0;
 	modwid = NULL;
 }
 
 void BridgeOut::findSource() {
 	json_t *rootJ;
 	auto rack = APP->scene->rack;
+	sourceId = 0;
+	connected = false;
+
     for (::rack::widget::Widget* w2 : rack->getModuleContainer()->children) {		
         modwid = dynamic_cast<ModuleWidget*>(w2);
         if (modwid) {
@@ -22,14 +25,44 @@ void BridgeOut::findSource() {
 					json_t *nIdJ = json_object_get(rootJ, JSON_OUT_ID);
 					if (nIdJ) {
 						if (id == (json_integer_value(nIdJ))) {
-							// Led should go green
+							// Tell source I am connected
 							connected=true;
+							sourceId = modwid->getModule()->getId();
+							json_object_set(rootJ, JSON_OUT_CONNECTED, json_boolean(true));
+							modwid->getModule()->dataFromJson(rootJ);
 							break;						
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+void BridgeOut::process(const ProcessArgs &args) {
+	simd::float_4 output;
+	int channels;
+
+	if (id != 0) {
+		if (sourceId) {
+			if (APP->engine->getModule(sourceId) != NULL) {
+				std::vector<PortWidget *> inputList = modwid->getInputs();
+				for (int i=0;i<8;i++) {
+					if (inputList[i]->getPort()->isConnected() && outputs[i].isConnected()) {
+						channels = std::max(inputList[i]->getPort()->getChannels(), 1);
+						outputs[i].setChannels(channels);
+						for (int c=0;c<channels;c+=4) {
+							output = simd::float_4::load(inputList[i]->getPort()->getVoltages(c));
+							output.store(outputs[i].getVoltages(c));
+						}
+					}
+				}
+			}
+			else 
+				findSource();
+		}
+		else
+			findSource();
 	}
 	if (connected) {
 		lights[RGB_LIGHT + 0].setBrightness(0.f);
@@ -43,27 +76,6 @@ void BridgeOut::findSource() {
 	}
 }
 
-void BridgeOut::process(const ProcessArgs &args) {
-	simd::float_4 output;
-	int channels = 16;
-
-	if (id != 0) {
-		if (modwid) {
-			std::vector<PortWidget *> inputList = modwid->getInputs();
-			for (int i=0;i<8;i++) {
-				if (inputList[i]->getPort()->isConnected() && outputs[i].isConnected()) {
-					outputs[i].setChannels(channels);
-					for (int c=0;c<channels;c+=4) {
-						output = simd::float_4::load(inputList[i]->getPort()->getVoltages(c));
-						output.store(outputs[i].getVoltages(c));
-					}
-				}
-			}			
-		}
-		findSource();
-	}
-}
-
 struct BridgeOutModuleWidget : ModuleWidget {
 	BridgeOutModuleWidget(BridgeOut* module) {
 
@@ -74,7 +86,11 @@ struct BridgeOutModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);			
-
+		{
+			BridgeOutDisplay * idd = new BridgeOutDisplay(Vec(21,315));
+			idd->module = module;
+			addChild(idd);
+		}
 		addOutput(createOutput<PJ301MPort>(Vec(10, 55), module, BridgeOut::POLYOUTPUT_A));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 90), module, BridgeOut::POLYOUTPUT_B));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 125), module, BridgeOut::POLYOUTPUT_C));
@@ -83,7 +99,7 @@ struct BridgeOutModuleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(Vec(10, 230), module, BridgeOut::POLYOUTPUT_F));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 265), module, BridgeOut::POLYOUTPUT_G));
 		addOutput(createOutput<PJ301MPort>(Vec(10, 300), module, BridgeOut::POLYOUTPUT_H));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17, 330), module, BridgeOut::RGB_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17, 30), module, BridgeOut::RGB_LIGHT));
 	}
 
 	void appendContextMenu(Menu *menu) override {
@@ -104,7 +120,7 @@ json_t *BridgeOut::dataToJson() {
 void BridgeOut::dataFromJson(json_t *rootJ) {
 	json_t *nIdJ = json_object_get(rootJ, JSON_OUT_ID);
 	if (nIdJ) {
-	//	id = (json_integer_value(nIdJ));
+		id = (json_integer_value(nIdJ));
 	}
 }
 

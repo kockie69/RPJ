@@ -4,6 +4,7 @@ using namespace rack;
 
 const int MODULE_WIDTH=3;
 const char* JSON_IN_ID = "Bridge ID";
+const char* JSON_IN_CONNECTED = "Connected";
 
 struct BridgeIn : Module {
 
@@ -28,6 +29,7 @@ struct BridgeIn : Module {
 	};
 
 	enum LightsIds {
+		ENUMS(RGB_LIGHT,3),
 		NUM_LIGHTS,
 	};
 		BridgeIn();
@@ -36,6 +38,7 @@ struct BridgeIn : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		int id;
+		bool connected;
 		rack::app::ModuleWidget* modwid;
 };
 

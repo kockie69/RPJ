@@ -5,6 +5,7 @@
 BridgeIn::BridgeIn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	id=0;
+	connected = false;
 }
 
 int BridgeIn::getId() {
@@ -39,6 +40,16 @@ int BridgeIn::getId() {
 void BridgeIn::process(const ProcessArgs &args) {
 	if (id==0)
 		id = getId();
+	if (connected) {
+		lights[RGB_LIGHT + 0].setBrightness(0.f);
+		lights[RGB_LIGHT + 1].setBrightness(1.f);
+		lights[RGB_LIGHT + 2].setBrightness(0.f);
+	}
+	else {
+		lights[RGB_LIGHT + 0].setBrightness(1.f);
+		lights[RGB_LIGHT + 1].setBrightness(0.f);
+		lights[RGB_LIGHT + 2].setBrightness(0.f);
+	}
 }
 
 struct BridgeInModuleWidget : ModuleWidget {
@@ -64,19 +75,25 @@ struct BridgeInModuleWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(Vec(10, 230), module, BridgeIn::POLYINPUT_F));
 		addInput(createInput<PJ301MPort>(Vec(10, 265), module, BridgeIn::POLYINPUT_G));
 		addInput(createInput<PJ301MPort>(Vec(10, 300), module, BridgeIn::POLYINPUT_H));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17, 30), module, BridgeIn::RGB_LIGHT));
 	}
 };
 
 json_t *BridgeIn::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_IN_ID, json_integer(id));
+	json_object_set_new(rootJ, JSON_IN_CONNECTED, json_boolean(connected));
 	return rootJ;
 }
 
 void BridgeIn::dataFromJson(json_t *rootJ) {
 	json_t *nIdJ = json_object_get(rootJ, JSON_IN_ID);
+	json_t *nConnJ = json_object_get(rootJ, JSON_IN_CONNECTED);
 	if (nIdJ) {
 		id = (json_integer_value(nIdJ));
+	}
+	if (nConnJ) {
+		connected = (json_boolean_value(nConnJ));
 	}
 }
 
