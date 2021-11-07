@@ -28,12 +28,18 @@ struct BridgeOut : Module {
 	};
 
 	enum LightsIds {
+		ENUMS(RGB_LIGHT,3),
 		NUM_LIGHTS,
 	};
 		BridgeOut();
+		void findSource();
 		void process(const ProcessArgs &) override;
 		void processChannel(Output&);
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
 		rack::engine::Module* bridgeSource;
-		int id;
+		int id, menuId;
+		bool connected;
+		rack::app::ModuleWidget* modwid;
 };
 

@@ -4,27 +4,41 @@
 
 BridgeIn::BridgeIn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	id=0;
 }
 
-void BridgeIn::processChannel(Input& inA, Input& inB, Output& out) {
-	// Get input
-	int channels = std::max(inA.getChannels(), inB.getChannels());
-	out.setChannels(channels);
-	simd::float_4 v1[4],v2[4];
-	for (int c = 0; c < channels; c += 4) {
-		v1[c / 4] = simd::float_4::load(inA.getVoltages(c));
-		v2[c / 4] = simd::float_4::load(inB.getVoltages(c));
+int BridgeIn::getId() {
 
-		inB.isConnected() ? v2[c / 4].store(out.getVoltages(c)) : v1[c / 4].store(out.getVoltages(c));
+	std::vector<int> v;
+	json_t *rootJ;
+	auto rack = APP->scene->rack;
+
+    for (::rack::widget::Widget* w2 : rack->getModuleContainer()->children) {		
+        modwid = dynamic_cast<ModuleWidget*>(w2);
+        if (modwid) {
+            Model* model = modwid->model;
+            if (model->slug == "BridgeIn") {
+				if(modwid->getModule()) {
+					rootJ= modwid->getModule()->dataToJson();
+					json_t *nIdJ = json_object_get(rootJ, JSON_IN_ID);
+					if (nIdJ) 
+						v.push_back(json_integer_value(nIdJ));			
+				}
+			}
+		}
 	}
+	std::sort(v.begin(),v.end());
+	for (std::vector<int>::iterator it=v.begin(); it!=v.end(); ++it) {
+		if (id < *it)
+			break;
+		id++;
+	}
+	return id;
 }
 
 void BridgeIn::process(const ProcessArgs &args) {
-	id = 1;
-
-	//for (int i=0; i<3;i++)
-		//if (outputs[POLYOUTPUT_1+i].isConnected() && (inputs[POLYINPUT_A+(2*i)].isConnected() || inputs[POLYINPUT_B+(2*i)].isConnected())) 
-		//	processChannel(inputs[POLYINPUT_A+(2*i)],inputs[POLYINPUT_B+(2*i)],outputs[POLYOUTPUT_1+i]);
+	if (id==0)
+		id = getId();
 }
 
 struct BridgeInModuleWidget : ModuleWidget {
@@ -37,7 +51,11 @@ struct BridgeInModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);			
-
+		{
+			BridgeInDisplay * idd = new BridgeInDisplay(Vec(21,315));
+			idd->module = module;
+			addChild(idd);
+		}
 		addInput(createInput<PJ301MPort>(Vec(10, 55), module, BridgeIn::POLYINPUT_A));
 		addInput(createInput<PJ301MPort>(Vec(10, 90), module, BridgeIn::POLYINPUT_B));
 		addInput(createInput<PJ301MPort>(Vec(10, 125), module, BridgeIn::POLYINPUT_C));
