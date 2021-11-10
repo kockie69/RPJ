@@ -5,7 +5,7 @@
 BridgeIn::BridgeIn() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	id=0;
-	connected = false;
+	connected = 0;
 }
 
 int BridgeIn::getId() {
@@ -37,9 +37,54 @@ int BridgeIn::getId() {
 	return id;
 }
 
+void BridgeIn::onRemove(const RemoveEvent & e) {
+	json_t *rootJ;
+
+	if (id != 0) {
+		if (modwid) {
+			if (modwid->getModule()) {
+				rootJ= modwid->getModule()->dataToJson();
+				json_t *nConnJ = json_object_get(rootJ, JSON_IN_CONNECTED);
+				if (nConnJ) {
+					int nrConns = json_integer_value(nConnJ) - 1;
+					json_object_set(rootJ, JSON_IN_CONNECTED, json_integer(nrConns));
+					modwid->getModule()->dataFromJson(rootJ);
+				}
+			}
+		}
+	}
+	Module::onRemove(e);
+}
+
+void BridgeIn::findDestination() {
+	json_t *rootJ;
+	auto rack = APP->scene->rack;
+	connected = false;
+
+    for (::rack::widget::Widget* w2 : rack->getModuleContainer()->children) {		
+        modwid = dynamic_cast<ModuleWidget*>(w2);
+        if (modwid) {
+            Model* model = modwid->model;
+            if (model->slug == "BridgeOut") {
+				if(modwid->getModule()) {
+					rootJ= modwid->getModule()->dataToJson();
+					json_t *nIdJ = json_object_get(rootJ, JSON_IN_ID);
+					if (nIdJ) {
+						if (id == (json_integer_value(nIdJ)))
+							connected += 1;			
+					}
+				}
+			}
+		}
+	}
+}
+
 void BridgeIn::process(const ProcessArgs &args) {
-	if (id==0)
+	if (id==0) {
 		id = getId();
+		findDestination();
+	}
+	
 	if (connected) {
 		lights[RGB_LIGHT + 0].setBrightness(0.f);
 		lights[RGB_LIGHT + 1].setBrightness(1.f);
@@ -82,7 +127,7 @@ struct BridgeInModuleWidget : ModuleWidget {
 json_t *BridgeIn::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_IN_ID, json_integer(id));
-	json_object_set_new(rootJ, JSON_IN_CONNECTED, json_boolean(connected));
+	json_object_set_new(rootJ, JSON_IN_CONNECTED, json_integer(connected));
 	return rootJ;
 }
 
@@ -93,7 +138,7 @@ void BridgeIn::dataFromJson(json_t *rootJ) {
 		id = (json_integer_value(nIdJ));
 	}
 	if (nConnJ) {
-		connected = (json_boolean_value(nConnJ));
+		connected = (json_integer_value(nConnJ));
 	}
 }
 

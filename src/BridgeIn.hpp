@@ -34,11 +34,13 @@ struct BridgeIn : Module {
 	};
 		BridgeIn();
 		int getId();
+		void findDestination();
 		void process(const ProcessArgs &) override;
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
+		void onRemove(const RemoveEvent &) override;
 		int id;
-		bool connected;
+		int connected;
 		rack::app::ModuleWidget* modwid;
 };
 

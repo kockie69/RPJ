@@ -33,16 +33,25 @@ struct BridgeOut : Module {
 		NUM_LIGHTS,
 	};
 		BridgeOut();
+		void remove();
+		void onRemove(const RemoveEvent & ) override;
 		void findSource();
 		void process(const ProcessArgs &) override;
-		void processChannel(Output&);
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		rack::engine::Module* bridgeSource;
 		int id;
-		bool connected;
+		int oldId;
+		int connected;
 		rack::app::ModuleWidget* modwid;
+		rack::app::ModuleWidget* theModwid;
 		int64_t sourceId;
+};
+
+struct nBridgeIdMenuItem : TextField {
+	Menu* menu;
+	BridgeOut *module;
+	void onSelectKey(const SelectKeyEvent &) override;
 };
 
 struct BridgeOutDisplay : TransparentWidget {
