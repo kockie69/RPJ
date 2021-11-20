@@ -1,11 +1,11 @@
 #include "RPJ.hpp"
 #include "TheWeb.hpp"
-
+#include "ctrl/RPJKnobs.hpp"
 
 TheWeb::TheWeb() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
@@ -13,56 +13,92 @@ TheWeb::TheWeb() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	LPFafp.algorithm=filterAlgorithm::kButterLPF2;
 	HPFafp.algorithm=filterAlgorithm::kButterHPF2;
 	BPFafp.algorithm=filterAlgorithm::kButterBPF2;
 	BSFafp.algorithm=filterAlgorithm::kButterBSF2;
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void TheWeb::onSampleRateChange() {
+	for (int i = 0;i<4;i++) {
+		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		BPFaudioFilter[i].reset(APP->engine->getSampleRate());
+		BSFaudioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void TheWeb::processChannel(Input& in, Output& lpfOut, Output& hpfOut, Output& bpfOut, Output& bsfOut) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+	}
+
+	simd::float_4 output;
+	lpfOut.setChannels(channels);
+	hpfOut.setChannels(channels);
+	bpfOut.setChannels(channels);
+	bsfOut.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (lpfOut.isConnected()) {
+			LPFaudioFilter[c/4].setParameters(LPFafp);
+			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);	
+			output.store(lpfOut.getVoltages(c));
+		}
+		if (hpfOut.isConnected()) {
+			HPFaudioFilter[c/4].setParameters(HPFafp);
+			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(hpfOut.getVoltages(c));
+		}
+		if (bpfOut.isConnected()) {
+			BPFaudioFilter[c/4].setParameters(BPFafp);
+			output = BPFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bpfOut.getVoltages(c));
+		}
+		if (bsfOut.isConnected()) {
+			BSFaudioFilter[c/4].setParameters(BSFafp);
+			output = BSFaudioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(bsfOut.getVoltages(c));
+		}
+	}
 }
 
 void TheWeb::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected() || outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) {
 
-		LPFaudioFilter.setSampleRate(args.sampleRate);
-		HPFaudioFilter.setSampleRate(args.sampleRate);
-
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0);
 	
 		float cvq = 1.f;
 		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
+			cvq = abs(inputs[INPUT_CVQ].getVoltage() / 10.0);
  	
- 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+ 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * cvq;
 		LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
+		LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
 
-		if (outputs[OUTPUT_LPFMAIN].isConnected()) {
-			LPFaudioFilter.setSampleRate(args.sampleRate);
-			LPFaudioFilter.setParameters(LPFafp);
-			float LPFOut = LPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());	
-			outputs[OUTPUT_LPFMAIN].setVoltage(LPFOut);
-		}
-		if (outputs[OUTPUT_HPFMAIN].isConnected()) {
-			HPFaudioFilter.setSampleRate(args.sampleRate);
-			HPFaudioFilter.setParameters(HPFafp);
-			float HPFOut = HPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_HPFMAIN].setVoltage(HPFOut);
-		}
-		if (outputs[OUTPUT_BPFMAIN].isConnected()) {
-			BPFaudioFilter.setSampleRate(args.sampleRate);
-			BPFaudioFilter.setParameters(BPFafp);
-			float BPFOut = BPFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BPFMAIN].setVoltage(BPFOut);
-		}
-		if (outputs[OUTPUT_BSFMAIN].isConnected()) {
-			BSFaudioFilter.setSampleRate(args.sampleRate);
-			BSFaudioFilter.setParameters(BSFafp);
-			float BSFOut = BSFaudioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-			outputs[OUTPUT_BSFMAIN].setVoltage(BSFOut);
-		}
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
+
 	}
 }
 
@@ -77,62 +113,6 @@ struct TheWebModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("THE WEB");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("2nd Order Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 85));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 155));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 155));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 210));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 210));
-			tl->setText("LPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 250));
-			tl->setText("HPF");
-			addChild(tl);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 290));
-			tl->setText("BPF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("BSF");
-			addChild(tl);
-		}
-
 		addInput(createInput<PJ301MPort>(Vec(10, 240), module, TheWeb::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, TheWeb::OUTPUT_LPFMAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, TheWeb::OUTPUT_HPFMAIN));
@@ -140,14 +120,35 @@ struct TheWebModuleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, TheWeb::OUTPUT_BSFMAIN));
 
 
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, TheWeb::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 60), module, TheWeb::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 62), module, TheWeb::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 115), module, TheWeb::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(8, 115), module, TheWeb::PARAM_Q));
 		addInput(createInput<PJ301MPort>(Vec(55, 117), module, TheWeb::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 185), module, TheWeb::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 185), module, TheWeb::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 175), module, TheWeb::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 175), module, TheWeb::PARAM_DRY));
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		TheWeb * module = dynamic_cast<TheWeb*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *TheWeb::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void TheWeb::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelTheWeb = createModel<TheWeb, TheWebModuleWidget>("TheWeb");

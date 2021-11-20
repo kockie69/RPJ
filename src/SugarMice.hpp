@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=3;
 
 struct SugarMice : Module {
 
@@ -28,7 +28,9 @@ struct SugarMice : Module {
 
 		SugarMice();
 		void process(const ProcessArgs &) override;
-		WDFTunableButterLPF3 wdfButterLPF3;
+		void onSampleRateChange() override;
+		void processChannel(Input&, Output&);
+		WDFTunableButterLPF3 wdfButterLPF3[4];
 		double sampleRate, fc;
 		bool warp;
 };

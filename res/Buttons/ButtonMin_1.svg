@@ -13,7 +13,7 @@
    height="9"
    version="1.1"
    id="svg1764"
-   sodipodi:docname="ButtonPlus_1.svg"
+   sodipodi:docname="ButtonMin_1.svg"
    inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)">
   <metadata
      id="metadata1768">
@@ -65,16 +65,15 @@
      r="4.5"
      fill="rgb(32,32,32)"
      id="circle2353"
-     style="isolation:isolate;fill:#666666;stroke-width:7;fill-opacity:1" />
+     style="isolation:isolate;fill:#ae1c28;stroke-width:7;fill-opacity:1" />
   <g
-     aria-label="+"
-     id="text1601"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.6667px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;isolation:isolate;fill:#ffffff"
-     inkscape:transform-center-x="0.11846627"
-     inkscape:transform-center-y="-0.23806981"
-     transform="matrix(0.61146304,0,0,0.61439805,1.729125,1.7623687)">
+     aria-label="- "
+     transform="matrix(1.176695,0,0,0.8498379,0.24999995,-2.8591337e-7)"
+     id="text2263"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5515px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;isolation:isolate;fill:#ffffff;stroke-width:1.17669">
     <path
-       d="M 7.8023931,4.8724622 H 4.9638425 V 7.7110129 H 4.0992564 V 4.8724622 H 1.2607058 V 4.0391263 H 4.0992564 V 1.2005756 h 0.8645861 v 2.8385507 h 2.8385506 z"
-       id="path2230" />
+       d="M 5.7364205,5.8160681 H 1.9121353 V 4.7067803 h 3.8242852 z"
+       style="fill:#ffffff;stroke-width:1.17669"
+       id="path2269" />
   </g>
 </svg>

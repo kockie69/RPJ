@@ -1,5 +1,7 @@
 
 #include "Grendel.hpp"
+#include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJLights.hpp"
 
 template <typename T>
 LFO<T>::LFO() {
@@ -158,6 +160,7 @@ RPJLFO::RPJLFO() {
 	parameter[3] = dynamic_cast<ParamQuantity*>(paramQuantities[FREQ4_PARAM]);
 	prevMode = NUM_MODES;
 	parameter[0]->module = this;
+	paramQuantities[RPJLFO::MODE_PARAM]->snapEnabled=true;
 }
 
 ModeValuePair RPJLFO::getModeValuePair(ModeIds m) {
@@ -205,28 +208,28 @@ void RPJLFO::process(const ProcessArgs &args) {
 				switch (mode) {
 					case FREE_MODE:
 						parameter[i]->unit=" Hz";
-						parameter[i]->label="Frequency";
+						parameter[i]->name="Frequency";
 						parameter[i]->minValue=-7.f;
 						parameter[i]->maxValue=7.f;
 						parameter[i]->displayBase=2;
 						break;
 					case QUAD_MODE:
 						parameter[i]->unit="";
-						parameter[i]->label="Attenuation";
+						parameter[i]->name="Attenuation";
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=1;
 						parameter[i]->displayBase=0;
 						break;
 					case PHASE_MODE:
 						parameter[i]->unit=" Degrees";
-						parameter[i]->label="Phase";
+						parameter[i]->name="Phase";
 						parameter[i]->minValue=0;
 						parameter[i]->maxValue=360;
 						parameter[i]->displayBase=0;
 						break;
 					case DIVIDE_MODE:
 						parameter[i]->unit="";
-						parameter[i]->label="Ratio";
+						parameter[i]->name="Ratio";
 						parameter[i]->minValue=2;
 						parameter[i]->maxValue=32;
 						parameter[i]->displayBase=0;
@@ -301,17 +304,6 @@ void RPJLFO::process(const ProcessArgs &args) {
 	prevMode = mode;
 }
 
-BGKnob::BGKnob(int dim) {
-	setSvg(APP->window->loadSvg(asset::system("res/ComponentLibrary/RoundSmallBlackKnob.svg")));
-	box.size = Vec(dim, dim);
-	shadow->blurRadius = 2.0;
-	shadow->box.pos = Vec(0.0, 3.0);
-}
-
-Knob16::Knob16() : BGKnob(24) {
-	shadow->box.pos = Vec(0.0, 2.5);
-}
-
 struct RPJLFOModuleWidget : ModuleWidget {
 	RPJLFOModuleWidget(RPJLFO* module) {
 
@@ -324,66 +316,55 @@ struct RPJLFOModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 
 		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("GRENDEL");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 19),10);
-			tl->setText("Quadruple LFO");
-			addChild(tl);
-		}
-		{
-			auto w = createParam<Knob16>(Vec(73,49), module, RPJLFO::MODE_PARAM);
+			auto w = createParam<RPJKnob>(Vec(70,49), module, RPJLFO::MODE_PARAM);
 			auto k = dynamic_cast<SvgKnob*>(w);
-			k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);
 		}
 	
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(34, 95), module, RPJLFO::FREQ1_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(70, 95), module, RPJLFO::FREQ2_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueYellowLight>>(Vec(140, 95), module, RPJLFO::FREQ4_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(16, 95), module, RPJLFO::FREQ1_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(52, 95), module, RPJLFO::FREQ2_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(105, 95), module, RPJLFO::FREQ3_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueWhiteLight>>(Vec(140.5, 95), module, RPJLFO::FREQ4_LIGHT));
 	
-		addParam(createParam<RoundSmallBlackKnob>(Vec(27, 110), module, RPJLFO::FREQ1_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(63, 110), module, RPJLFO::FREQ2_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(98, 110), module, RPJLFO::FREQ3_PARAM));
-		addParam(createParam<RoundSmallBlackKnob>(Vec(134, 110), module, RPJLFO::FREQ4_PARAM));
+		addParam(createParam<RPJKnob>(Vec(6, 110), module, RPJLFO::FREQ1_PARAM));
+		addParam(createParam<RPJKnob>(Vec(42, 110), module, RPJLFO::FREQ2_PARAM));
+		addParam(createParam<RPJKnob>(Vec(95, 110), module, RPJLFO::FREQ3_PARAM));
+		addParam(createParam<RPJKnob>(Vec(131, 110), module, RPJLFO::FREQ4_PARAM));
 
-		addInput(createInput<PJ301MPort>(Vec(26, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(62, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(8, 142), module, RPJLFO::FRQ_PH_DIV1_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(44, 142), module, RPJLFO::FRQ_PH_DIV2_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(97, 142), module, RPJLFO::FRQ_PH_DIV3_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(132, 142), module, RPJLFO::FRQ_PH_DIV4_INPUT));
 
-		addInput(createInput<PJ301MPort>(Vec(26, 173), module, RPJLFO::RESET1_INPUT));
-		addInput(createInput<PJ301MPort>(Vec(62, 173), module, RPJLFO::RESET2_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(8, 173), module, RPJLFO::RESET1_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(44, 173), module, RPJLFO::RESET2_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(97, 173), module, RPJLFO::RESET3_INPUT));
 		addInput(createInput<PJ301MPort>(Vec(132, 173), module, RPJLFO::RESET4_INPUT));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 204), module, RPJLFO::SAWDOWN_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 204), module, RPJLFO::SAWDOWN_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 204), module, RPJLFO::SAWDOWN_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 204), module, RPJLFO::SAWDOWN_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 204), module, RPJLFO::SAWDOWN_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 204), module, RPJLFO::SAWDOWN_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 235), module, RPJLFO::SAWUP_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 235), module, RPJLFO::SAWUP_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 235), module, RPJLFO::SAWUP_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 235), module, RPJLFO::SAWUP_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 235), module, RPJLFO::SAWUP_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 235), module, RPJLFO::SAWUP_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 266), module, RPJLFO::SQR_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 266), module, RPJLFO::SQR_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 266), module, RPJLFO::SQR_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 266), module, RPJLFO::SQR_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 266), module, RPJLFO::SQR_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 266), module, RPJLFO::SQR_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 297), module, RPJLFO::TRI_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 297), module, RPJLFO::TRI_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 297), module, RPJLFO::TRI_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 297), module, RPJLFO::TRI_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 297), module, RPJLFO::TRI_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 297), module, RPJLFO::TRI_OUTPUT4));
 
-		addOutput(createOutput<PJ301MPort>(Vec(26, 328), module, RPJLFO::SIN_OUTPUT1));
-		addOutput(createOutput<PJ301MPort>(Vec(62, 328), module, RPJLFO::SIN_OUTPUT2));
+		addOutput(createOutput<PJ301MPort>(Vec(8, 328), module, RPJLFO::SIN_OUTPUT1));
+		addOutput(createOutput<PJ301MPort>(Vec(44, 328), module, RPJLFO::SIN_OUTPUT2));
 		addOutput(createOutput<PJ301MPort>(Vec(97, 328), module, RPJLFO::SIN_OUTPUT3));
 		addOutput(createOutput<PJ301MPort>(Vec(132, 328), module, RPJLFO::SIN_OUTPUT4));
 

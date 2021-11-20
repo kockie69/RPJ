@@ -31,8 +31,10 @@ struct Gaza : Module {
 		NUM_LIGHTS,
 	};
 		Gaza();
-		EnvelopeFollower envelopeFollower;
+		EnvelopeFollower<rack::simd::float_4> envelopeFollower[4];
 		void process(const ProcessArgs &) override;
+		void processChannel(Input&, Output&);
+		void onSampleRateChange() override;
 		EnvelopeFollowerParameters efp;
 };
 

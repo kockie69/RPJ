@@ -1,10 +1,18 @@
 #include "RPJ.hpp"
 #include "Easter.hpp"
+#include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJButtons.hpp"
+
+std::string EasterAlgorithmTxt[static_cast<int>(filterAlgorithm::numFilterAlgorithms)] = { "LPF1", "HPF1", "LPF2", "HPF2", "BPF2", "BSF2", 
+		"ButterLPF2", "ButterHPF2", "ButterBPF2", "ButterBSF2", "MMALPF2", "MMALPF2B", "LowShelf",
+		"HiShelf", "NCQParaEQ", "CQParaEQ", "LWRLPF2", "LWRHPF2", "APF1", "APF2", "ResonA", "ResonB",
+		"MatchLP2A", "MatchLP2B", "MatchBP2A", "MatchBP2B", "ImpInvLP1", "ImpInvLP2" };
+
 
 Easter::Easter() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
@@ -12,7 +20,37 @@ Easter::Easter() {
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "WET");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
+	for (int i=0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
 	afp.algorithm = filterAlgorithm::kResonA;
+	strAlgorithm = "ResonA";
+	bqa=biquadAlgorithm::kDirect;
+}
+
+void Easter::onSampleRateChange() {
+	for (int i=0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Easter::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioFilter[c/4].setParameters(afp);
+			output = audioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void Easter::process(const ProcessArgs &args) {
@@ -21,48 +59,27 @@ void Easter::process(const ProcessArgs &args) {
 		afp.algorithm = filterAlgorithm::kResonB;	
 	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		afp.algorithm = filterAlgorithm::kResonA;
-	afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-	audioFilter.setParameters(afp);
+	strAlgorithm = EasterAlgorithmTxt[static_cast<int>(afp.algorithm)];
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {
-		audioFilter.setSampleRate(args.sampleRate);
 	
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() /10.0);
 	
 		float cvq = 1.f;
 		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
+			cvq = abs(inputs[INPUT_CVQ].getVoltage() / 10.0);
  	
-		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
+		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		afp.Q = params[PARAM_Q].getValue() * cvq;
 		afp.dry = params[PARAM_DRY].getValue();
 		afp.wet = params[PARAM_WET].getValue();
+		afp.bqa = bqa;
 
-		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-		audioFilter.setParameters(afp);
-		
-		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
-
-struct buttonPlusSmall : SvgSwitch  {
-	buttonPlusSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
-	}
-};
-
-struct buttonMinSmall : SvgSwitch  {
-	buttonMinSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
-	}
-};
 
 struct EasterModuleWidget : ModuleWidget {
 	EasterModuleWidget(Easter* module) {
@@ -76,64 +93,50 @@ struct EasterModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("EASTER");
-			addChild(title);
-		} 
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 19),10,MODULE_WIDTH);
-			tl->setText("Resonance Filter");
-			addChild(tl);
-		}
-		{
-			FilterNameDisplay * fnd = new FilterNameDisplay(Vec(39,30));
+			EasterFilterNameDisplay * fnd = new EasterFilterNameDisplay(Vec(39,30));
 			fnd->module = module;
 			addChild(fnd);
 		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(58, 190));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(5, 190));
-			tl->setText("WET");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Easter::INPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(10, 320), module, Easter::INPUT_MAIN));
 		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Easter::OUTPUT_MAIN));
 		
 		addParam(createParam<buttonMinSmall>(Vec(5,45),module, Easter::PARAM_DOWN));
 		addParam(createParam<buttonPlusSmall>(Vec(76,45),module, Easter::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Easter::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Easter::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Easter::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Easter::INPUT_CVQ));	
-		addParam(createParam<RoundBlackKnob>(Vec(8, 225), module, Easter::PARAM_WET));
-		addParam(createParam<RoundBlackKnob>(Vec(55, 225), module, Easter::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(8, 105), module, Easter::PARAM_FC));
+		addInput(createInput<PJ301MPort>(Vec(55, 107), module, Easter::INPUT_CVFC));
+		addParam(createParam<RPJKnob>(Vec(8, 175), module, Easter::PARAM_Q));
+		addInput(createInput<PJ301MPort>(Vec(55, 177), module, Easter::INPUT_CVQ));	
+		addParam(createParam<RPJKnob>(Vec(8, 250), module, Easter::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(55, 250), module, Easter::PARAM_DRY));
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		Easter * module = dynamic_cast<Easter*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *Easter::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_RESONATOR_TYPE_KEY, json_integer(static_cast<int>(afp.algorithm)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void Easter::dataFromJson(json_t *rootJ) {
+	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_RESONATOR_TYPE_KEY);
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nAlgorithmJ) {
+		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+	if (nBiquadAlgorithmJ) {
+		bqa=static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelEaster = createModel<Easter, EasterModuleWidget>("Easter");

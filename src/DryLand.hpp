@@ -8,13 +8,8 @@ const int MODULE_WIDTH=6;
 struct DryLand : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
 		PARAM_CVFC,
-		PARAM_Q,
-		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
 		NUM_PARAMS,
@@ -23,7 +18,6 @@ struct DryLand : Module {
 	enum InputIds {
 		INPUT_MAIN,
 		INPUT_CVFC,
-		INPUT_CVQ,
 		NUM_INPUTS,
 	};
 
@@ -38,11 +32,15 @@ struct DryLand : Module {
 	};
 
 		DryLand();
-		AudioFilter LPFaudioFilter;
-		AudioFilter HPFaudioFilter;
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		AudioFilter<rack::simd::float_4> LPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> HPFaudioFilter[4];
 		void process(const ProcessArgs &) override;
-		dsp::SchmittTrigger upTrigger,downTrigger;
+		void processChannel(Input&, Output&, Output&);
+		void onSampleRateChange() override; 
 		AudioFilterParameters LPFafp,HPFafp;
+		biquadAlgorithm bqa;
 };
 
 

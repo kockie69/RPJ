@@ -18,6 +18,8 @@ extern Model *modelMontreal;
 extern Model *modelBlindCurve;
 extern Model *modelGaza;
 extern Model *modelCircularRide;
+extern Model *modelDrillingHoles;
+extern Model *modelTuxOn;
 
 struct RPJTextLabel : TransparentWidget {
 
@@ -66,4 +68,6 @@ struct RPJTitle: TransparentWidget {
 	float parentW = 0;
 	int moduleWidth;
 };
+
+
 

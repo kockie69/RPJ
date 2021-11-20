@@ -1,70 +1,92 @@
 #include "RPJ.hpp"
 #include "CircularRide.hpp"
+#include "ctrl/RPJButtons.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 CircularRide::CircularRide() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     
-    configParam(PARAM_DELAY, 0.f, 2000.f,250.f, "Delay");
+    configParam(PARAM_DELAYL, 0.f, 2000.f,250.f, "Delay");
+	configParam(PARAM_DELAYC, 0.f, 2000.f,250.f, "Delay");
+	configParam(PARAM_DELAYR, 0.f, 2000.f,250.f, "Delay");
     configParam(PARAM_FEEDBACK, 0.f, 100.f,50.f, "Feedback");
     configParam(PARAM_RATIO, 0.f, 100.f,50.f, "Ratio");
-    configParam(PARAM_DRY, -60.f, 12.f,-3.f, "Dry");
-    configParam(PARAM_WET, -60.f, 12.f,-3.f, "Wet");
+    configParam(PARAM_DRY, -60.f, 12.f,-3.f, "Dry","dB");
+    configParam(PARAM_WET, -60.f, 12.f,-3.f, "Wet","dB");
 	configParam<DetectAlgorithmQuantity>(PARAM_ALGORITHM, 0.f, 1.f, 0.f, "Algorithm");
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
     configParam(PARAM_TYPE, 0.f, 1.f,0.f, "Delay Update Type");
-	audioDelay.reset(44100);
-    audioDelay.createDelayBuffers(44100,2000);
+	configParam(PARAM_LPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_HPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	for (int i=0;i<4;i++) {
+		audioDelay[i].reset(APP->engine->getSampleRate());
+		audioDelay[i].createDelayBuffers(APP->engine->getSampleRate(),2000);
+	}
+	strAlgorithm = "Normal";
+}
+
+void CircularRide::onSampleRateChange() {
+	for (int i=0;i<4;i++) {
+		audioDelay[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+template <typename T>
+void CircularRide::processChannel(Input& inl, Input& inr, Output& outl, Output& outr) {
+		
+	// Get input
+	int channels = std::max(inl.getChannels(), inr.getChannels());
+	T xnL,xnR;
+	T i[2];
+    T o[2] = {0.0, 0.0};
+	outl.setChannels(channels);
+	outr.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		if (outl.isConnected() || outr.isConnected()) {
+			audioDelay[c/4].setParameters(adp);
+			xnL = simd::float_4::load(inl.getVoltages(c));
+    		xnR = simd::float_4::load(inr.getVoltages(c));
+			i[0] = xnL;
+			i[1] = xnR;
+			audioDelay[c/4].processAudioFrame(i,o,2,2);
+
+			o[0].store(outl.getVoltages(c));
+			o[1].store(outr.getVoltages(c));
+		}
+	}
 }
 
 void CircularRide::process(const ProcessArgs &args) {
 
 	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		adp.algorithm = delayAlgorithm::kPingPong;	
+		if (static_cast<int>(adp.algorithm)+1 < static_cast<int>(delayAlgorithm::numDelayAlgorithms))
+			adp.algorithm = static_cast<delayAlgorithm>(static_cast<int>(adp.algorithm) + 1);
+
 	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
-		adp.algorithm = delayAlgorithm::kNormal;
-	adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
-	audioDelay.setParameters(adp);
+		if (static_cast<int>(adp.algorithm) - 1 >= 0)
+			adp.algorithm = static_cast<delayAlgorithm>(static_cast<int>(adp.algorithm) - 1);
+	
+	strAlgorithm = delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
 	
 	if ((outputs[OUTPUT_LEFT].isConnected() || outputs[OUTPUT_RIGHT].isConnected()) && (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected())) {
-		adp.strAlgorithm = audioDelay.delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
         adp.delayRatio_Pct = params[PARAM_RATIO].getValue();;
         adp.dryLevel_dB = params[PARAM_DRY].getValue();
 		adp.feedback_Pct  = params[PARAM_FEEDBACK].getValue();
-		adp.leftDelay_mSec=params[PARAM_DELAY].getValue();
-		adp.rightDelay_mSec=params[PARAM_DELAY].getValue();
+		adp.leftDelay_mSec=params[PARAM_DELAYL].getValue();
+		adp.centreDelay_mSec=params[PARAM_DELAYC].getValue();
+		adp.rightDelay_mSec=params[PARAM_DELAYR].getValue();
         adp.updateType = static_cast<delayUpdateType>(static_cast<int>(params[PARAM_TYPE].getValue()));
         adp.wetLevel_dB = params[PARAM_WET].getValue();
-		audioDelay.setParameters(adp);
+		adp.lpfFc = params[PARAM_LPFFC].getValue();
+		adp.hpfFc = params[PARAM_HPFFC].getValue();
+		adp.useLPF = enableLPF;
+		adp.useHPF = enableHPF;
 
-        float xnL = inputs[INPUT_LEFT].getVoltage();
-        float xnR = inputs[INPUT_RIGHT].getVoltage();
-
-        float i[2] = {xnL, xnR};
-        float o[2] = {0.0, 0.0};
-
-		audioDelay.processAudioFrame(i,o,2,2);
-
-		outputs[OUTPUT_LEFT].setVoltage(o[0]);
-        outputs[OUTPUT_RIGHT].setVoltage(o[1]);
+		processChannel<rack::simd::float_4>(inputs[INPUT_LEFT], inputs[INPUT_RIGHT],outputs[OUTPUT_LEFT], outputs[OUTPUT_RIGHT] );
 	}
 }
-
-struct buttonPlusSmall : SvgSwitch  {
-	buttonPlusSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonPlus_1.svg")));
-	}
-};
-
-struct buttonMinSmall : SvgSwitch  {
-	buttonMinSmall() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/ButtonMin_1.svg")));
-	}
-};
 
 struct CircularRideModuleWidget : ModuleWidget {
 	CircularRideModuleWidget(CircularRide* module) {
@@ -73,95 +95,44 @@ struct CircularRideModuleWidget : ModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CircularRide.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("CIRCULARRIDE");
-			addChild(title);
-		}
         {
-			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(54,40));
+			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(76,30));
 			ad->module = module;
 			addChild(ad);
 		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
-			tl->setText("Stereo Delay");
-			addChild(tl);
-		}	
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 60));
-			tl->setText("DELAY");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(60, 60));
-			tl->setText("FEEDBACK");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(40, 100));
-			tl->setText("RATIO");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(20,160),10);
-			tl->setText("Left+Ratio");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(20, 200),10);
-			tl->setText("Left&Right");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(10, 200));
-			tl->setText("DRY");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(85, 200));
-			tl->setText("WET");
-			addChild(tl);
-		}		
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 260));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(82, 260));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 278));
-			tl->setText("L");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 310));
-			tl->setText("R");
-			addChild(tl);
-		}
 
-		addInput(createInput<PJ301MPort>(Vec(10, 290), module, CircularRide::INPUT_LEFT));
-        addInput(createInput<PJ301MPort>(Vec(10, 320), module, CircularRide::INPUT_RIGHT));
-		addOutput(createOutput<PJ301MPort>(Vec(82, 290), module, CircularRide::OUTPUT_LEFT));
-        addOutput(createOutput<PJ301MPort>(Vec(82, 320), module, CircularRide::OUTPUT_RIGHT));
+		addInput(createInput<PJ301MPort>(Vec(89, 290), module, CircularRide::INPUT_LEFT));
+        addInput(createInput<PJ301MPort>(Vec(89, 320), module, CircularRide::INPUT_RIGHT));
+		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
+        addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
 		
-        addParam(createParam<RoundBlackKnob>(Vec(8,90),module, CircularRide::PARAM_DELAY));
-        addParam(createParam<RoundBlackKnob>(Vec(82,90),module, CircularRide::PARAM_FEEDBACK));
-        addParam(createParam<RoundBlackKnob>(Vec(45,130),module, CircularRide::PARAM_RATIO));
+        addParam(createParam<RPJKnob>(Vec(9,90),module, CircularRide::PARAM_DELAYL));
+		addParam(createParam<RPJKnob>(Vec(67,90),module, CircularRide::PARAM_DELAYC));
+		addParam(createParam<RPJKnob>(Vec(125,90),module, CircularRide::PARAM_DELAYR));
+        addParam(createParam<RPJKnob>(Vec(125,155),module, CircularRide::PARAM_FEEDBACK));
+        addParam(createParam<RPJKnob>(Vec(9,155),module, CircularRide::PARAM_RATIO));
+        addParam(createParam<buttonMinSmall>(Vec(42,45),module, CircularRide::PARAM_DOWN));
+		addParam(createParam<buttonPlusSmall>(Vec(113,45),module, CircularRide::PARAM_UP));
+        addParam(createParam<RPJKnob>(Vec(9,237),module, CircularRide::PARAM_LPFFC));
+		addParam(createParam<RPJKnob>(Vec(47, 237), module, CircularRide::PARAM_DRY));
+		addParam(createParam<RPJKnob>(Vec(87, 237), module, CircularRide::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(125,237),module, CircularRide::PARAM_HPFFC));
+        addParam(createParam<Toggle2P>(Vec(65, 170), module, CircularRide::PARAM_TYPE));
+	}
 
-        addParam(createParam<buttonMinSmall>(Vec(20,55),module, CircularRide::PARAM_DOWN));
-		addParam(createParam<buttonPlusSmall>(Vec(91,55),module, CircularRide::PARAM_UP));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 230), module, CircularRide::PARAM_DRY));
-       	addParam(createParam<RoundBlackKnob>(Vec(82, 230), module, CircularRide::PARAM_WET));
-        addParam(createParam<Toggle2P>(Vec(42, 180), module, CircularRide::PARAM_TYPE)); 
+	void appendContextMenu(Menu *menu) override {
+		CircularRide *module = dynamic_cast<CircularRide*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(rack::createBoolPtrMenuItem("Enable Low Pass Filter", "", &module->enableLPF));
+		menu->addChild(rack::createBoolPtrMenuItem("Enable High Pass Filter", "", &module->enableHPF));
 	}
 };
 
@@ -204,16 +175,19 @@ void AlgorithmDisplay::setColor(unsigned char r, unsigned char g, unsigned char 
 	txtCol.a = a;
 }
 
-void AlgorithmDisplay::draw(const DrawArgs &args) {
-	char tbuf[11];
+void AlgorithmDisplay::drawLayer(const DrawArgs &args,int layer) {
+	if (layer == 1) {
+		char tbuf[11];
 
-	if (module == NULL) return;
+		if (module == NULL) return;
 
-	std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioDelay.getParameters().strAlgorithm[0]);
+		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
-	TransparentWidget::draw(args);
-	drawBackground(args);
-	drawValue(args, tbuf);
+		TransparentWidget::draw(args);
+		drawBackground(args);
+		drawValue(args, tbuf);
+	}
+	TransparentWidget::drawLayer(args,layer);
 }
 
 void AlgorithmDisplay::drawBackground(const DrawArgs &args) {
@@ -255,7 +229,6 @@ Toggle2P::Toggle2P() {
 
 	// no shadow for switches
 	shadow->opacity = 0.0f;
-
 	neg = pos = 0;
 }
 
@@ -264,22 +237,33 @@ void Toggle2P::onChange(const event::Change &e) {
 
 	SvgSwitch::onChange(e);
 
-	if (paramQuantity->getValue() > 0.5f)
-		paramQuantity->setValue(1.0f);
+	if (getParamQuantity()->getValue() > 0.5f)
+		getParamQuantity()->setValue(1.0f);
 	else
-		paramQuantity->setValue(0.0f);
+		getParamQuantity()->setValue(0.0f);
 }
 
+json_t *CircularRide::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_DELAY_ALGORITHM_KEY, json_integer(static_cast<int>(adp.algorithm)));
+	json_object_set_new(rootJ, JSON_ENABLE_LPF_KEY, json_boolean(enableLPF));
+	json_object_set_new(rootJ, JSON_ENABLE_HPF_KEY, json_boolean(enableHPF));
+	return rootJ;
+}
 
-// override the base randomizer as it sets switches to invalid values.
-void Toggle2P::randomize() {
-	SvgSwitch::randomize();
-
-	if (paramQuantity->getValue() > 0.5f)
-		paramQuantity->setValue(1.0f);
-	else
-		paramQuantity->setValue(0.0f);
-}	
-
+void CircularRide::dataFromJson(json_t *rootJ) {
+	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_DELAY_ALGORITHM_KEY);
+	json_t *nLPFJ = json_object_get(rootJ, JSON_ENABLE_LPF_KEY);
+	json_t *nHPFJ = json_object_get(rootJ, JSON_ENABLE_HPF_KEY);
+	if (nAlgorithmJ) {
+		adp.algorithm=static_cast<delayAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+	if (nLPFJ) {
+		enableLPF=json_boolean_value(nLPFJ);
+	}
+	if (nHPFJ) {
+		enableHPF=json_boolean_value(nHPFJ);
+	}
+}
 
 Model * modelCircularRide = createModel<CircularRide, CircularRideModuleWidget>("CircularRide");

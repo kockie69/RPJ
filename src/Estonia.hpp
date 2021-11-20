@@ -4,6 +4,7 @@
 using namespace rack;
 
 const int MODULE_WIDTH=6;
+const char *JSON_FILTER_ALGORITHM_KEY="Algorithm";
 		
 struct Estonia : Module {
 
@@ -34,20 +35,25 @@ struct Estonia : Module {
 	};
 
 		Estonia();
-		AudioFilter audioFilter;
+		void processChannel(Input&, Output&);
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override;
+		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
+		std::string strAlgorithm;
 };
 
-struct FilterNameDisplay : TransparentWidget {
+struct EstoniaFilterNameDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	Estonia* module;
 	const int fh = 12; // font height
 
 
-	FilterNameDisplay(Vec pos) {
+	EstoniaFilterNameDisplay(Vec pos) {
 		box.pos = pos;
 		box.size.y = fh;
 		box.size.x = fh;
@@ -55,7 +61,7 @@ struct FilterNameDisplay : TransparentWidget {
 		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 	}
 
-	FilterNameDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	EstoniaFilterNameDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 		box.pos = pos;
 		box.size.y = fh;
 		box.size.x = fh;
@@ -70,17 +76,18 @@ struct FilterNameDisplay : TransparentWidget {
 		txtCol.a = a;
 	}
 
-	void draw(const DrawArgs &args) override {
-		char tbuf[11];
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			char tbuf[11];
 
-		if (module == NULL) return;
+			if (module == NULL) return;
 
-		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioFilter.getParameters().strAlgorithm[0]);
+			std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
-		TransparentWidget::draw(args);
-		drawBackground(args);
-		drawValue(args, tbuf);
-
+			TransparentWidget::draw(args);
+			drawBackground(args);
+			drawValue(args, tbuf);
+		}
 	}
 
 	void drawBackground(const DrawArgs &args) {

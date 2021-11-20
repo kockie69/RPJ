@@ -2,7 +2,7 @@ name: Build VCV Rack Plugin Development
 on: [workflow_dispatch,push,pull_request]
 
 env:
-  rack-sdk-version: 042a9ce0
+  rack-sdk-version: 588342d7
 
 defaults:
   run:
@@ -21,6 +21,7 @@ jobs:
               arch: lin
               compiler: cc
               install-dependencies: |
+                sudo apt-get update
                 sudo apt-get install libglu1-mesa-dev 
             - os: macos-latest
               name: Mac

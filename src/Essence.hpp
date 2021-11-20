@@ -35,9 +35,14 @@ struct Essence : Module {
 	};
 
 		Essence();
-		AudioFilter audioFilter;
+		void processChannel(Input&, Output&);
+		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override; 
 		AudioFilterParameters afp;
+		biquadAlgorithm bqa;
 };
 
 

@@ -1,14 +1,42 @@
 #include "RPJ.hpp"
+#include "ctrl/RPJKnobs.hpp"
 #include "BlindCurve.hpp"
 
 BlindCurve::BlindCurve() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
+	configInput(INPUT_MAIN, "Audio");
+	configOutput(OUTPUT_MAIN, "Audio");
     configParam(PARAM_ATK, 1.f, 250.0f,20.f, "Attack"," mSec");
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
 	configParam<DetectModeQuantity>(PARAM_MODE, 0.f, 2.f, 0.f, "Detect Mode");
+	for (int i=0;i<4;i++) {
+		audioDetector[i].reset(APP->engine->getSampleRate());
+	}
+}
 
-	audioDetector.reset(14400);
+void BlindCurve::onSampleRateChange() {
+	for (int i=0;i<4;i++) {
+		audioDetector[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void BlindCurve::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioDetector[c/4].setParameters(adp);
+			output = audioDetector[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void BlindCurve::process(const ProcessArgs &args) {
@@ -20,9 +48,8 @@ void BlindCurve::process(const ProcessArgs &args) {
 		adp.detectMode = static_cast<int>(params[PARAM_MODE].getValue());
 		adp.clampToUnityMax = true;
 		adp.detect_dB = false;
-		audioDetector.setParameters(adp);
-		float out = audioDetector.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out * 5);
+		
+		processChannel(inputs[INPUT_MAIN], outputs[OUTPUT_MAIN]);
 	}
 }
 
@@ -36,73 +63,20 @@ struct BlindCurveModuleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("BLINDCURVE");
-			addChild(title);
-		}
-				{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 17),10,MODULE_WIDTH);
-			tl->setText("Audio Detector");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 30));
-			tl->setText("ATTACK");
-			addChild(tl);
-		}
-        {
-			RPJTextLabel * tl = new RPJTextLabel(Vec(35, 80));
-			tl->setText("RELEASE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 170));
-			tl->setText("DETECT MODE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(8, 220),10);
-			tl->setText("PEAK");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(39, 189),10);
-			tl->setText("MS");
-			addChild(tl);
-		}	
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 220),10);
-			tl->setText("RMS");
-			addChild(tl);
-		}				
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 260));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-
-		addInput(createInput<PJ301MPort>(Vec(10, 290), module, BlindCurve::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, BlindCurve::OUTPUT_MAIN));
+	
+		addInput(createInput<PJ301MPort>(Vec(33, 255), module, BlindCurve::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(33, 310), module, BlindCurve::OUTPUT_MAIN));
 		
-		addParam(createParam<RoundBlackKnob>(Vec(8, 60), module, BlindCurve::PARAM_ATK));
-       	addParam(createParam<RoundBlackKnob>(Vec(55, 110), module, BlindCurve::PARAM_REL)); 
+		addParam(createParam<RPJKnob>(Vec(31, 52), module, BlindCurve::PARAM_ATK));
+       	addParam(createParam<RPJKnob>(Vec(31, 115), module, BlindCurve::PARAM_REL)); 
 		{
-			auto w = createParam<RoundBlackKnob>(Vec(31,210), module, BlindCurve::PARAM_MODE);
+			auto w = createParam<RPJKnobSnap>(Vec(32,185), module, BlindCurve::PARAM_MODE);
 			auto k = dynamic_cast<SvgKnob*>(w);
-			k->snap = true;
 			k->minAngle = -0.75*M_PI;
 			k->maxAngle = 0.75*M_PI;
 			addParam(w);
 		}
 	}
-
 };
 
 std::string DetectModeQuantity::getDisplayValueString() {

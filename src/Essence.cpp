@@ -1,44 +1,60 @@
 #include "RPJ.hpp"
 #include "Essence.hpp"
+#include "ctrl/RPJKnobs.hpp"
 
 Essence::Essence() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
+	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kCQParaEQ;
+	for (int i = 0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Essence::onSampleRateChange() {
+	for (int i = 0;i<4;i++) {
+		audioFilter[i].reset(APP->engine->getSampleRate());
+	}
+}
+
+void Essence::processChannel(Input& in, Output& out) {
+		
+	// Get input
+	int channels = std::max(in.getChannels(), 1);
+	simd::float_4 v[4];
+	simd::float_4 output;
+	out.setChannels(channels);
+
+	for (int c = 0; c < channels; c += 4) {
+		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		if (out.isConnected()) {
+			audioFilter[c/4].setParameters(afp);
+			output = audioFilter[c/4].processAudioSample(v[c/4]);
+			output.store(out.getVoltages(c));
+		}
+	}
 }
 
 void Essence::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected()) {
-		audioFilter.setSampleRate(args.sampleRate);
 	
-		float cvfc = 1.f;
-		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = inputs[INPUT_CVFC].getVoltage();
-
-		float cvq = 1.f;
-		if (inputs[INPUT_CVQ].isConnected())
-			cvq = inputs[INPUT_CVQ].getVoltage();
-	
-		float cvb = 1.f;
-		if (inputs[INPUT_CVB].isConnected())
-			cvb = inputs[INPUT_CVB].getVoltage();
+		float cvfc = inputs[INPUT_CVFC].isConnected() ? inputs[INPUT_CVFC].getVoltage() : 1.f;
+		float cvq = inputs[INPUT_CVQ].isConnected() ? inputs[INPUT_CVQ].getVoltage() : 1.f;
+		float cvb = inputs[INPUT_CVB].isConnected() ? inputs[INPUT_CVB].isConnected() : 1.f;
  	
-		afp.fc = params[PARAM_FC].getValue() * rescale(cvfc,-10,10,0,1);
-		afp.Q = params[PARAM_Q].getValue() * rescale(cvq,-10,10,0,1);
-		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * rescale(cvb,-10,10,0,1);
-		afp.dry=0;
-		afp.wet=1;
-		afp.strAlgorithm = audioFilter.filterAlgorithmTxt[static_cast<int>(afp.algorithm)];
-		audioFilter.setParameters(afp);
-
-		float out = audioFilter.processAudioSample(inputs[INPUT_MAIN].getVoltage());
-		outputs[OUTPUT_MAIN].setVoltage(out);
+		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+		afp.Q = params[PARAM_Q].getValue() * cvq;
+		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() * cvb;
+		afp.bqa = bqa;
+		
+		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 	}
 }
 
@@ -53,53 +69,38 @@ struct EssenceModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		{
-			RPJTitle * title = new RPJTitle(box.size.x,MODULE_WIDTH);
-			title->setText("ESSENCE");
-			addChild(title);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 20),10,MODULE_WIDTH);
-			tl->setText("Parametric EQ Filter");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 50));
-			tl->setText("CUTOFF");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 110));
-			tl->setText("RESONANCE");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(1, 170));
-			tl->setText("BOOST/CUT");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(13, 270));
-			tl->setText("IN");
-			addChild(tl);
-		}
-		{
-			RPJTextLabel * tl = new RPJTextLabel(Vec(55, 290));
-			tl->setText("OUT");
-			addChild(tl);
-		}
-
-		addInput(createInput<PJ301MPort>(Vec(10, 300), module, Essence::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, Essence::OUTPUT_MAIN));
+		addInput(createInput<PJ301MPort>(Vec(33, 258), module, Essence::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(33, 315), module, Essence::OUTPUT_MAIN));
 		
-		addParam(createParam<RoundBlackKnob>(Vec(8, 80), module, Essence::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(8, 80), module, Essence::PARAM_FC));
 		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Essence::INPUT_CVFC));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 140), module, Essence::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(8, 140), module, Essence::PARAM_Q));
 		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Essence::INPUT_CVQ));
-		addParam(createParam<RoundBlackKnob>(Vec(8, 200), module, Essence::PARAM_BOOSTCUT_DB));
+		addParam(createParam<RPJKnob>(Vec(8, 200), module, Essence::PARAM_BOOSTCUT_DB));
 		addInput(createInput<PJ301MPort>(Vec(55, 202), module, Essence::INPUT_CVB));	
 	}
 
+	void appendContextMenu(Menu *menu) override {
+		Essence * module = dynamic_cast<Essence*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+
+	}
 };
+
+json_t *Essence::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	return rootJ;
+}
+
+void Essence::dataFromJson(json_t *rootJ) {
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
+	if (nBiquadAlgorithmJ) {
+		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+	}
+}
 
 Model * modelEssence = createModel<Essence, EssenceModuleWidget>("Essence");
