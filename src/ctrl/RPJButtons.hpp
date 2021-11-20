@@ -71,8 +71,8 @@ class RedButton : public ToggleButton {
 public:
     RedButton() {
 		rack::app::Switch::momentary = true;
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-up-grey.svg")));
-        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/oval-button-down.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/oval-button-up-grey.svg")));
+        addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/oval-button-down.svg")));
     }
 };
 
@@ -80,8 +80,8 @@ struct StartButton : ToggleButton  {
 	
 	StartButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Start_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Start_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Start_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {
@@ -96,8 +96,8 @@ struct StopButton : ToggleButton  {
 
 	StopButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Stop_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Stop_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Stop_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {
@@ -112,8 +112,8 @@ struct PauseButton : ToggleButton  {
 
 	PauseButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Pause_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Pause_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Pause_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {
@@ -129,8 +129,8 @@ struct FwdButton : ToggleButton  {
 
 	FwdButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Fwd_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Fwd_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Fwd_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {
@@ -145,8 +145,8 @@ struct RwdButton : ToggleButton  {
 
 	RwdButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Rwd_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Rwd_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Rwd_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {
@@ -161,8 +161,8 @@ struct EjectButton : ToggleButton  {
 
 	EjectButton() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_off.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Buttons/Ejct_line_on.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Ejct_line_off.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/Ejct_line_on.svg")));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer)override {

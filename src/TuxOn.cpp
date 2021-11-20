@@ -325,14 +325,14 @@ ButtonSVG::ButtonSVG() {
 	sw = new widget::SvgWidget;
 	fb->addChild(sw);
 
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Pause_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Rwd_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Fwd_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Ejct_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Stop_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Start_On.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Buttons/Black_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Black_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Pause_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Rwd_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Fwd_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Ejct_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Stop_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Start_On.svg")));
+	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/buttons/Black_On.svg")));
 }
 
 void ButtonSVG::addFrame(std::shared_ptr<Svg> svg) {
