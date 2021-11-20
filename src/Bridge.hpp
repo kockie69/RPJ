@@ -17,6 +17,7 @@ struct Bridge : Module {
 };
 
 std::vector<bridgeChannel> Bridge::bridgeBus;
+struct BridgeIn;
 
 template <typename T>
 struct BridgeDisplay : TransparentWidget {
@@ -128,11 +129,12 @@ struct BridgeOut : Bridge {
 		void removeSubscriber(int64_t, int);
 		void updateSubscriber(int);
 		bool connected(int);
-		uint64_t getPublisherId(int cid);
+		int64_t getPublisherId(int cid);
 		rack::engine::Module* bridgeSource;
 		int cid;
 		json_t *rootJ2;
 		rack::app::ModuleWidget* modwid;
+		BridgeIn *publisherModule;
 
 	json_t* dataToJson() override {
 		json_t *rootJ=json_object();
@@ -144,8 +146,9 @@ struct BridgeOut : Bridge {
 		json_t *nIdJ = json_object_get(rootJ, JSON_ID);
 		if (nIdJ) {
 			cid = (json_integer_value(nIdJ));
-			if (cid!=0)
+			if (cid!=0) {
 				BridgeOut::addSubscriber(cid);
+			}
 		}
 	}
 };
@@ -199,8 +202,10 @@ struct BridgeIn : Bridge {
 		json_t *nIdJ = json_object_get(rootJ, JSON_ID);
 		if (nIdJ) {
 			cid = (json_integer_value(nIdJ));
-			if (cid!=0)
-				BridgeIn::addPublisher(cid);
+			if (cid!=0) {
+				if (idIsFree(cid))
+					BridgeIn::addPublisher(cid);
+			}
 		}
 	}
 };

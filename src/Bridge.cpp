@@ -358,8 +358,8 @@ bool BridgeOut::connected(int cid) {
 	return conn;
 }
 
-uint64_t BridgeOut::getPublisherId(int cid) {
-	uint64_t publisherId = 0;
+int64_t BridgeOut::getPublisherId(int cid) {
+	int64_t publisherId = 0;
 	for (unsigned i=0; i<bridgeBus.size(); ++i) {
 			if ( bridgeBus[i].channelId == cid) {
 				publisherId = bridgeBus[i].publisher;
@@ -372,19 +372,19 @@ uint64_t BridgeOut::getPublisherId(int cid) {
 void BridgeOut::process(const ProcessArgs &args) {
 	simd::float_4 output;
 	int channels;
-	Module *publisherModule;
 
 	if (cid != 0) {
-		uint64_t publisherId = getPublisherId(cid);
-		if (publisherId) {
-			publisherModule = APP->engine->getModule(publisherId);
-			for (int i=0;i<8;i++) {
-				if (publisherModule->inputs[i].isConnected() && outputs[i].isConnected()) {
-					channels = publisherModule->inputs[i].getChannels();
-					outputs[i].setChannels(channels);
+		int64_t publisherId = getPublisherId(cid);
+		if (publisherId!=0) {
+			//publisherModule = dynamic_cast<BridgeIn*>(APP->engine->getModule(publisherId));
+			int numberOfPorts = std::min(publisherModule->getNumInputs(),getNumOutputs());
+			for (int i=0;i<numberOfPorts;i++) {
+				if (publisherModule->inputs[BridgeIn::POLYINPUT_A + i].isConnected() && outputs[POLYOUTPUT_A + i].isConnected()) {
+					channels = publisherModule->inputs[BridgeIn::POLYINPUT_A + i].getChannels();
+					outputs[POLYOUTPUT_A + i].setChannels(channels);
 					for (int c=0;c<channels;c+=4) {
-						output = simd::float_4::load(publisherModule->inputs[i].getVoltages(c));
-						output.store(outputs[i].getVoltages(c));
+						output = simd::float_4::load(publisherModule->inputs[BridgeIn::POLYINPUT_A + i].getVoltages(c));
+						output.store(outputs[POLYOUTPUT_A + i].getVoltages(c));
 					}
 				}
 			}
@@ -521,6 +521,7 @@ if (e.action == GLFW_PRESS || e.action == GLFW_REPEAT) {
 			if(regex_match(getText(), std::regex("[0-9]+"))) {
 				if (stoi(getText()) >  0) {
 					module->updateSubscriber(stoi(getText()));
+					module->publisherModule = dynamic_cast<BridgeIn*>(APP->engine->getModule(module->getPublisherId(module->cid)));
 					getAncestorOfType<ui::MenuOverlay>()->requestDelete();
 				}
 			}
