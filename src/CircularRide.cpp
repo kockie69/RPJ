@@ -24,6 +24,8 @@ CircularRide::CircularRide() {
 		audioDelay[i].createDelayBuffers(APP->engine->getSampleRate(),2000);
 	}
 	strAlgorithm = "Normal";
+	prevSampleTime = 0;
+	delta = 0;
 }
 
 void CircularRide::onSampleRateChange() {
@@ -74,9 +76,21 @@ void CircularRide::process(const ProcessArgs &args) {
         adp.delayRatio_Pct = params[PARAM_RATIO].getValue();;
         adp.dryLevel_dB = params[PARAM_DRY].getValue();
 		adp.feedback_Pct  = params[PARAM_FEEDBACK].getValue();
-		adp.leftDelay_mSec=params[PARAM_DELAYL].getValue();
-		adp.centreDelay_mSec=params[PARAM_DELAYC].getValue();
-		adp.rightDelay_mSec=params[PARAM_DELAYR].getValue();
+		if (inputs[INPUT_SYNC].isConnected()) {
+			delta++;
+			if (syncTrigger.process(rescale(inputs[INPUT_SYNC].getVoltage(), 1.f, 0.1f, 0.f, 1.f))) {
+				delta = delta * args.sampleTime * 1000;
+				adp.leftDelay_mSec=delta;
+				adp.centreDelay_mSec=delta;
+				adp.rightDelay_mSec=delta;
+				delta=0;
+			}
+		}
+		else {
+			adp.leftDelay_mSec=params[PARAM_DELAYL].getValue();
+			adp.centreDelay_mSec=params[PARAM_DELAYC].getValue();
+			adp.rightDelay_mSec=params[PARAM_DELAYR].getValue();
+		}
         adp.updateType = static_cast<delayUpdateType>(static_cast<int>(params[PARAM_TYPE].getValue()));
         adp.wetLevel_dB = params[PARAM_WET].getValue();
 		adp.lpfFc = params[PARAM_LPFFC].getValue();
@@ -109,6 +123,7 @@ struct CircularRideModuleWidget : ModuleWidget {
 
 		addInput(createInput<PJ301MPort>(Vec(89, 290), module, CircularRide::INPUT_LEFT));
         addInput(createInput<PJ301MPort>(Vec(89, 320), module, CircularRide::INPUT_RIGHT));
+		addInput(createInput<PJ301MPort>(Vec(11, 290), module, CircularRide::INPUT_SYNC));
 		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
         addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
 		

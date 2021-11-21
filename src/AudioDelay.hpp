@@ -371,7 +371,7 @@ public:
 		// --- check update type first:
 		if (parameters.updateType == delayUpdateType::kLeftAndRight)
 		{
-			// --- set left and right delay times
+			// --- set left, right and centre delay times
 			// --- calculate total delay time in samples + fraction
 			double newDelayInSamples_L = parameters.leftDelay_mSec*(samplesPerMSec);
 			double newDelayInSamples_C = parameters.centreDelay_mSec*(samplesPerMSec);
