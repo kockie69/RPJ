@@ -88,8 +88,14 @@ void CircularRide::process(const ProcessArgs &args) {
 		}
 		else {
 			adp.leftDelay_mSec=params[PARAM_DELAYL].getValue();
+			if (inputs[INPUT_DELAYLCV].isConnected())
+				adp.leftDelay_mSec=params[PARAM_DELAYL].getValue()*(inputs[INPUT_DELAYLCV].getVoltage()/10.f);
 			adp.centreDelay_mSec=params[PARAM_DELAYC].getValue();
+			if (inputs[INPUT_DELAYCCV].isConnected())
+				adp.centreDelay_mSec=params[PARAM_DELAYC].getValue()*(inputs[INPUT_DELAYCCV].getVoltage()/10.f);
 			adp.rightDelay_mSec=params[PARAM_DELAYR].getValue();
+			if (inputs[INPUT_DELAYRCV].isConnected())
+				adp.rightDelay_mSec=params[PARAM_DELAYR].getValue()*(inputs[INPUT_DELAYRCV].getVoltage()/10.f);
 		}
         adp.updateType = static_cast<delayUpdateType>(static_cast<int>(params[PARAM_TYPE].getValue()));
         adp.wetLevel_dB = params[PARAM_WET].getValue();
@@ -116,7 +122,7 @@ struct CircularRideModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
         {
-			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(76,30));
+			AlgorithmDisplay * ad = new AlgorithmDisplay(Vec(76,20));
 			ad->module = module;
 			addChild(ad);
 		}
@@ -124,16 +130,20 @@ struct CircularRideModuleWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(Vec(89, 290), module, CircularRide::INPUT_LEFT));
         addInput(createInput<PJ301MPort>(Vec(89, 320), module, CircularRide::INPUT_RIGHT));
 		addInput(createInput<PJ301MPort>(Vec(11, 290), module, CircularRide::INPUT_SYNC));
+		addInput(createInput<PJ301MPort>(Vec(11, 105), module, CircularRide::INPUT_DELAYLCV));
+		addInput(createInput<PJ301MPort>(Vec(69, 105), module, CircularRide::INPUT_DELAYCCV));
+		addInput(createInput<PJ301MPort>(Vec(127, 105), module, CircularRide::INPUT_DELAYRCV));
+
 		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
         addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
 		
-        addParam(createParam<RPJKnob>(Vec(9,90),module, CircularRide::PARAM_DELAYL));
-		addParam(createParam<RPJKnob>(Vec(67,90),module, CircularRide::PARAM_DELAYC));
-		addParam(createParam<RPJKnob>(Vec(125,90),module, CircularRide::PARAM_DELAYR));
+        addParam(createParam<RPJKnob>(Vec(9,70),module, CircularRide::PARAM_DELAYL));
+		addParam(createParam<RPJKnob>(Vec(67,70),module, CircularRide::PARAM_DELAYC));
+		addParam(createParam<RPJKnob>(Vec(125,70),module, CircularRide::PARAM_DELAYR));
         addParam(createParam<RPJKnob>(Vec(125,155),module, CircularRide::PARAM_FEEDBACK));
         addParam(createParam<RPJKnob>(Vec(9,155),module, CircularRide::PARAM_RATIO));
-        addParam(createParam<buttonMinSmall>(Vec(42,45),module, CircularRide::PARAM_DOWN));
-		addParam(createParam<buttonPlusSmall>(Vec(113,45),module, CircularRide::PARAM_UP));
+        addParam(createParam<buttonMinSmall>(Vec(42,35),module, CircularRide::PARAM_DOWN));
+		addParam(createParam<buttonPlusSmall>(Vec(113,35),module, CircularRide::PARAM_UP));
         addParam(createParam<RPJKnob>(Vec(9,237),module, CircularRide::PARAM_LPFFC));
 		addParam(createParam<RPJKnob>(Vec(47, 237), module, CircularRide::PARAM_DRY));
 		addParam(createParam<RPJKnob>(Vec(87, 237), module, CircularRide::PARAM_WET));

@@ -34,6 +34,9 @@ struct CircularRide : Module {
 		INPUT_LEFT,
         INPUT_RIGHT,
 		INPUT_SYNC,
+		INPUT_DELAYLCV,
+		INPUT_DELAYCCV,
+		INPUT_DELAYRCV,
 		NUM_INPUTS,
 	};
 
