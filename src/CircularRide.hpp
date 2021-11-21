@@ -33,6 +33,16 @@ struct CircularRide : Module {
 	enum InputIds {
 		INPUT_LEFT,
         INPUT_RIGHT,
+		INPUT_SYNC,
+		INPUT_DELAYLCV,
+		INPUT_DELAYCCV,
+		INPUT_DELAYRCV,
+		INPUT_RATIOCV,
+		INPUT_FBCV,
+		INPUT_DRYCV,
+		INPUT_LPFCV,
+		INPUT_WETCV,
+		INPUT_HPFCV,
 		NUM_INPUTS,
 	};
 
@@ -53,12 +63,14 @@ struct CircularRide : Module {
 		void processChannel(Input&, Input&, Output&, Output&);
 		void onSampleRateChange() override;
 
-        dsp::SchmittTrigger upTrigger,downTrigger;
+        dsp::SchmittTrigger upTrigger,downTrigger,syncTrigger;
 		AudioDelayParameters adp;
 		AudioDelay<rack::simd::float_4> audioDelay[4];
 		bool enableLPF = true;
 		bool enableHPF = true;
 		std::string strAlgorithm;
+		float prevSampleTime;
+		float delta;
 };
 
 struct DetectAlgorithmQuantity : public rack::engine::ParamQuantity {
