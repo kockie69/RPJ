@@ -73,9 +73,15 @@ void CircularRide::process(const ProcessArgs &args) {
 	strAlgorithm = delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
 	
 	if ((outputs[OUTPUT_LEFT].isConnected() || outputs[OUTPUT_RIGHT].isConnected()) && (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected())) {
-        adp.delayRatio_Pct = params[PARAM_RATIO].getValue();;
+		adp.delayRatio_Pct = params[PARAM_RATIO].getValue();
+		if (inputs[INPUT_RATIOCV].isConnected())
+			adp.delayRatio_Pct = params[PARAM_RATIO].getValue()*(inputs[INPUT_RATIOCV].getVoltage()/10.f);
         adp.dryLevel_dB = params[PARAM_DRY].getValue();
+		if (inputs[INPUT_DRYCV].isConnected())
+			adp.feedback_Pct = params[PARAM_DRY].getValue()*(inputs[INPUT_DRYCV].getVoltage()/10.f);
 		adp.feedback_Pct  = params[PARAM_FEEDBACK].getValue();
+		if (inputs[INPUT_FBCV].isConnected())
+			adp.feedback_Pct = params[PARAM_FEEDBACK].getValue()*(inputs[INPUT_FBCV].getVoltage()/10.f);
 		if (inputs[INPUT_SYNC].isConnected()) {
 			delta++;
 			if (syncTrigger.process(rescale(inputs[INPUT_SYNC].getVoltage(), 1.f, 0.1f, 0.f, 1.f))) {
@@ -99,8 +105,14 @@ void CircularRide::process(const ProcessArgs &args) {
 		}
         adp.updateType = static_cast<delayUpdateType>(static_cast<int>(params[PARAM_TYPE].getValue()));
         adp.wetLevel_dB = params[PARAM_WET].getValue();
-		adp.lpfFc = params[PARAM_LPFFC].getValue();
+		if (inputs[INPUT_WETCV].isConnected())
+			adp.wetLevel_dB = params[PARAM_WET].getValue()*(inputs[INPUT_WETCV].getVoltage()/10.f);
+ 		adp.lpfFc = params[PARAM_LPFFC].getValue();
+		if (inputs[INPUT_LPFCV].isConnected())
+			adp.lpfFc = params[PARAM_LPFFC].getValue()*(inputs[INPUT_LPFCV].getVoltage()/10.f); 
 		adp.hpfFc = params[PARAM_HPFFC].getValue();
+		if (inputs[INPUT_HPFCV].isConnected())
+			adp.hpfFc = params[PARAM_HPFFC].getValue()*(inputs[INPUT_HPFCV].getVoltage()/10.f);		
 		adp.useLPF = enableLPF;
 		adp.useHPF = enableHPF;
 
@@ -127,15 +139,21 @@ struct CircularRideModuleWidget : ModuleWidget {
 			addChild(ad);
 		}
 
-		addInput(createInput<PJ301MPort>(Vec(89, 290), module, CircularRide::INPUT_LEFT));
-        addInput(createInput<PJ301MPort>(Vec(89, 320), module, CircularRide::INPUT_RIGHT));
-		addInput(createInput<PJ301MPort>(Vec(11, 290), module, CircularRide::INPUT_SYNC));
+		addInput(createInput<PJ301MPort>(Vec(11, 320), module, CircularRide::INPUT_LEFT));
+        addInput(createInput<PJ301MPort>(Vec(11, 350), module, CircularRide::INPUT_RIGHT));
+		addInput(createInput<PJ301MPort>(Vec(49, 320), module, CircularRide::INPUT_SYNC));
 		addInput(createInput<PJ301MPort>(Vec(11, 105), module, CircularRide::INPUT_DELAYLCV));
 		addInput(createInput<PJ301MPort>(Vec(69, 105), module, CircularRide::INPUT_DELAYCCV));
 		addInput(createInput<PJ301MPort>(Vec(127, 105), module, CircularRide::INPUT_DELAYRCV));
+		addInput(createInput<PJ301MPort>(Vec(11, 190), module, CircularRide::INPUT_RATIOCV));
+		addInput(createInput<PJ301MPort>(Vec(127, 190), module, CircularRide::INPUT_FBCV));
+		addInput(createInput<PJ301MPort>(Vec(11, 272), module, CircularRide::INPUT_LPFCV));
+		addInput(createInput<PJ301MPort>(Vec(49, 272), module, CircularRide::INPUT_DRYCV));
+		addInput(createInput<PJ301MPort>(Vec(89, 272), module, CircularRide::INPUT_WETCV));
+		addInput(createInput<PJ301MPort>(Vec(127, 272), module, CircularRide::INPUT_HPFCV));
 
-		addOutput(createOutput<PJ301MPort>(Vec(126, 290), module, CircularRide::OUTPUT_LEFT));
-        addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_RIGHT));
+		addOutput(createOutput<PJ301MPort>(Vec(126, 320), module, CircularRide::OUTPUT_LEFT));
+        addOutput(createOutput<PJ301MPort>(Vec(126, 350), module, CircularRide::OUTPUT_RIGHT));
 		
         addParam(createParam<RPJKnob>(Vec(9,70),module, CircularRide::PARAM_DELAYL));
 		addParam(createParam<RPJKnob>(Vec(67,70),module, CircularRide::PARAM_DELAYC));
