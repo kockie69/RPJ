@@ -17,8 +17,8 @@ CircularRide::CircularRide() {
 	configParam(PARAM_UP, 0.0, 1.0, 0.0);
 	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
     configParam(PARAM_TYPE, 0.f, 1.f,0.f, "Delay Update Type");
-	configParam(PARAM_LPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
-	configParam(PARAM_HPFFC, 20.f, 20480.f, 1000.f, "fc"," Hz");
+	configParam(PARAM_LPFFC, 0.0909f, 1.f, 0.5f, "fc"," Hz", 2048, 10);
+	configParam(PARAM_HPFFC, 0.0909f, 1.f, 0.5f, "fc"," Hz", 2048, 10);
 	for (int i=0;i<4;i++) {
 		audioDelay[i].reset(APP->engine->getSampleRate());
 		audioDelay[i].createDelayBuffers(APP->engine->getSampleRate(),2000);
@@ -107,12 +107,12 @@ void CircularRide::process(const ProcessArgs &args) {
         adp.wetLevel_dB = params[PARAM_WET].getValue();
 		if (inputs[INPUT_WETCV].isConnected())
 			adp.wetLevel_dB = params[PARAM_WET].getValue()*(inputs[INPUT_WETCV].getVoltage()/10.f);
- 		adp.lpfFc = params[PARAM_LPFFC].getValue();
+		adp.lpfFc = pow(2048,params[PARAM_LPFFC].getValue()) * 10;
 		if (inputs[INPUT_LPFCV].isConnected())
-			adp.lpfFc = params[PARAM_LPFFC].getValue()*(inputs[INPUT_LPFCV].getVoltage()/10.f); 
-		adp.hpfFc = params[PARAM_HPFFC].getValue();
+			adp.lpfFc = pow(2048,params[PARAM_LPFFC].getValue()) * abs(inputs[INPUT_LPFCV].getVoltage()); 
+		adp.hpfFc = pow(2048,params[PARAM_HPFFC].getValue()) * 10;
 		if (inputs[INPUT_HPFCV].isConnected())
-			adp.hpfFc = params[PARAM_HPFFC].getValue()*(inputs[INPUT_HPFCV].getVoltage()/10.f);		
+			adp.hpfFc = pow(2048,params[PARAM_HPFFC].getValue()) * abs(inputs[INPUT_HPFCV].getVoltage()); 
 		adp.useLPF = enableLPF;
 		adp.useHPF = enableHPF;
 
