@@ -109,10 +109,10 @@ void CircularRide::process(const ProcessArgs &args) {
 			adp.wetLevel_dB = params[PARAM_WET].getValue()*(inputs[INPUT_WETCV].getVoltage()/10.f);
 		adp.lpfFc = pow(2048,params[PARAM_LPFFC].getValue()) * 10;
 		if (inputs[INPUT_LPFCV].isConnected())
-			adp.lpfFc = pow(2048,params[PARAM_LPFFC].getValue()) * inputs[INPUT_LPFCV].getVoltage(); 
+			adp.lpfFc = pow(2048,params[PARAM_LPFFC].getValue()) * abs(inputs[INPUT_LPFCV].getVoltage()); 
 		adp.hpfFc = pow(2048,params[PARAM_HPFFC].getValue()) * 10;
 		if (inputs[INPUT_HPFCV].isConnected())
-			adp.hpfFc = pow(2048,params[PARAM_HPFFC].getValue()) * inputs[INPUT_HPFCV].getVoltage(); 
+			adp.hpfFc = pow(2048,params[PARAM_HPFFC].getValue()) * abs(inputs[INPUT_HPFCV].getVoltage()); 
 		adp.useLPF = enableLPF;
 		adp.useHPF = enableHPF;
 
