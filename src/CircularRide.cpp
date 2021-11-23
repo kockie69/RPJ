@@ -260,7 +260,7 @@ void AlgorithmDisplay::drawValue(const DrawArgs &args, const char * txt) {
 
 	nvgFontSize(args.vg, fh);
 	nvgFontFaceId(args.vg, font->handle);
-	nvgTextLetterSpacing(args.vg, -2);
+	nvgTextLetterSpacing(args.vg, -1);
 	nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
 	nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));
 	nvgText(args.vg, c.x, c.y+fh-1, txt, NULL);
@@ -310,3 +310,4 @@ void CircularRide::dataFromJson(json_t *rootJ) {
 }
 
 Model * modelCircularRide = createModel<CircularRide, CircularRideModuleWidget>("CircularRide");
+
