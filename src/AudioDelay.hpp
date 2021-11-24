@@ -130,8 +130,12 @@ struct AudioDelay
 public:
 
 	AudioDelay() {
-		LPFaudioFilter.reset(APP->engine->getSampleRate());
-		HPFaudioFilter.reset(APP->engine->getSampleRate());
+		LPFaudioFilter_L.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_L.reset(APP->engine->getSampleRate());
+		LPFaudioFilter_C.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_C.reset(APP->engine->getSampleRate());
+		LPFaudioFilter_R.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_R.reset(APP->engine->getSampleRate());
 		LPFafp.algorithm=filterAlgorithm::kLPF1;
 		HPFafp.algorithm=filterAlgorithm::kHPF1;
 	} /* C-TOR */
@@ -155,6 +159,12 @@ public:
 		// --- create new buffer, will store sample rate and length(mSec)
 		createDelayBuffers(_sampleRate, bufferLength_mSec);
 
+		LPFaudioFilter_L.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_L.reset(APP->engine->getSampleRate());
+		LPFaudioFilter_C.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_C.reset(APP->engine->getSampleRate());
+		LPFaudioFilter_R.reset(APP->engine->getSampleRate());
+		HPFaudioFilter_R.reset(APP->engine->getSampleRate());
 		return true;
 	}
 	
@@ -222,19 +232,56 @@ public:
 		// --- read delay LEFT
 		T ynL = delayBuffer_L.readBuffer(delayInSamples_L);
 
-		// --- read delay LEFT
+		// --- read delay Center
 		T ynC = delayBuffer_C.readBuffer(delayInSamples_C);
 
 		// --- read delay RIGHT
 		T ynR = delayBuffer_R.readBuffer(delayInSamples_R);
 
+
+
+
+ 		LPFafp.fc = parameters.lpfFc;
+		HPFafp.fc = parameters.hpfFc;
+		LPFafp.dry = HPFafp.dry = 0;
+		LPFafp.wet = HPFafp.wet = 1;
+
+		// Check if LPF is enabled
+		T LPFOutL = (parameters.feedback_Pct / 100.0) * ynL;
+		T LPFOutC = (parameters.feedback_Pct / 100.0) * ynC;
+		T LPFOutR = (parameters.feedback_Pct / 100.0) * ynR;
+
+		if (parameters.useLPF) {
+			LPFaudioFilter_L.setParameters(LPFafp);
+			LPFOutL = LPFaudioFilter_L.processAudioSample(LPFOutL);
+			LPFaudioFilter_C.setParameters(LPFafp);
+			LPFOutC = LPFaudioFilter_C.processAudioSample(LPFOutC);
+			LPFaudioFilter_R.setParameters(LPFafp);
+			LPFOutR = LPFaudioFilter_R.processAudioSample(LPFOutR);
+		}
+
+		// Check if HPF is enabled 
+		T HPFOutL = LPFOutL;
+		T HPFOutC = LPFOutC;
+		T HPFOutR = LPFOutR;
+		if (parameters.useHPF) {
+			HPFaudioFilter_L.setParameters(HPFafp);
+			HPFOutL = HPFaudioFilter_L.processAudioSample(HPFOutL);
+			HPFaudioFilter_C.setParameters(HPFafp);
+			HPFOutC = HPFaudioFilter_C.processAudioSample(HPFOutC);
+			HPFaudioFilter_R.setParameters(HPFafp);
+			HPFOutR = HPFaudioFilter_R.processAudioSample(HPFOutR);
+		}
+
 		// --- create input for delay buffer with LEFT channel info
-		T dnL = xnL + (parameters.feedback_Pct / 100.0) * ynL;
+		T dnL = xnL + HPFOutL;
+
+		// T dnC = xnL + xnR + HPFOutC;
 
 		// --- create input for delay buffer with RIGHT channel info
-		T dnR = xnR + (parameters.feedback_Pct / 100.0) * ynR;
-
+		T dnR = xnR + HPFOutR;
 		// --- decode
+
 		if (parameters.algorithm == delayAlgorithm::kNormal)
 		{
 			// --- write to LEFT delay buffer with LEFT channel info
@@ -269,29 +316,9 @@ public:
 		
 			// TO DO: Check if LPF and HPF are enabled in the menu
 			// if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected()) {
-			LPFaudioFilter.setSampleRate(sampleRate);
-			HPFaudioFilter.setSampleRate(sampleRate);
- 	
- 			LPFafp.fc = parameters.lpfFc;
-			HPFafp.fc = parameters.hpfFc;
-			LPFafp.dry = HPFafp.dry = 0;
-			LPFafp.wet = HPFafp.wet = 1;
 
-			// Check if LPF is enabled
-			T LPFOut = (parameters.feedback_Pct / 100.0) * ynC; 
-			if (parameters.useLPF) {
-				LPFaudioFilter.setParameters(LPFafp);
-				LPFOut = LPFaudioFilter.processAudioSample(LPFOut);
-			}
 
-			// Check if HPF is enabled 
-			T HPFOut = LPFOut;
-			if (parameters.useHPF) {
-				HPFaudioFilter.setParameters(HPFafp);
-				HPFOut = HPFaudioFilter.processAudioSample(HPFOut);
-			}
-
-			T dnC = xnL + xnR + HPFOut;
+			T dnC = xnL + xnR + HPFOutC;
 
 			// --- write to LEFT delay buffer with LEFT channel info
 			delayBuffer_L.writeBuffer(xnL);
@@ -436,8 +463,11 @@ private:
 	CircularBuffer<T> delayBuffer_C;	///< LEFT delay buffer of doubles
 	CircularBuffer<T> delayBuffer_R;	///< RIGHT delay buffer of doubles
 
-	AudioFilter<T> LPFaudioFilter;
-	AudioFilter<T> HPFaudioFilter;
+	AudioFilter<T> LPFaudioFilter_L;
+	AudioFilter<T> HPFaudioFilter_L;
+	AudioFilter<T> LPFaudioFilter_C;
+	AudioFilter<T> HPFaudioFilter_C;
+	AudioFilter<T> LPFaudioFilter_R;
+	AudioFilter<T> HPFaudioFilter_R;
 	AudioFilterParameters LPFafp,HPFafp;
 };
-
