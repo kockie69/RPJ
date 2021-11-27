@@ -200,7 +200,7 @@ AlgorithmDisplay::AlgorithmDisplay(Vec pos) {
 	box.size.y = fh;
 	box.size.x = fh;
 	setColor(0xff, 0xff, 0xff, 0xff);
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 }
 
 AlgorithmDisplay::AlgorithmDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
@@ -208,7 +208,7 @@ AlgorithmDisplay::AlgorithmDisplay(Vec pos, unsigned char r, unsigned char g, un
 	box.size.y = fh;
 	box.size.x = fh;
 	setColor(r, g, b, a);
-	font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 }
 
 void AlgorithmDisplay::setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
@@ -219,7 +219,8 @@ void AlgorithmDisplay::setColor(unsigned char r, unsigned char g, unsigned char 
 }
 
 void AlgorithmDisplay::drawLayer(const DrawArgs &args,int layer) {
-	if (layer == 1) {
+	
+		if (layer == 1) {
 		char tbuf[11];
 
 		if (module == NULL) return;
@@ -257,9 +258,11 @@ void AlgorithmDisplay::drawBackground(const DrawArgs &args) {
 
 void AlgorithmDisplay::drawValue(const DrawArgs &args, const char * txt) {
 	Vec c = Vec(box.size.x/2, box.size.y);
+	std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 
 	nvgFontSize(args.vg, fh);
-	nvgFontFaceId(args.vg, font->handle);
+	if (font)
+		nvgFontFaceId(args.vg, font->handle);
 	nvgTextLetterSpacing(args.vg, -1);
 	nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
 	nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));

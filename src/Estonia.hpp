@@ -58,7 +58,7 @@ struct EstoniaFilterNameDisplay : TransparentWidget {
 		box.size.y = fh;
 		box.size.x = fh;
 		setColor(0xff, 0xff, 0xff, 0xff);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 	}
 
 	EstoniaFilterNameDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
@@ -66,7 +66,7 @@ struct EstoniaFilterNameDisplay : TransparentWidget {
 		box.size.y = fh;
 		box.size.x = fh;
 		setColor(r, g, b, a);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 	}
 
 	void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
@@ -114,9 +114,11 @@ struct EstoniaFilterNameDisplay : TransparentWidget {
 
 	void drawValue(const DrawArgs &args, const char * txt) {
 		Vec c = Vec(box.size.x/2, box.size.y);
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 
 		nvgFontSize(args.vg, fh);
-		nvgFontFaceId(args.vg, font->handle);
+		if (font)
+			nvgFontFaceId(args.vg, font->handle);
 		nvgTextLetterSpacing(args.vg, -2);
 		nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
 		nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));

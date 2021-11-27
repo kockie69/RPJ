@@ -83,7 +83,7 @@ struct DetectAlgorithmQuantity : public rack::engine::ParamQuantity {
 };
 
 struct AlgorithmDisplay : TransparentWidget {
-	std::shared_ptr<Font> font;
+	//std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	CircularRide* module;
 	const int fh = 12; // font height
