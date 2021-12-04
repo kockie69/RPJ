@@ -382,7 +382,20 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 		module->display->setDisplayFont(pluginInstance,asset::system("res/fonts/ShareTechMono-Regular.ttf"));
 		addChild(module->display);
 	}
+	else {
+		// Fill the display for the module browser
+		Display *display = new Display(WIDTH);
+		display->box.pos = Vec(5, 40);
+		display->box.size = Vec(WIDTH, 250);
+		display->setDisplayFont(pluginInstance,asset::system("res/fonts/ShareTechMono-Regular.ttf"));
+		display->fileDesc="And on Sunday your mates were toasting you with champagne down the pub";
 
+		// Draw waveform
+		/*for (int i=0; i < WIDTH-1; i++ ) {
+			display->displayBuff[i]=sin(i);
+		}*/
+		addChild(display);	
+	}
 	{
 		button = new ButtonSVG();
 		button->box.pos = Vec(192, 35);
