@@ -223,9 +223,10 @@ void AlgorithmDisplay::drawLayer(const DrawArgs &args,int layer) {
 		if (layer == 1) {
 		char tbuf[11];
 
-		if (module == NULL) return;
-
-		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
+		if (module == NULL)
+			std::snprintf(tbuf, sizeof(tbuf), "%s", "only life");
+		else 
+			std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
 		TransparentWidget::draw(args);
 		drawBackground(args);

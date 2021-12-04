@@ -1,44 +1,15 @@
 #include "rack.hpp"
 
-/**
-@dBTo_Raw
-\ingroup FX-Functions
-
-@brief converts dB to raw value
-
-\param dB - value to convert to raw
-\return the raw value
-*/
 inline double dB2Raw(double dB)
 {
 	return pow(10.0, (dB / 20.0));
 }
 
-
-
-/**
-@rawTo_dB
-\ingroup FX-Functions
-
-@brief calculates dB for given input
-
-\param raw - value to convert to dB
-\return the dB value
-*/
 inline double raw2dB(double raw)
 {
 	return 20.0*log10(raw);
 }
 
-/**
-@peakGainFor_Q
-\ingroup FX-Functions
-
-@brief calculates the peak magnitude for a given Q
-
-\param Q - the Q value
-\return the peak gain (not in dB)
-*/
 inline double peakGainFor_Q(double Q)
 {
 	// --- no resonance at or below unity
@@ -46,29 +17,11 @@ inline double peakGainFor_Q(double Q)
 	return (Q*Q) / (pow((Q*Q - 0.25), 0.5));
 }
 
-/**
-@dBPeakGainFor_Q
-\ingroup FX-Functions
-
-@brief calculates the peak magnitude in dB for a given Q
-
-\param Q - the Q value
-\return the peak gain in dB
-*/
 inline double dBPeakGainFor_Q(double Q)
 {
 	return raw2dB(peakGainFor_Q(Q));
 }
 
-/**
-@softClipWaveShaper
-\ingroup FX-Functions
-
-@brief calculates hyptan waveshaper
-\param xn - the input value
-\param saturation  - the saturation control
-\return the waveshaped output value
-*/
 template<typename T>
 inline T softClipWaveShaper(T xn, double saturation)
 {
@@ -76,108 +29,26 @@ inline T softClipWaveShaper(T xn, double saturation)
 	return sgn(xn)*(1.0 - exp(-fabs(saturation*xn)));
 }
 
-/**
-@sgn
-\ingroup FX-Functions
-
-@brief calculates sgn( ) of input
-\param xn - the input value
-\return -1 if xn is negative or +1 if xn is 0 or greater
-*/
 inline double sgn(double );
 
-
-/**
-@softClipWaveShaper
-\ingroup FX-Functions
-
-@brief calculates hyptan waveshaper
-\param xn - the input value
-\param saturation  - the saturation control
-\return the waveshaped output value
-*/
 inline double softClipWaveShaper(double , double );
 
-
-/**
-@dBTo_Raw
-\ingroup FX-Functions
-
-@brief converts dB to raw value
-
-\param dB - value to convert to raw
-\return the raw value
-*/
 inline double dB2Raw(double );
 
-/**
-@rawTo_dB
-\ingroup FX-Functions
-
-@brief calculates dB for given input
-
-\param raw - value to convert to dB
-\return the dB value
-*/
 inline double raw2dB(double );
 
-/**
-@peakGainFor_Q
-\ingroup FX-Functions
-
-@brief calculates the peak magnitude for a given Q
-
-\param Q - the Q value
-\return the peak gain (not in dB)
-*/
 inline double peakGainFor_Q(double);
 
-/**
-@dBPeakGainFor_Q
-\ingroup FX-Functions
-
-@brief calculates the peak magnitude in dB for a given Q
-
-\param Q - the Q value
-\return the peak gain in dB
-*/
 inline double dBPeakGainFor_Q(double Q);
 
-/**
-\enum vaFilterAlgorithm
-\ingroup Constants-Enums
-\brief
-Use this strongly typed enum to easily set the virtual analog filter algorithm
-
-- enum class vaFilterAlgorithm { kLPF1, kHPF1, kAPF1, kSVF_LP, kSVF_HP, kSVF_BP, kSVF_BS };
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 enum class vaFilterAlgorithm {
 	kLPF1, kHPF1, kAPF1, kSVF_LP, kSVF_HP, kSVF_BP, kSVF_BS
-}; // --- you will add more here...
+};
 
-/**
-\struct ZVAFilterParameters
-\ingroup FX-Objects
-\brief
-Custom parameter structure for the ZVAFilter object.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 struct ZVAFilterParameters
 {
 	ZVAFilterParameters();
-	/** all FXObjects parameter objects require overloaded= operator so remember to add new entries if you add new variables. */
-	//ZVAFilterParameters& operator=(const ZVAFilterParameters& );
 
-	// --- individual parameters
 	vaFilterAlgorithm filterAlgorithm = vaFilterAlgorithm::kSVF_LP;	///< va filter algorithm
 	rack::simd::float_4 fc = 1000.0;						///< va filter fc
 	double Q = 0.707;						///< va filter Q
@@ -189,46 +60,13 @@ struct ZVAFilterParameters
 };
 
 
-/**
-\class ZVAFilter
-\ingroup FX-Objects
-\brief
-The ZVAFilter object implements multpile Zavalishin VA Filters.
-Audio I/O:
-- Processes mono input to mono output.
-
-Control I/F:
-- Use BiquadParameters structure to get/set object params.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 template <typename T>
 class ZVAFilter
 {
 public:
-/**
-\class ZVAFilter
-\ingroup FX-Objects
-\brief
-The ZVAFilter object implements multpile Zavalishin VA Filters.
-Audio I/O:
-- Processes mono input to mono output.
-
-Control I/F:
-- Use BiquadParameters structure to get/set object params.
-
-\author Will Pirkle http://www.willpirkle.com
-\remark This object is included in Designing Audio Effects Plugins in C++ 2nd Ed. by Will Pirkle
-\version Revision : 1.0
-\date Date : 2018 / 09 / 7
-*/
 ZVAFilter() {}		/* C-TOR */
 ~ZVAFilter() {}		/* D-TOR */
 
-/** reset members to initialized state */
 bool reset(double _sampleRate)
 {
 	sampleRate = _sampleRate;
@@ -238,19 +76,11 @@ bool reset(double _sampleRate)
 	return true;
 }
 
-/** get parameters: note use of custom structure for passing param data */
-/**
-\return ZVAFilterParameters custom data structure
-*/
 ZVAFilterParameters getParameters()
 {
 	return zvaFilterParameters;
 }
 
-/** set parameters: note use of custom structure for passing param data */
-/**
-\param ZVAFilterParameters custom data structure
-*/
 void setParameters(const ZVAFilterParameters& params)
 {
 	T mask = rack::simd::operator!=(params.fc,zvaFilterParameters.fc);
@@ -267,22 +97,16 @@ void setParameters(const ZVAFilterParameters& params)
 		zvaFilterParameters = params;
 }
 
-/** return false: this object only processes samples */
 bool canProcessAudioFrame() { return false; }
 
-/** process input x(n) through the VA filter to produce return value y(n) */
-/**
-\param xn input
-\return the processed sample
-*/
 T processAudioSample(T xn)
 {
+	vaFilterAlgorithm filterAlgorithm = zvaFilterParameters.filterAlgorithm;
+	bool matchAnalogNyquistLPF = zvaFilterParameters.matchAnalogNyquistLPF;
+	
 	// --- with gain comp enabled, we reduce the input by
 	//     half the gain in dB at resonant peak
 	//     NOTE: you can change that logic here!
-	vaFilterAlgorithm filterAlgorithm = zvaFilterParameters.filterAlgorithm;
-	bool matchAnalogNyquistLPF = zvaFilterParameters.matchAnalogNyquistLPF;
-
 	if (zvaFilterParameters.enableGainComp)
 	{
 		double peak_dB = dBPeakGainFor_Q(zvaFilterParameters.Q);

@@ -82,9 +82,10 @@ struct EasterFilterNameDisplay : TransparentWidget {
 	void drawLayer(const DrawArgs &args, int layer) override {
 		if (layer == 1) {
 			char tbuf[11];
-			if (module == NULL) return;
-
-			std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
+			if (module == NULL)
+				std::snprintf(tbuf, sizeof(tbuf), "%s", "here again");
+			else 
+				std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
 			TransparentWidget::draw(args);
 			drawBackground(args);
