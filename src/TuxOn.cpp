@@ -388,12 +388,12 @@ TuxOnModuleWidget::TuxOnModuleWidget(TuxOn* module) {
 		display->box.pos = Vec(5, 40);
 		display->box.size = Vec(WIDTH, 250);
 		display->setDisplayFont(pluginInstance,asset::system("res/fonts/ShareTechMono-Regular.ttf"));
-		display->fileDesc="And on Sunday your mates were toasting you with champagne down the pub";
+		display->fileDesc="And on Sunday your mates were toasting you with champagne down the pub\n\n\n";
 
 		// Draw waveform
-		/*for (int i=0; i < WIDTH-1; i++ ) {
-			display->displayBuff[i]=sin(i);
-		}*/
+		for (int i=0; i < WIDTH-1; i++ ) {
+			display->displayBuff.push_back(rack::random::uniform()-0.5f);
+		}
 		addChild(display);	
 	}
 	{
