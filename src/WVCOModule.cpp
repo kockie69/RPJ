@@ -457,7 +457,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
         Comp::SNAP_PARAM));
 #endif
 
-    addParam(SqHelper::createParam<RPJKnob>(
+/*    addParam(SqHelper::createParam<RPJKnob>(
         icomp,
         Vec(39, knobY3),
         module,
@@ -484,7 +484,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
         module,
         Comp::RELEASE_PARAM));
     // addLabel(Vec(knobX4 + 4, knobY3 - labelAboveKnob), "R");
-
+*/
     // fourth row
     //PITCH MOD
 #if 1
