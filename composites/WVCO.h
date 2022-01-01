@@ -291,7 +291,8 @@ inline float WVCO<TBase>::convertOldShapeGain(float old) const {
 
 template <class TBase>
 inline void WVCO<TBase>::stepm() {
-    numChannels_m = std::max<int>(1, TBase::inputs[VOCT_INPUT].channels);
+    numChannels_m = std::max<int>(TBase::inputs[VOCT_INPUT].getChannels,TBase::inputs[GATE_INPUT].getChannels);
+    numChannels_m = std::max<int>(1,numChannels_m);
     WVCO<TBase>::outputs[WVCO<TBase>::MAIN_OUTPUT].setChannels(numChannels_m);
 
     numBanks_m = numChannels_m / 4;
@@ -532,7 +533,12 @@ inline void WVCO<TBase>::stepn_fullRate()
         // TODO: add CV (use getNormalPolyVoltage)
         dsp[bank].outputLevel = baseOutputLevel_m;
         if (enableAdsrLevel) {
-            dsp[bank].outputLevel *= adsr.get(bank);
+            // RPJ:: This were we can disable ADSR and read external ADSR
+            // dsp[bank].outputLevel *= adsr.get(bank);
+            Port& p = TBase::inputs[GATE_INPUT];
+            for (int i=0;i<numBanks_m;i++)
+            //float_4 g = p.getVoltageSimd<float_4>(i * 4);
+                dsp[bank].outputLevel *= p.getVoltageSimd<float_4>(i*bank);
         }
     }
 }

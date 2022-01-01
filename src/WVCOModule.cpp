@@ -13,6 +13,7 @@
 
 
 using Comp = WVCO<WidgetComposite>;
+using Input = ::rack::engine::Input;
 
 class DiscreteParamQuantity : public ParamQuantity {
 public:
