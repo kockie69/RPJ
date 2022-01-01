@@ -291,7 +291,7 @@ inline float WVCO<TBase>::convertOldShapeGain(float old) const {
 
 template <class TBase>
 inline void WVCO<TBase>::stepm() {
-    numChannels_m = std::max<int>(TBase::inputs[VOCT_INPUT].getChannels,TBase::inputs[GATE_INPUT].getChannels);
+    numChannels_m = std::max<int>(TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels());
     numChannels_m = std::max<int>(1,numChannels_m);
     WVCO<TBase>::outputs[WVCO<TBase>::MAIN_OUTPUT].setChannels(numChannels_m);
 
