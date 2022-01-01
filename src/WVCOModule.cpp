@@ -356,7 +356,7 @@ const float knobX4 = 169;
 
 const float knobY1 = 60;
 const float knobDeltaY = 70;
-const float knobY2 = 124;
+const float knobY2 = 154;
 const float knobY3 = 210;
 const float trimY = 276;
 const float trimX = 52;
@@ -377,15 +377,15 @@ public:
 void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
     // first row
-    addParam(SqHelper::createParam<RPJKnobSnap>(
+    addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX1, knobY1),
+        Vec(knobX1, knobY2),
         module,
-        Comp::OCTAVE_PARAM));
+        Comp::VCA_PARAM));
 
     //addLabel(Vec(knobX1 - 13, knobY1 - labelAboveKnob), "Octave");
 
-    addParam(SqHelper::createParam<RPJKnobSnap>(
+    addParam(SqHelper::createParam<RPJKnob>(
         icomp,
         Vec(knobX2, knobY1),
         module,
@@ -395,7 +395,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX3, knobY1),
+        Vec(knobX4, knobY2),
         module,
         Comp::FINE_TUNE_PARAM));
     //addLabel(Vec(knobX3 - 4, knobY1 - labelAboveKnob), "Fine");
@@ -417,7 +417,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     // 1 level
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX1, knobY2),
+        Vec(knobX1, knobY3),
         module,
         Comp::OUTPUT_LEVEL_PARAM));
     //addLabel(Vec(knobX1 - 8, knobY2 - labelAboveKnob), "Level");
@@ -441,7 +441,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     // 4 SHAPE
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX4, knobY2),
+        Vec(knobX4, knobY3),
         module,
         Comp::WAVESHAPE_GAIN_PARAM));
    // addLabel(Vec(knobX4 - 10, knobY2 - labelAboveKnob), "Shape");
@@ -449,13 +449,13 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
     // third row
 
-#if 1
+/*#if 1
     addParam(SqHelper::createParam<CKSSThree>(
         icomp,
         Vec(11, knobY3),
         module,
         Comp::SNAP_PARAM));
-#endif
+#endif*/
 
 /*    addParam(SqHelper::createParam<RPJKnob>(
         icomp,
@@ -487,13 +487,13 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 */
     // fourth row
     //PITCH MOD
-#if 1
+/*#if 1
     addParam(SqHelper::createParam<SqTrimpot24>(
         icomp,
         Vec(trimX, trimY),
         module,
         Comp::FM_DEPTH_PARAM));
-#endif
+#endif*/
 }
 
 const float switchRow = 164;
@@ -501,7 +501,7 @@ const float buttonXShift = 3;
 
 void WVCOWidget::addButtons(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
-    addParam(SqHelper::createParam<SqBlueButton>(
+    /*addParam(SqHelper::createParam<SqBlueButton>(
         icomp,
         Vec(knobX1, switchRow),
         module,
@@ -523,7 +523,7 @@ void WVCOWidget::addButtons(WVCOModule *module, std::shared_ptr<IComposite> icom
         icomp,
         Vec(knobX4, switchRow),
         module,
-        Comp::ADSR_SHAPE_PARAM));
+        Comp::ADSR_SHAPE_PARAM));*/
 }
 
 const float jacksX1 = 11;
@@ -533,63 +533,65 @@ const float jacksX3 = 93;
 const float jacksX4 = 134;
 const float jacksX5 = 175;
 
-const float jacksY1 = 276;
-const float jacksY2 = 327;
+const float jacksY1 = 120;
+const float jacksY2 = 174;
+const float jacksY3 = 276;
+const float jacksY4 = 327;
 
 void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
     //-------------------------------- first row ----------------------------------
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX1, jacksY1),
+        Vec(jacksX1, jacksY2),
         module,
         Comp::GATE_INPUT));
     ///addLabel(Vec(jacksX1 - 8, jacksY1 - labelAboveKnob), "Gate");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX3, jacksY1),
+        Vec(jacksX1, jacksY3),
         module,
         Comp::LINEAR_FM_DEPTH_INPUT));
     //addLabel(Vec(jacksX3 - 12, jacksY1 - labelAboveKnob), "Depth");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX4, jacksY1),
+        Vec(jacksX4, jacksY3),
         module,
         Comp::FEEDBACK_INPUT));
     //addLabel(Vec(jacksX4 - 8, jacksY1 - labelAboveKnob), "Fbck");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX5, jacksY1),
+        Vec(jacksX5, jacksY3),
         module,
         Comp::SHAPE_INPUT));
     //addLabel(Vec(jacksX5 - 12, jacksY1 - labelAboveKnob), "Shape");
 
     //----------------------------- second row -----------------------
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX1, jacksY2),
+        Vec(jacksX2, jacksY4),
         module,
         Comp::VOCT_INPUT));
     //addLabel(Vec(jacksX1 - 11, jacksY2 - labelAboveKnob), "V/Oct");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX2, jacksY2),
+        Vec(jacksX1, jacksY4),
         module,
         Comp::FM_INPUT));
     //addLabel(Vec(jacksX2 - 3, jacksY2 - labelAboveKnob), "FM");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX3, jacksY2),
+        Vec(jacksX2, jacksY3),
         module,
         Comp::LINEAR_FM_INPUT));
     //addLabel(Vec(jacksX3 - 6, jacksY2 - labelAboveKnob), "LFM");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX4, jacksY2),
+        Vec(jacksX4, jacksY4),
         module,
         Comp::SYNC_INPUT));
     //addLabel(Vec(jacksX4 - 9, jacksY2 - labelAboveKnob), "Sync");
 
     addOutput(createOutput<PJ301MPort>(
-        Vec(jacksX5, jacksY2),
+        Vec(jacksX5, jacksY4),
         module,
         Comp::MAIN_OUTPUT));
     //addLabel(Vec(jacksX5 - 7, jacksY2 - labelAboveKnob), "Out");

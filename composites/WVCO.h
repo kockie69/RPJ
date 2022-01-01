@@ -141,7 +141,7 @@ public:
     void init();
 
     enum ParamIds {
-        OCTAVE_PARAM,
+        VCA_PARAM,
         FREQUENCY_MULTIPLIER_PARAM,
         FINE_TUNE_PARAM,
         FM_DEPTH_PARAM,
@@ -234,7 +234,7 @@ private:
     float_4 baseFeedback_m = 0;
     float_4 baseOutputLevel_m = 1;  // 0..x
     float_4 baseOffset_m = 0;
-    bool enableAdsrLevel = false;
+    /*bool enableAdsrLevel = false;*/
     bool enableAdsrFeedback = false;
     bool enableAdsrFM = false;
     bool enableAdsrShape = false;
@@ -300,9 +300,10 @@ inline void WVCO<TBase>::stepm() {
         numBanks_m++;
     }
 
-    float basePitch = -4.0f + roundf(TBase::params[OCTAVE_PARAM].value) +
-                      TBase::params[FINE_TUNE_PARAM].value / 12.0f;
+    // float basePitch = -4.0f + roundf(TBase::params[OCTAVE_PARAM].value) +
+    //                  TBase::params[FINE_TUNE_PARAM].value / 12.0f;
 
+    float basePitch = -4.0f + TBase::params[FINE_TUNE_PARAM].value / 12.0f;
     const float q = float(log2(261.626));  // move up to pitch range of EvenVCO
     basePitch += q;
     basePitch_m = float_4(basePitch);
@@ -395,7 +396,7 @@ inline void WVCO<TBase>::stepm() {
 
     adsr.setNumChannels(numChannels_m);
 
-    enableAdsrLevel = TBase::params[ADSR_OUTPUT_LEVEL_PARAM].value > .5;
+    /*enableAdsrLevel = TBase::params[ADSR_OUTPUT_LEVEL_PARAM].value > .5;*/
     enableAdsrFeedback = TBase::params[ADSR_FBCK_PARAM].value > .5;
     enableAdsrFM = TBase::params[ADSR_LFM_DEPTH_PARAM].value > .5;
     enableAdsrShape = TBase::params[ADSR_SHAPE_PARAM].value > .5;
@@ -532,14 +533,13 @@ inline void WVCO<TBase>::stepn_fullRate()
 
         // TODO: add CV (use getNormalPolyVoltage)
         dsp[bank].outputLevel = baseOutputLevel_m;
-        if (enableAdsrLevel) {
-            // RPJ:: This were we can disable ADSR and read external ADSR
-            // dsp[bank].outputLevel *= adsr.get(bank);
-            Port& p = TBase::inputs[GATE_INPUT];
-            for (int i=0;i<numBanks_m;i++)
-            //float_4 g = p.getVoltageSimd<float_4>(i * 4);
-                dsp[bank].outputLevel *= p.getVoltageSimd<float_4>(i*bank);
-        }
+        // RPJ:: This is were we can disable ADSR and read external ADSR
+        // dsp[bank].outputLevel *= adsr.get(bank);
+        Port& p = TBase::inputs[GATE_INPUT];
+        Param& pa = TBase::params[VCA_PARAM];
+        for (int i=0;i<numBanks_m;i++)
+        //float_4 g = p.getVoltageSimd<float_4>(i * 4);
+            dsp[bank].outputLevel *= p.getVoltageSimd<float_4>(i*bank)/5.0f * pa.getValue();
     }
 }
 
@@ -602,11 +602,11 @@ template <class TBase>
 inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
     Config ret(0, 1, 0, "");
     switch (i) {
-        case WVCO<TBase>::OCTAVE_PARAM:
-            ret = {0.f, 10.0f, 4, "Octave"};
+        case WVCO<TBase>::VCA_PARAM:
+            ret = {.0f, 1.0f, 0.5f, "VCA"};
             break;
         case WVCO<TBase>::FREQUENCY_MULTIPLIER_PARAM:
-            ret = {0.f, 16.0f, 1, "Frequency Ratio"};
+            ret = {0.f, 32.0f, 1, "Frequency Ratio"};
             break;
         case WVCO<TBase>::FINE_TUNE_PARAM:
             ret = {-12.0f, 12.0f, 0, "Fine tune"};
