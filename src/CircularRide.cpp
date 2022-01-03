@@ -270,17 +270,17 @@ void AlgorithmDisplay::drawValue(const DrawArgs &args, const char * txt) {
 	nvgText(args.vg, c.x, c.y+fh-1, txt, NULL);
 }
 
-Toggle2P::Toggle2P() {
+/*Toggle2P::Toggle2P() {
 	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_0.svg")));
 	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_2.svg")));
 
 	// no shadow for switches
 	shadow->opacity = 0.0f;
 	neg = pos = 0;
-}
+}*/
 
 // handle the manually entered values
-void Toggle2P::onChange(const event::Change &e) {
+/*void Toggle2P::onChange(const event::Change &e) {
 
 	SvgSwitch::onChange(e);
 
@@ -288,7 +288,7 @@ void Toggle2P::onChange(const event::Change &e) {
 		getParamQuantity()->setValue(1.0f);
 	else
 		getParamQuantity()->setValue(0.0f);
-}
+}*/
 
 json_t *CircularRide::dataToJson() {
 	json_t *rootJ=json_object();

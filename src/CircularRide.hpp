@@ -101,7 +101,7 @@ struct AlgorithmDisplay : TransparentWidget {
 	void drawValue(const DrawArgs &, const char * );
 };
 
-struct Toggle2P : SvgSwitch {
+/*struct Toggle2P : SvgSwitch {
 	int pos;
 	int neg;
 
@@ -109,7 +109,7 @@ struct Toggle2P : SvgSwitch {
 
 	// handle the manually entered values
 	void onChange(const event::Change &) override;
-};
+};*/
 
 /* Context Menu Item for changing the LPF setting */
 struct nLPFMenuItem : MenuItem {

@@ -9,8 +9,7 @@
 #include "ctrl/SqHelper.h"
 #include "ctrl/SqMenuItem.h"
 #include "ctrl/PopupMenuParamWidget.h"
-#include "ctrl/ToggleButton.h"
-
+#include "ctrl/RPJButtons.hpp"
 
 using Comp = WVCO<WidgetComposite>;
 using Input = ::rack::engine::Input;
@@ -205,6 +204,9 @@ struct WVCOModule : Module
 {
 public:
     steppings stepping;
+    std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
+    std::string steppingTxt[6] = { "Legacy", "Legacy + SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
+
     WVCOModule();
     /**
      * Overrides of Module functions
@@ -285,6 +287,7 @@ void WVCOModule::step()
         checkForFormatUpgrade();
         haveCheckedFormat = true;
     }
+
     wvco->step();
 }
 
@@ -309,6 +312,7 @@ struct WVCOWidget : ModuleWidget
     }
  #endif
 
+    void addDisplays(WVCOModule *module, std::shared_ptr<IComposite> icomp);
     void addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp);
     void addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp);
     void addButtons(WVCOModule *module, std::shared_ptr<IComposite> icomp);
@@ -347,17 +351,194 @@ void WVCOWidget::appendContextMenu(Menu *menu)
     }
 }
 
+const float dispX1 = 150;
+const float dispY1 = 40;
+const float dispDeltaY = 48;
+const float dispY2 = dispY1 + dispDeltaY;
+
+struct RPJDisplay : TransparentWidget {
+	std::shared_ptr<Font> font;
+	NVGcolor txtCol;
+	WVCOModule* module;
+	const int fh = 12; // font height
+
+	RPJDisplay(Vec pos) {
+		box.pos = pos;
+		box.size.y = fh;
+		box.size.x = fh;
+		setColor(0xff, 0xff, 0xff, 0xff);
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	}
+
+	RPJDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+		box.pos = pos;
+		box.size.y = fh;
+		box.size.x = fh;
+		setColor(r, g, b, a);
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	}
+
+	void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+		txtCol.r = r;
+		txtCol.g = g;
+		txtCol.b = b;
+		txtCol.a = a;
+	}
+
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			char tbuf[11];
+			if (module == NULL)
+				std::snprintf(tbuf, sizeof(tbuf), "%s", "fly away");
+			else 
+				std::snprintf(tbuf, sizeof(tbuf), "%s", &module->waveFormTxt[module->wvco->wfFromUI][0]);
+		
+			TransparentWidget::draw(args);
+			drawBackground(args);
+			drawValue(args, tbuf);
+		}
+		TransparentWidget::drawLayer(args,layer);
+	}
+
+	void drawBackground(const DrawArgs &args) {
+		Vec c = Vec(box.size.x/2, box.size.y);
+		int whalf = 2.25*box.size.x;
+		int hfh = floor(fh / 2);
+
+		// Draw rounded rectangle
+		nvgFillColor(args.vg, nvgRGBA(0x00, 0x00, 0x00, 0xff));
+		{
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg, c.x -whalf, c.y +2);
+			nvgLineTo(args.vg, c.x +whalf, c.y +2);
+			nvgQuadTo(args.vg, c.x +whalf +5, c.y +2+hfh, c.x +whalf, c.y+fh+2);
+			nvgLineTo(args.vg, c.x -whalf, c.y+fh+2);
+			nvgQuadTo(args.vg, c.x -whalf -5, c.y +2+hfh, c.x -whalf, c.y +2);
+			nvgClosePath(args.vg);
+		}
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGBA(0x00, 0x00, 0x00, 0x0F));
+		nvgStrokeWidth(args.vg, 1.f);
+		nvgStroke(args.vg);
+	}
+
+	void drawValue(const DrawArgs &args, const char * txt) {
+		Vec c = Vec(box.size.x/2, box.size.y);
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+
+		nvgFontSize(args.vg, fh);
+		if (font)
+			nvgFontFaceId(args.vg, font->handle);
+		nvgTextLetterSpacing(args.vg, -2);
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
+		nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));
+		nvgText(args.vg, c.x, c.y+fh-1, txt, NULL);
+	}
+};
+
+struct RPJSteppingDisplay : TransparentWidget {
+	std::shared_ptr<Font> font;
+	NVGcolor txtCol;
+	WVCOModule* module;
+	const int fh = 12; // font height
+
+	RPJSteppingDisplay(Vec pos) {
+		box.pos = pos;
+		box.size.y = fh;
+		box.size.x = fh;
+		setColor(0xff, 0xff, 0xff, 0xff);
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	}
+
+	RPJSteppingDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+		box.pos = pos;
+		box.size.y = fh;
+		box.size.x = fh;
+		setColor(r, g, b, a);
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+	}
+
+	void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+		txtCol.r = r;
+		txtCol.g = g;
+		txtCol.b = b;
+		txtCol.a = a;
+	}
+
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			char tbuf[11];
+			if (module == NULL)
+				std::snprintf(tbuf, sizeof(tbuf), "%s", "fly away");
+			else 
+				std::snprintf(tbuf, sizeof(tbuf), "%s", &module->steppingTxt[module->wvco->steppingFromUI][0]);
+		
+			TransparentWidget::draw(args);
+			drawBackground(args);
+			drawValue(args, tbuf);
+		}
+		TransparentWidget::drawLayer(args,layer);
+	}
+
+	void drawBackground(const DrawArgs &args) {
+		Vec c = Vec(box.size.x/2, box.size.y);
+		int whalf = 2.25*box.size.x;
+		int hfh = floor(fh / 2);
+
+		// Draw rounded rectangle
+		nvgFillColor(args.vg, nvgRGBA(0x00, 0x00, 0x00, 0xff));
+		{
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg, c.x -whalf, c.y +2);
+			nvgLineTo(args.vg, c.x +whalf, c.y +2);
+			nvgQuadTo(args.vg, c.x +whalf +5, c.y +2+hfh, c.x +whalf, c.y+fh+2);
+			nvgLineTo(args.vg, c.x -whalf, c.y+fh+2);
+			nvgQuadTo(args.vg, c.x -whalf -5, c.y +2+hfh, c.x -whalf, c.y +2);
+			nvgClosePath(args.vg);
+		}
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, nvgRGBA(0x00, 0x00, 0x00, 0x0F));
+		nvgStrokeWidth(args.vg, 1.f);
+		nvgStroke(args.vg);
+	}
+
+	void drawValue(const DrawArgs &args, const char * txt) {
+		Vec c = Vec(box.size.x/2, box.size.y);
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+
+		nvgFontSize(args.vg, fh);
+		if (font)
+			nvgFontFaceId(args.vg, font->handle);
+		nvgTextLetterSpacing(args.vg, -2);
+		nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
+		nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));
+		nvgText(args.vg, c.x, c.y+fh-1, txt, NULL);
+	}
+};
+
+void WVCOWidget::addDisplays(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
+	RPJDisplay * wfd = new RPJDisplay(Vec(dispX1,dispY1));
+    wfd->module = module;
+	addChild(wfd);
+    
+    RPJSteppingDisplay * std = new RPJSteppingDisplay(Vec(dispX1,dispY2));
+	std->module = module;
+    addChild(std);
+    
+}
+
 //const float knobLeftEdge = 24;
 //const float knobDeltaX = 46;
-const float knobX1 = 11;
-const float knobX2 = 64;
-const float knobX3 = 116;
-const float knobX4 = 169;
+const float knobX1 = 9;
+const float knobDeltaX = 53;
+const float knobX2 = knobX1 + knobDeltaX;
+const float knobX3 = knobX2 + knobDeltaX;
+const float knobX4 = knobX3 + knobDeltaX;
 
-const float knobY1 = 60;
+const float knobY1 = 55;
 const float knobDeltaY = 70;
-const float knobY2 = 154;
-const float knobY3 = 210;
+const float knobY2 = 145;
+const float knobY3 = 245;
 const float trimY = 276;
 const float trimX = 52;
 //const float labelAboveKnob = 20;
@@ -372,10 +553,13 @@ public:
     }
 };
 
-
-
 void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
+    addParam(createParam<buttonMinSmall>(Vec(117,54),module, Comp::PARAM_WAVEFORM_DOWN));
+	addParam(createParam<buttonPlusSmall>(Vec(185,54),module, Comp::PARAM_WAVEFORM_UP));
+	addParam(createParam<buttonMinSmall>(Vec(117,103),module, Comp::PARAM_STEPPING_DOWN));
+	addParam(createParam<buttonPlusSmall>(Vec(185,103),module, Comp::PARAM_STEPPING_UP));
+    
     // first row
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
@@ -400,24 +584,23 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
         Comp::FINE_TUNE_PARAM));
     //addLabel(Vec(knobX3 - 4, knobY1 - labelAboveKnob), "Fine");
 
-    PopupMenuParamWidget* p = SqHelper::createParam<PopupMenuParamWidget>(
+    addParam(SqHelper::createParam<Toggle2P>(
         icomp,
-        Vec(knobX4-12, knobY1+2),
-        module,
-        Comp::WAVE_SHAPE_PARAM);
-    p->box.size.x = 48;  // width
-    p->box.size.y = 22;   
-    p->text = "Off";
-    p->setLabels( {"sine", "fold", "T/S"});
-    addParam(p);
+        Vec(knobX2, knobY2), 
+        module, 
+        Comp::LINEXP_PARAM));
 
-    //addLabel(Vec(knobX4 - 8, knobY1 - labelAboveKnob), "Wave");
+    addParam(SqHelper::createParam<Toggle2P>(
+        icomp,
+        Vec(knobX3, knobY2), 
+        module, 
+        Comp::POSINV_PARAM));
 
     // second row
     // 1 level
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX1, knobY3),
+        Vec(knobX3, knobY3),
         module,
         Comp::OUTPUT_LEVEL_PARAM));
     //addLabel(Vec(knobX1 - 8, knobY2 - labelAboveKnob), "Level");
@@ -425,7 +608,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     // 2 fm-0
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX2, knobY2),
+        Vec(knobX1, knobY3),
         module,
         Comp::LINEAR_FM_DEPTH_PARAM));
     //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
@@ -433,7 +616,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
   // 3 Fdbk
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
-        Vec(knobX3, knobY2),
+        Vec(knobX3, knobY3),
         module,
         Comp::FEEDBACK_PARAM));
     //addLabel(Vec(knobX3 - 6, knobY2 - labelAboveKnob), "Fbck");
@@ -448,90 +631,16 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
 
     // third row
-
-/*#if 1
-    addParam(SqHelper::createParam<CKSSThree>(
-        icomp,
-        Vec(11, knobY3),
-        module,
-        Comp::SNAP_PARAM));
-#endif*/
-
-/*    addParam(SqHelper::createParam<RPJKnob>(
-        icomp,
-        Vec(39, knobY3),
-        module,
-        Comp::ATTACK_PARAM));
-    // addLabel(Vec(knobX1 + 4, knobY3 - labelAboveKnob), "A");
-
-    addParam(SqHelper::createParam<RPJKnob>(
-        icomp,
-        Vec(82, knobY3),
-        module,
-        Comp::DECAY_PARAM));
-    // ddLabel(Vec(knobX2 + 4, knobY3 - labelAboveKnob), "D");
-
-    addParam(SqHelper::createParam<RPJKnob>(
-        icomp,
-        Vec(127, knobY3),
-        module,
-        Comp::SUSTAIN_PARAM));
-    // addLabel(Vec(knobX3 + 4, knobY3 - labelAboveKnob), "S");
-
-    addParam(SqHelper::createParam<RPJKnob>(
-        icomp,
-        Vec(169, knobY3),
-        module,
-        Comp::RELEASE_PARAM));
-    // addLabel(Vec(knobX4 + 4, knobY3 - labelAboveKnob), "R");
-*/
-    // fourth row
-    //PITCH MOD
-/*#if 1
-    addParam(SqHelper::createParam<SqTrimpot24>(
-        icomp,
-        Vec(trimX, trimY),
-        module,
-        Comp::FM_DEPTH_PARAM));
-#endif*/
 }
 
 const float switchRow = 164;
 const float buttonXShift = 3;
 
-void WVCOWidget::addButtons(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
-
-    /*addParam(SqHelper::createParam<SqBlueButton>(
-        icomp,
-        Vec(knobX1, switchRow),
-        module,
-        Comp::ADSR_OUTPUT_LEVEL_PARAM));
-
-    addParam(SqHelper::createParam<SqBlueButton>(
-        icomp,
-        Vec(knobX2, switchRow),
-        module,
-        Comp::ADSR_LFM_DEPTH_PARAM));
-   
-    addParam(SqHelper::createParam<SqBlueButton>(
-        icomp,
-        Vec(knobX3, switchRow),
-        module,
-        Comp::ADSR_FBCK_PARAM));
-
-    addParam(SqHelper::createParam<SqBlueButton>(
-        icomp,
-        Vec(knobX4, switchRow),
-        module,
-        Comp::ADSR_SHAPE_PARAM));*/
-}
-
 const float jacksX1 = 11;
-const float jacksDeltaX = 38;
-const float jacksX2 = 52;
-const float jacksX3 = 93;
-const float jacksX4 = 134;
-const float jacksX5 = 175;
+const float jacksDeltaX = 53;
+const float jacksX2 = jacksX1 + jacksDeltaX;
+const float jacksX3 = jacksX2 + jacksDeltaX;
+const float jacksX4 = jacksX3 + jacksDeltaX;
 
 const float jacksY1 = 120;
 const float jacksY2 = 174;
@@ -554,13 +663,13 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     //addLabel(Vec(jacksX3 - 12, jacksY1 - labelAboveKnob), "Depth");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX4, jacksY3),
+        Vec(jacksX3, jacksY3),
         module,
         Comp::FEEDBACK_INPUT));
     //addLabel(Vec(jacksX4 - 8, jacksY1 - labelAboveKnob), "Fbck");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX5, jacksY3),
+        Vec(jacksX4, jacksY3),
         module,
         Comp::SHAPE_INPUT));
     //addLabel(Vec(jacksX5 - 12, jacksY1 - labelAboveKnob), "Shape");
@@ -591,7 +700,7 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     //addLabel(Vec(jacksX4 - 9, jacksY2 - labelAboveKnob), "Sync");
 
     addOutput(createOutput<PJ301MPort>(
-        Vec(jacksX5, jacksY4),
+        Vec(jacksX4, jacksY4),
         module,
         Comp::MAIN_OUTPUT));
     //addLabel(Vec(jacksX5 - 7, jacksY2 - labelAboveKnob), "Out");
@@ -619,12 +728,12 @@ WVCOWidget::WVCOWidget(WVCOModule *mod) : module(mod)
 
     std::shared_ptr<IComposite> icomp = Comp::getDescription();
 
+    addDisplays(module, icomp);
     addKnobs(module, icomp);
-    addButtons(module, icomp);
     addJacks(module, icomp);
 
 }
 
-Model *modelWVCOModule = createModel<WVCOModule, WVCOWidget>("squinkylabs-wvco");
+Model *modelWVCOModule = createModel<WVCOModule, WVCOWidget>("rpj-wvco");
 
 

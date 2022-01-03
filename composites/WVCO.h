@@ -127,11 +127,13 @@ public:
 template <class TBase>
 class WVCO : public TBase {
 public:
+    int wfFromUI = 0;
+    int steppingFromUI = 0;
     WVCO(Module* module) : TBase(module) {
     }
     WVCO() : TBase() {
     }
-
+    
     /**
     * re-calc everything that changes with sample
     * rate. Also everything that depends on baseFrequency.
@@ -150,19 +152,13 @@ public:
         WAVE_SHAPE_PARAM,
         FEEDBACK_PARAM,
         OUTPUT_LEVEL_PARAM,  // 8
-
-        ATTACK_PARAM,
-        DECAY_PARAM,
-        SUSTAIN_PARAM,
-        RELEASE_PARAM,  // 12
-
-        ADSR_SHAPE_PARAM,
-        ADSR_FBCK_PARAM,
-        ADSR_OUTPUT_LEVEL_PARAM,
-        ADSR_LFM_DEPTH_PARAM,
-        SNAP_PARAM,
-        SNAP2_PARAM,          // This is unused now
+        LINEXP_PARAM,
+        POSINV_PARAM,
         PATCH_VERSION_PARAM,  // just for backwards compatibility with patch loading 19
+        PARAM_STEPPING_DOWN,
+        PARAM_STEPPING_UP,
+        PARAM_WAVEFORM_DOWN,
+        PARAM_WAVEFORM_UP,
         NUM_PARAMS
     };
 
@@ -234,11 +230,11 @@ private:
     float_4 baseFeedback_m = 0;
     float_4 baseOutputLevel_m = 1;  // 0..x
     float_4 baseOffset_m = 0;
-    /*bool enableAdsrLevel = false;*/
+
     bool enableAdsrFeedback = false;
     bool enableAdsrFM = false;
     bool enableAdsrShape = false;
-
+    dsp::SchmittTrigger waveFormUpTrigger,waveFormDownTrigger,steppingUpTrigger,steppingDownTrigger;
     float_4 getOscFreq(int bank);
 
     /**
@@ -294,7 +290,7 @@ inline void WVCO<TBase>::stepm() {
     numChannels_m = std::max<int>(TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels());
     numChannels_m = std::max<int>(1,numChannels_m);
     WVCO<TBase>::outputs[WVCO<TBase>::MAIN_OUTPUT].setChannels(numChannels_m);
-
+    
     numBanks_m = numChannels_m / 4;
     if (numChannels_m > numBanks_m * 4) {
         numBanks_m++;
@@ -332,9 +328,8 @@ inline void WVCO<TBase>::stepm() {
         syncInputConnected_m = syncInputPort.isConnected();
     }
 
-    int wfFromUI = (int)std::round(TBase::params[WAVE_SHAPE_PARAM].value);
+    //int wfFromUI = (int)std::round(TBase::params[WAVE_SHAPE_PARAM].value);
     WVCODsp::WaveForm wf = WVCODsp::WaveForm(wfFromUI);
-
     baseShapeGain = TBase::params[WAVESHAPE_GAIN_PARAM].value / 100;
 
     // we want an nice taper for the wave folding depth.
@@ -374,32 +369,6 @@ inline void WVCO<TBase>::stepm() {
         default:
             assert(0);
     }
-
-    const bool snap = TBase::params[SNAP_PARAM].value > .5f;
-    const bool snap2 = TBase::params[SNAP2_PARAM].value > .5f;
-    const bool snap3 = TBase::params[SNAP_PARAM].value > 1.5f;
-
-    float k = 1;
-    if (snap || snap2) {
-        k = .6f;
-    }
-    if (snap3 || (snap && snap2)) {
-        k = .3f;
-    }
-
-    adsr.setParamValues(
-        TBase::params[ATTACK_PARAM].value * .01f,
-        TBase::params[DECAY_PARAM].value * .01f,
-        TBase::params[SUSTAIN_PARAM].value * .01f,
-        TBase::params[RELEASE_PARAM].value * .01f,
-        k);
-
-    adsr.setNumChannels(numChannels_m);
-
-    /*enableAdsrLevel = TBase::params[ADSR_OUTPUT_LEVEL_PARAM].value > .5;*/
-    enableAdsrFeedback = TBase::params[ADSR_FBCK_PARAM].value > .5;
-    enableAdsrFM = TBase::params[ADSR_LFM_DEPTH_PARAM].value > .5;
-    enableAdsrShape = TBase::params[ADSR_SHAPE_PARAM].value > .5;
 }
 
 template <class TBase>
@@ -419,8 +388,8 @@ inline void WVCO<TBase>::updateFreq_n() {
         for (int i = 0; i < 4; ++i) {
             freq[i] = expLookup(pitch[i]);
         }
-
-        freq *= freqMultiplier_m;
+        //RPJ: pitch * 16?
+        freq *= freqMultiplier_m*16;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
         freq = time;
 
@@ -557,6 +526,20 @@ inline void WVCO<TBase>::step()
     stepn_fullRate();
     assert(numBanks_m > 0);
 
+	if (waveFormUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		if (wfFromUI+1 < 3)
+			wfFromUI = wfFromUI + 1;
+	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
+		if (wfFromUI - 1 >= 0)
+			wfFromUI = wfFromUI - 1;
+    
+    if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		if (steppingFromUI+1 < 6)
+			steppingFromUI = steppingFromUI + 1;
+	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
+		if (steppingFromUI - 1 >= 0)
+			steppingFromUI = steppingFromUI - 1;
+    
     // this could even be moves out of the "every sample" loop
     if (!syncInputConnected_m && !fmInputConnected_m) {
         for (int bank = 0; bank < numBanks_m; ++bank) {
@@ -602,6 +585,19 @@ template <class TBase>
 inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
     Config ret(0, 1, 0, "");
     switch (i) {
+        
+        case WVCO<TBase>::PARAM_WAVEFORM_UP:
+            ret = {.0f, 1.0f, 0.f, "Waveform Up"};
+            break;
+        case WVCO<TBase>::PARAM_WAVEFORM_DOWN:
+            ret = {.0f, 1.0f, 0.f, "Waveform Down"};
+            break;
+        case WVCO<TBase>::PARAM_STEPPING_UP:
+            ret = {.0f, 1.0f, 0.f, "Stepping Up"};
+            break;
+        case WVCO<TBase>::PARAM_STEPPING_DOWN:
+            ret = {.0f, 1.0f, 0.f, "Stepping Down"};
+            break;
         case WVCO<TBase>::VCA_PARAM:
             ret = {.0f, 1.0f, 0.5f, "VCA"};
             break;
@@ -626,38 +622,14 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
         case WVCO<TBase>::FEEDBACK_PARAM:
             ret = {0, 100, 0, "FM Feedback depth"};
             break;
-        case WVCO<TBase>::ATTACK_PARAM:
-            ret = {0, 100, 50, "ADSR Attack"};
+        case WVCO<TBase>::LINEXP_PARAM:
+            ret = {0, 1, 0, "Linear or Logarythmic"};
             break;
-        case WVCO<TBase>::DECAY_PARAM:
-            ret = {0, 100, 50, "ADSR Decay"};
-            break;
-        case WVCO<TBase>::SUSTAIN_PARAM:
-            ret = {0, 100, 50, "ADSR Sustain"};
-            break;
-        case WVCO<TBase>::RELEASE_PARAM:
-            ret = {0, 100, 50, "ADSR Release"};
-            break;
+        case WVCO<TBase>::POSINV_PARAM:
+            ret = {0, 1, 0, "Positive or Inverted"};
+            break;  
         case WVCO<TBase>::OUTPUT_LEVEL_PARAM:
             ret = {0, 100, 100, "output Level"};
-            break;
-        case WVCO<TBase>::ADSR_SHAPE_PARAM:
-            ret = {0, 1, 0, "ADSR->Shape"};
-            break;
-        case WVCO<TBase>::ADSR_FBCK_PARAM:
-            ret = {0, 1, 0, "ADSR->Feedback"};
-            break;
-        case WVCO<TBase>::ADSR_OUTPUT_LEVEL_PARAM:
-            ret = {0, 1, 0, "ADSR->output Level"};
-            break;
-        case WVCO<TBase>::ADSR_LFM_DEPTH_PARAM:
-            ret = {0, 1, 0, "ADSR->LFM Depth"};
-            break;
-        case WVCO<TBase>::SNAP_PARAM:
-            ret = {0, 2, 0, "ADSR Snap"};
-            break;
-        case WVCO<TBase>::SNAP2_PARAM:
-            ret = {0, 1, 0, "ARSR Snap2"};
             break;
         case WVCO<TBase>::PATCH_VERSION_PARAM:
             ret = {0, 10, 0, "patch version"};

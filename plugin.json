@@ -133,8 +133,8 @@
       "tags": ["Utility"]
     },
     {
-			"slug": "squinkylabs-wvco",
-			"name": "FM Kitchen Sink",
+			"slug": "rpj-wvco",
+			"name": "FM Pigeon Plink",
 			"description": "Many function VCO",
 			"manualUrl": "https://github.com/kockie69/SquinkyVCV-main/blob/master/docs/kitchen-sink.md",
 			"tags": ["VCO", "Polyphonic", "Synth voice"]

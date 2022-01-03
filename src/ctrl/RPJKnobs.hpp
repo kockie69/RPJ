@@ -13,3 +13,23 @@ struct RPJKnobSnap : RPJKnob{
 		snap = true;
 	}
 };
+
+struct Toggle2P : SvgSwitch {
+	Toggle2P() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_2.svg")));
+
+		// no shadow for switches
+		shadow->opacity = 0.0f;
+	}
+
+	void onChange(const event::Change &e) override {
+
+		SvgSwitch::onChange(e);
+
+		if (getParamQuantity()->getValue() > 0.5f)
+			getParamQuantity()->setValue(1.0f);
+		else
+			getParamQuantity()->setValue(0.0f);
+	}
+};
