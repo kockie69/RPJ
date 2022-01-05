@@ -203,6 +203,7 @@ public:
     }
 
     float convertOldShapeGain(float old) const;
+    float getRatio(int, float);
 
 private:
     Divider divn;
@@ -272,6 +273,51 @@ inline void WVCO<TBase>::init() {
 }
 
 template <class TBase>
+inline float WVCO<TBase>::getRatio(int steppingType, float ratio) {
+    float ret;
+    switch (steppingType) {
+        case 0: 
+            ret = std::max(1,(int)round(ratio));
+            break;
+        case 1: {
+            ret = std::max(1,(int)round(ratio));
+            if (ratio <= 1)
+                ret = 1;
+            if (ratio <= 0.5)
+                ret = 0.5;
+            if (ratio <= 0.25)
+                ret = 0.25;
+            if (ratio <= 0.125)
+                ret = 0;           
+            }
+            break;
+        case 2: {
+            if (ratio == 32)
+                ret = 32;
+            if (ratio < 32)
+                ret = 16;
+            if (ratio < 16)
+                ret = 8;
+            if (ratio < 8)
+                ret = 4;
+            if (ratio < 4)
+                ret = 2; 
+            if (ratio <= 2)
+                ret = 2;
+            if (ratio < 1)
+                ret = 0.5;
+            if (ratio < 0.5)
+                ret = 0.25;
+            if (ratio < 0.25)
+                ret = 0.125;
+            if (ratio <= 0.125)
+                ret = 0;        
+            }
+            break;
+    }
+    return ret;
+}
+template <class TBase>
 inline float WVCO<TBase>::convertOldShapeGain(float old) const {
     std::function<double(double)> fi = AudioMath::makeFunc_InverseAudioTaper(-18);
 
@@ -308,7 +354,8 @@ inline void WVCO<TBase>::stepm() {
                         *audioTaperLookupParams,
                         TBase::params[FM_DEPTH_PARAM].value * .01f);
 
-    freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
+    //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
+    freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue());
 
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {

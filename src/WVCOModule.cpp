@@ -205,7 +205,7 @@ struct WVCOModule : Module
 public:
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
-    std::string steppingTxt[6] = { "Legacy", "Legacy + SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
+    std::string steppingTxt[6] = { "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
 
     WVCOModule();
     /**
