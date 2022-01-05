@@ -389,9 +389,9 @@ inline void WVCO<TBase>::updateFreq_n() {
             freq[i] = expLookup(pitch[i]);
         }
         //RPJ: pitch * 16?
-        freq *= freqMultiplier_m*16;
+        freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
-        freq = time;
+        freq = time*16;
 
         dsp[bank].normalizedFreq = freq / WVCODsp::oversampleRate;
     }
@@ -491,7 +491,9 @@ inline void WVCO<TBase>::stepn_fullRate()
         float_4 feedbackAmount = baseFeedback_m;
         ;
         if (enableAdsrFeedback) {
-            feedbackAmount *= adsr.get(bank);
+           //feedbackAmount *= adsr.get(bank);
+           Port& p = TBase::inputs[GATE_INPUT];
+           feedbackAmount *= p.getVoltageSimd<float_4>(bank);
         }
         if (feedbackConnected_m) {
             Port& feedbackPort = WVCO<TBase>::inputs[FEEDBACK_INPUT];
@@ -502,13 +504,20 @@ inline void WVCO<TBase>::stepn_fullRate()
 
         // TODO: add CV (use getNormalPolyVoltage)
         dsp[bank].outputLevel = baseOutputLevel_m;
-        // RPJ:: This is were we can disable ADSR and read external ADSR
-        // dsp[bank].outputLevel *= adsr.get(bank);
         Port& p = TBase::inputs[GATE_INPUT];
-        Param& pa = TBase::params[VCA_PARAM];
-        for (int i=0;i<numBanks_m;i++)
-        //float_4 g = p.getVoltageSimd<float_4>(i * 4);
-            dsp[bank].outputLevel *= p.getVoltageSimd<float_4>(i*bank)/5.0f * pa.getValue();
+        if (p.isConnected()) {
+            // RPJ:: This is were we can disable ADSR and read external ADSR
+            // dsp[bank].outputLevel *= adsr.get(bank);
+
+            Param& pa_vca = TBase::params[VCA_PARAM];
+            Param& pa_pi = TBase::params[POSINV_PARAM];
+            for (int i=0;i<numBanks_m;i++)
+            //float_4 g = p.getVoltageSimd<float_4>(i * 4);
+                if (pa_pi.getValue())
+                    dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) + ((1 - pa_vca.getValue()) * (p.getVoltageSimd<float_4>(bank)/10.f));
+                else
+                    dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) - (pa_vca.getValue() * (p.getVoltageSimd<float_4>(bank)/10.f));
+        }
     }
 }
 
