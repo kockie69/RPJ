@@ -233,7 +233,9 @@ WVCOModule::WVCOModule()
     configInput(Comp::FM_INPUT,"Frequency modulation");
     configInput(Comp::LINEAR_FM_INPUT,"Linear Frequency Modulation");
     configInput(Comp::SYNC_INPUT,"Sync");
+    configInput(Comp::RATIO_INPUT,"Ratio Modulation");
     configOutput(Comp::MAIN_OUTPUT,"Audio");
+
 
     wvco = std::make_shared<Comp>(this);
     std::shared_ptr<IComposite> icomp = Comp::getDescription();
@@ -642,6 +644,7 @@ const float jacksX2 = jacksX1 + jacksDeltaX;
 const float jacksX3 = jacksX2 + jacksDeltaX;
 const float jacksX4 = jacksX3 + jacksDeltaX;
 
+const float jacksY0 = 85;
 const float jacksY1 = 120;
 const float jacksY2 = 174;
 const float jacksY3 = 276;
@@ -650,6 +653,11 @@ const float jacksY4 = 327;
 void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
     //-------------------------------- first row ----------------------------------
+    addInput(createInput<PJ301MPort>(
+        Vec(jacksX2, jacksY0),
+        module,
+        Comp::RATIO_INPUT));
+
     addInput(createInput<PJ301MPort>(
         Vec(jacksX1, jacksY2),
         module,

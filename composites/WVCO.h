@@ -129,6 +129,7 @@ class WVCO : public TBase {
 public:
     int wfFromUI = 0;
     int steppingFromUI = 0;
+    std::vector<std::vector<float>> v = {{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},{0.125,0.25, 0.5, 1.00,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0.125, 0.25, 0.5, 1.00, 2.00, 4.00, 8.00, 16.00, 32.00},{0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00, 8.50, 9.00, 9.50, 10.00, 11.00, 12.00, 13.00, 14.00, 15.00, 16.00},{0.50, 0.71, 0.78, 0.87, 1.00, 1.41, 1.57, 1.73, 2.00, 2.82, 3.00, 3.14, 3.46, 4.00, 4.24, 4.71, 5.00, 5.19, 5.65, 6.00, 6.28, 6.92, 7.00, 7.07, 7.85, 8.00, 8.48, 8.65, 9.00, 9.42, 9.89, 10.00, 10.38, 10.99, 11.00, 11.30, 12.00, 12.11, 12.56, 12.72, 13.00, 13.84, 14.00, 14.10, 14.13, 15.00, 15.55, 15.57, 15.70, 16.96, 17.27, 17.30, 18.37, 18.84, 19.03, 19.78, 20.41, 20.76, 21.20, 21.98, 22.49, 23.55, 24.22, 25.95}, {0.50,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}} ;
     WVCO(Module* module) : TBase(module) {
     }
     WVCO() : TBase() {
@@ -171,6 +172,7 @@ public:
         SHAPE_INPUT,
         LINEAR_FM_DEPTH_INPUT,
         FEEDBACK_INPUT,
+        RATIO_INPUT,
         NUM_INPUTS
     };
 
@@ -277,46 +279,69 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio) {
     float ret;
     switch (steppingType) {
         case 0: 
-            ret = std::max(1,(int)round(ratio));
-            break;
-        case 1: {
-            ret = std::max(1,(int)round(ratio));
-            if (ratio <= 1)
-                ret = 1;
-            if (ratio <= 0.5)
-                ret = 0.5;
-            if (ratio <= 0.25)
-                ret = 0.25;
-            if (ratio <= 0.125)
-                ret = 0;           
+            for (std::vector<float>::iterator it = v[0].begin() ; it != v[0].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
             }
             break;
-        case 2: {
-            if (ratio == 32)
-                ret = 32;
-            if (ratio < 32)
-                ret = 16;
-            if (ratio < 16)
-                ret = 8;
-            if (ratio < 8)
-                ret = 4;
-            if (ratio < 4)
-                ret = 2; 
-            if (ratio <= 2)
-                ret = 2;
-            if (ratio < 1)
-                ret = 0.5;
-            if (ratio < 0.5)
-                ret = 0.25;
-            if (ratio < 0.25)
-                ret = 0.125;
-            if (ratio <= 0.125)
-                ret = 0;        
+        case 1: 
+            for (std::vector<float>::iterator it = v[1].begin() ; it != v[1].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
             }
             break;
-    }
+        case 2: 
+            for (std::vector<float>::iterator it = v[2].begin() ; it != v[2].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        case 3: 
+            for (std::vector<float>::iterator it = v[3].begin() ; it != v[3].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        case 4: 
+            for (std::vector<float>::iterator it = v[4].begin() ; it != v[4].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        case 5: 
+            for (std::vector<float>::iterator it = v[5].begin() ; it != v[5].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        }
     return ret;
 }
+
 template <class TBase>
 inline float WVCO<TBase>::convertOldShapeGain(float old) const {
     std::function<double(double)> fi = AudioMath::makeFunc_InverseAudioTaper(-18);
