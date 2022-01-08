@@ -129,7 +129,22 @@ class WVCO : public TBase {
 public:
     int wfFromUI = 0;
     int steppingFromUI = 0;
-    std::vector<std::vector<float>> v = {{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},{0.125,0.25, 0.5, 1.00,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0.125, 0.25, 0.5, 1.00, 2.00, 4.00, 8.00, 16.00, 32.00},{0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00, 8.50, 9.00, 9.50, 10.00, 11.00, 12.00, 13.00, 14.00, 15.00, 16.00},{0.50, 0.71, 0.78, 0.87, 1.00, 1.41, 1.57, 1.73, 2.00, 2.82, 3.00, 3.14, 3.46, 4.00, 4.24, 4.71, 5.00, 5.19, 5.65, 6.00, 6.28, 6.92, 7.00, 7.07, 7.85, 8.00, 8.48, 8.65, 9.00, 9.42, 9.89, 10.00, 10.38, 10.99, 11.00, 11.30, 12.00, 12.11, 12.56, 12.72, 13.00, 13.84, 14.00, 14.10, 14.13, 15.00, 15.55, 15.57, 15.70, 16.96, 17.27, 17.30, 18.37, 18.84, 19.03, 19.78, 20.41, 20.76, 21.20, 21.98, 22.49, 23.55, 24.22, 25.95}, {0.50,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}} ;
+    std::vector<std::vector<float>> R = {
+    {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
+    {0.125,0.25, 0.5, 1.00,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
+    {0.125, 0.25, 0.5, 1.00, 2.00, 4.00, 8.00, 16.00, 32.00},
+    {0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00, 8.50, 9.00, 9.50, 10.00, 11.00, 12.00, 13.00, 14.00, 15.00, 16.00},
+    {0.50, 0.71, 0.78, 0.87, 1.00, 1.41, 1.57, 1.73, 2.00, 2.82, 3.00, 3.14, 3.46, 4.00, 4.24, 4.71, 5.00, 5.19, 5.65, 6.00, 6.28, 6.92, 7.00, 7.07, 7.85, 8.00, 8.48, 8.65, 9.00, 9.42, 9.89, 10.00, 10.38, 10.99, 11.00, 11.30, 12.00, 12.11, 12.56, 12.72, 13.00, 13.84, 14.00, 14.10, 14.13, 15.00, 15.55, 15.57, 15.70, 16.96, 17.27, 17.30, 18.37, 18.84, 19.03, 19.78, 20.41, 20.76, 21.20, 21.98, 22.49, 23.55, 24.22, 25.95}, 
+    {0.50,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}
+    };
+    std::vector<std::vector<float>> Av = {
+    {},
+    {0,0.55556,1.11111,1.66667,2.22222,2.77778,3.33333,3.88889,4.44444,5.00000,5.55556,6.11111,6.66667,7.22222,7.77778,8.33333,8.88889,9.44444,10.00000}
+    };
+    std::vector<std::vector<float>> Av2 = {
+    {},
+    {0.27778,0.83333,1.38889,1.94444,2.50000,3.05556,3.61111,4.16667,4.72222,5.27778,5.83333,6.38889,6.94444,7.50000,8.05556,8.61111,9.16667,9.72222}
+    };
     WVCO(Module* module) : TBase(module) {
     }
     WVCO() : TBase() {
@@ -149,6 +164,7 @@ public:
         FINE_TUNE_PARAM,
         FM_DEPTH_PARAM,
         LINEAR_FM_DEPTH_PARAM,
+        LINEAR_FM_PARAM,
         WAVESHAPE_GAIN_PARAM,
         WAVE_SHAPE_PARAM,
         FEEDBACK_PARAM,
@@ -205,7 +221,7 @@ public:
     }
 
     float convertOldShapeGain(float old) const;
-    float getRatio(int, float);
+    float getRatio(int, float,float);
 
 private:
     Divider divn;
@@ -227,6 +243,7 @@ private:
     bool feedbackConnected_m = false;
     bool fmInputConnected_m = false;
     bool syncInputConnected_m = false;
+    bool ratioInputConnected_m = false;
 
     float_4 freqMultiplier_m = 1;
     float baseShapeGain = 0;  // 0..1 -> re-do this!
@@ -275,11 +292,48 @@ inline void WVCO<TBase>::init() {
 }
 
 template <class TBase>
-inline float WVCO<TBase>::getRatio(int steppingType, float ratio) {
+inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV) {
     float ret;
     switch (steppingType) {
-        case 0: 
-            for (std::vector<float>::iterator it = v[0].begin() ; it != v[0].end(); ++it) {
+        case 0: //none
+            ret = ratio;
+            break;
+        case 1: { //legacy
+            float min = *(R[0].begin());
+            float max = *(R[0].end()-1);
+            float kV = ratio * 10/32;
+            float AV = rack::math::clamp(kV + ratioCV,0.f,10.f);
+
+            for (std::vector<float>::iterator it = Av[0].begin() ; it != Av[0].end(); ++it) {
+                if ((AV >= *it) && (AV < *(it+1))) {
+                    if (AV < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        }
+        case 2: // legacy+sub
+        {
+            float min = *(R[1].begin());
+            float max = *(R[1].end()-1);
+            float kV = ratio * 10/18;
+            float AV = rack::math::clamp(kV + ratioCV,0.f,10.f);
+            float volt = 0;
+            for (std::vector<float>::iterator it = Av[1].begin() ; it != Av[1].end(); ++it) {
+                if ((AV > *it) && (AV <= *(it+1))) {                    
+                    if (AV < ((*it + *(it+1))/2))
+                        volt = *it;
+                    else volt = *(it+1);
+                break;
+                }
+            }
+            ret = R[1][(int)volt];
+            break;
+        }
+        case 3: //octaves
+            for (std::vector<float>::iterator it = R[2].begin() ; it != R[2].end(); ++it) {
                 if ((ratio >= *it) && (ratio < *(it+1))) {
                     if (ratio < ((*it + *(it+1))/2))
                         ret = *it;
@@ -288,38 +342,8 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio) {
                 }
             }
             break;
-        case 1: 
-            for (std::vector<float>::iterator it = v[1].begin() ; it != v[1].end(); ++it) {
-                if ((ratio >= *it) && (ratio < *(it+1))) {
-                    if (ratio < ((*it + *(it+1))/2))
-                        ret = *it;
-                    else ret = *(it+1);
-                break;
-                }
-            }
-            break;
-        case 2: 
-            for (std::vector<float>::iterator it = v[2].begin() ; it != v[2].end(); ++it) {
-                if ((ratio >= *it) && (ratio < *(it+1))) {
-                    if (ratio < ((*it + *(it+1))/2))
-                        ret = *it;
-                    else ret = *(it+1);
-                break;
-                }
-            }
-            break;
-        case 3: 
-            for (std::vector<float>::iterator it = v[3].begin() ; it != v[3].end(); ++it) {
-                if ((ratio >= *it) && (ratio < *(it+1))) {
-                    if (ratio < ((*it + *(it+1))/2))
-                        ret = *it;
-                    else ret = *(it+1);
-                break;
-                }
-            }
-            break;
-        case 4: 
-            for (std::vector<float>::iterator it = v[4].begin() ; it != v[4].end(); ++it) {
+        case 4: //
+            for (std::vector<float>::iterator it = R[3].begin() ; it != R[3].end(); ++it) {
                 if ((ratio >= *it) && (ratio < *(it+1))) {
                     if (ratio < ((*it + *(it+1))/2))
                         ret = *it;
@@ -329,7 +353,17 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio) {
             }
             break;
         case 5: 
-            for (std::vector<float>::iterator it = v[5].begin() ; it != v[5].end(); ++it) {
+            for (std::vector<float>::iterator it = R[4].begin() ; it != R[4].end(); ++it) {
+                if ((ratio >= *it) && (ratio < *(it+1))) {
+                    if (ratio < ((*it + *(it+1))/2))
+                        ret = *it;
+                    else ret = *(it+1);
+                break;
+                }
+            }
+            break;
+        case 6: 
+            for (std::vector<float>::iterator it = R[5].begin() ; it != R[5].end(); ++it) {
                 if ((ratio >= *it) && (ratio < *(it+1))) {
                     if (ratio < ((*it + *(it+1))/2))
                         ret = *it;
@@ -380,7 +414,8 @@ inline void WVCO<TBase>::stepm() {
                         TBase::params[FM_DEPTH_PARAM].value * .01f);
 
     //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
-    freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue());
+    Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
+    freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());
 
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {
@@ -398,6 +433,10 @@ inline void WVCO<TBase>::stepm() {
     {
         Port& syncInputPort = WVCO<TBase>::inputs[SYNC_INPUT];
         syncInputConnected_m = syncInputPort.isConnected();
+    }
+    {
+        Port& ratioInputPort = WVCO<TBase>::inputs[RATIO_INPUT];
+        ratioInputConnected_m = ratioInputPort.isConnected();
     }
 
     //int wfFromUI = (int)std::round(TBase::params[WAVE_SHAPE_PARAM].value);
@@ -693,6 +732,9 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             break;
         case WVCO<TBase>::LINEAR_FM_DEPTH_PARAM:
             ret = {0, 100, 0, "Through-zero FM Depth"};
+            break;
+        case WVCO<TBase>::LINEAR_FM_PARAM:
+            ret = {0, 100, 0, "Linear FM Modulation"};
             break;
         case WVCO<TBase>::WAVESHAPE_GAIN_PARAM:
             ret = {0, 100, 0, "Shape modulation"};

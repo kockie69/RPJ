@@ -205,7 +205,7 @@ struct WVCOModule : Module
 public:
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
-    std::string steppingTxt[6] = { "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
+    std::string steppingTxt[7] = { "None", "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
 
     WVCOModule();
     /**
@@ -615,6 +615,13 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
         Comp::LINEAR_FM_DEPTH_PARAM));
     //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
   
+      addParam(SqHelper::createParam<RPJKnob>(
+        icomp,
+        Vec(knobX2, knobY3),
+        module,
+        Comp::LINEAR_FM_PARAM));
+    //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
+
   // 3 Fdbk
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
@@ -702,7 +709,7 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     //addLabel(Vec(jacksX3 - 6, jacksY2 - labelAboveKnob), "LFM");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX4, jacksY4),
+        Vec(jacksX3, jacksY4),
         module,
         Comp::SYNC_INPUT));
     //addLabel(Vec(jacksX4 - 9, jacksY2 - labelAboveKnob), "Sync");
