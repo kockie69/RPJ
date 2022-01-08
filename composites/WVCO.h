@@ -141,10 +141,10 @@ public:
     {},
     {0,0.55556,1.11111,1.66667,2.22222,2.77778,3.33333,3.88889,4.44444,5.00000,5.55556,6.11111,6.66667,7.22222,7.77778,8.33333,8.88889,9.44444,10.00000}
     };
-    std::vector<std::vector<float>> Av2 = {
+    /*std::vector<std::vector<float>> Av2 = {
     {},
     {0.27778,0.83333,1.38889,1.94444,2.50000,3.05556,3.61111,4.16667,4.72222,5.27778,5.83333,6.38889,6.94444,7.50000,8.05556,8.61111,9.16667,9.72222}
-    };
+    };*/
     WVCO(Module* module) : TBase(module) {
     }
     WVCO() : TBase() {
@@ -316,21 +316,27 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
         }
         case 2: // legacy+sub
         {
-            float min = *(R[1].begin());
-            float max = *(R[1].end()-1);
-            float kV = ratio * 10/18;
-            float AV = rack::math::clamp(kV + ratioCV,0.f,10.f);
-            float volt = 0;
-            for (std::vector<float>::iterator it = Av[1].begin() ; it != Av[1].end(); ++it) {
-                if ((AV > *it) && (AV <= *(it+1))) {                    
-                    if (AV < ((*it + *(it+1))/2))
-                        volt = *it;
-                    else volt = *(it+1);
-                break;
-                }
-            }
-            ret = R[1][(int)volt];
-            break;
+float vDivider = R[1].size()-1;
+//float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
+float KV = ratio;
+float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
+float exactRatioVoltage = 0.f;
+float nextExactRatioVoltage = 0.f;
+float nextVSwitchingPoint = 0.f;
+int ratioIndex = 0;
+for (int i = 0 ; i != (vDivider+1) ; ++i) {
+	if (i > 0) {
+		exactRatioVoltage = i * (10/vDivider);
+	}
+	nextExactRatioVoltage = (i+1) * (10/vDivider);
+	nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
+	if (AV < nextVSwitchingPoint) {
+		ratioIndex = i;
+		break;
+	}
+}
+ret = R[1][ratioIndex];
+break;
         }
         case 3: //octaves
             for (std::vector<float>::iterator it = R[2].begin() ; it != R[2].end(); ++it) {
@@ -722,7 +728,7 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             ret = {.0f, 1.0f, 0.5f, "VCA"};
             break;
         case WVCO<TBase>::FREQUENCY_MULTIPLIER_PARAM:
-            ret = {0.f, 32.0f, 1, "Frequency Ratio"};
+            ret = {0.f, 10.f, 0, "Frequency Ratio"};
             break;
         case WVCO<TBase>::FINE_TUNE_PARAM:
             ret = {-12.0f, 12.0f, 0, "Fine tune"};
