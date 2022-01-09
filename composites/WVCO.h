@@ -296,7 +296,7 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
     float ret;
     switch (steppingType) {
         case 0: //none
-            ret = ratio;
+            ret = ratio*3.2f;
             break;
         case 1: { //legacy
             float vDivider = R[0].size()-1;
@@ -414,12 +414,12 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
                     break;
                 }
             }
-            ret = R[5][ratioIndex];
+            ret = R[4][ratioIndex];
             break;
         }
         case 6:
         {
-            float vDivider = R[1].size()-1;
+            float vDivider = R[5].size()-1;
             //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
             float KV = ratio;
             float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
