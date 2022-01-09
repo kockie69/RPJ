@@ -321,13 +321,13 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
     float ret;
     switch (steppingType) {
         case 0: //none
-            ret = ratio*3.2f;
+            ret = rack::math::clamp(ratio + ratioCV,0.f,10.f) * 3.2f;
             break;
         case 1: { //legacy
             ret = getScaledRatio(R[0], ratio, ratioCV);
             break;
         }
-        case 2: // legacy+sub
+        case 2: // legacy+suboctaves
         {
             ret = getScaledRatio(R[1], ratio, ratioCV);
             break;
@@ -337,17 +337,17 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
             ret = getScaledRatio(R[2], ratio, ratioCV);
             break;
         }
-        case 4: //
+        case 4: //Digitone opperator
         {
             ret = getScaledRatio(R[3], ratio, ratioCV);
             break;
         }
-        case 5: 
+        case 5: //Yamaha TX81Z
         {
             ret = getScaledRatio(R[4], ratio, ratioCV);
             break;
         }
-        case 6:
+        case 6: //Yamaha DX7:
         {
             ret = getScaledRatio(R[5], ratio, ratioCV);
             break;
@@ -396,7 +396,7 @@ inline void WVCO<TBase>::stepm() {
     //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
     Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
     freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());
-
+    //TBase::params[FREQUENCY_MULTIPLIER_PARAM].setDisplayValueString(std::to_string(freqMultiplier_m[0]));
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {
         Port& depthCVPort = WVCO<TBase>::inputs[LINEAR_FM_DEPTH_INPUT];
@@ -634,7 +634,7 @@ inline void WVCO<TBase>::step()
 			wfFromUI = wfFromUI - 1;
     
     if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		if (steppingFromUI+1 < 6)
+		if (steppingFromUI+1 < 7)
 			steppingFromUI = steppingFromUI + 1;
 	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		if (steppingFromUI - 1 >= 0)
