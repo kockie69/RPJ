@@ -213,6 +213,9 @@ public:
      */
     void step() override;
     void onSampleRateChange() override;
+    json_t *dataToJson() override;
+	void dataFromJson(json_t *) override;
+
     std::shared_ptr<Comp> wvco;
   
 private:
@@ -291,6 +294,22 @@ void WVCOModule::step()
     }
 
     wvco->step();
+}
+
+json_t *WVCOModule::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, "JSON_WAVE", json_integer(static_cast<int>(wvco->wfFromUI)));
+    json_object_set_new(rootJ, "JSON_STEPPING", json_integer(static_cast<int>(wvco->steppingFromUI)));
+	return rootJ;
+}
+
+void WVCOModule::dataFromJson(json_t *rootJ) {
+	json_t *nWaveJ = json_object_get(rootJ, "JSON_WAVE");
+    json_t *nSteppingJ = json_object_get(rootJ, "JSON_STEPPING");
+	if (nWaveJ) 
+		wvco->wfFromUI = static_cast<int>(json_integer_value(nWaveJ));
+    if (nSteppingJ)
+        wvco->steppingFromUI = static_cast<int>(json_integer_value(nSteppingJ));
 }
 
 ////////////////////
