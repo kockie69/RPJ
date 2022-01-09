@@ -221,6 +221,7 @@ public:
     }
 
     float convertOldShapeGain(float old) const;
+    float getScaledRatio(std::vector<float>,float,float);
     float getRatio(int, float,float);
 
 private:
@@ -292,14 +293,8 @@ inline void WVCO<TBase>::init() {
 }
 
 template <class TBase>
-inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV) {
-    float ret;
-    switch (steppingType) {
-        case 0: //none
-            ret = ratio*3.2f;
-            break;
-        case 1: { //legacy
-            float vDivider = R[0].size()-1;
+inline float WVCO<TBase>::getScaledRatio(std::vector<float> R,float ratio,float ratioCV) {
+float vDivider = R.size()-1;
             //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
             float KV = ratio;
             float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
@@ -318,127 +313,43 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
 		            break;
 	            }
             }
-            ret = R[0][ratioIndex];
+            return R[ratioIndex];
+}
+
+template <class TBase>
+inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV) {
+    float ret;
+    switch (steppingType) {
+        case 0: //none
+            ret = ratio*3.2f;
+            break;
+        case 1: { //legacy
+            ret = getScaledRatio(R[0], ratio, ratioCV);
             break;
         }
         case 2: // legacy+sub
         {
-            float vDivider = R[1].size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-                if (i > 0) {
-                    exactRatioVoltage = i * (10/vDivider);
-                }
-                nextExactRatioVoltage = (i+1) * (10/vDivider);
-                nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-                if (AV < nextVSwitchingPoint) {
-                    ratioIndex = i;
-                    break;
-                }
-            }
-            ret = R[1][ratioIndex];
+            ret = getScaledRatio(R[1], ratio, ratioCV);
             break;
         }
         case 3: //octaves
         {
-            float vDivider = R[2].size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-                if (i > 0) {
-                    exactRatioVoltage = i * (10/vDivider);
-                }
-                nextExactRatioVoltage = (i+1) * (10/vDivider);
-                nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-                if (AV < nextVSwitchingPoint) {
-                    ratioIndex = i;
-                    break;
-                }
-            }
-            ret = R[2][ratioIndex];
+            ret = getScaledRatio(R[2], ratio, ratioCV);
             break;
         }
         case 4: //
         {
-            float vDivider = R[3].size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-                if (i > 0) {
-                    exactRatioVoltage = i * (10/vDivider);
-                }
-                nextExactRatioVoltage = (i+1) * (10/vDivider);
-                nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-                if (AV < nextVSwitchingPoint) {
-                    ratioIndex = i;
-                    break;
-                }
-            }
-            ret = R[3][ratioIndex];
+            ret = getScaledRatio(R[3], ratio, ratioCV);
             break;
         }
         case 5: 
         {
-            float vDivider = R[4].size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-                if (i > 0) {
-                    exactRatioVoltage = i * (10/vDivider);
-                }
-                nextExactRatioVoltage = (i+1) * (10/vDivider);
-                nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-                if (AV < nextVSwitchingPoint) {
-                    ratioIndex = i;
-                    break;
-                }
-            }
-            ret = R[4][ratioIndex];
+            ret = getScaledRatio(R[4], ratio, ratioCV);
             break;
         }
         case 6:
         {
-            float vDivider = R[5].size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-                if (i > 0) {
-		            exactRatioVoltage = i * (10/vDivider);
-                }
-                nextExactRatioVoltage = (i+1) * (10/vDivider);
-                nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-                if (AV < nextVSwitchingPoint) {
-                    ratioIndex = i;
-                    break;
-                }
-            }
-            ret = R[5][ratioIndex];
+            ret = getScaledRatio(R[5], ratio, ratioCV);
             break;
         }
     }
