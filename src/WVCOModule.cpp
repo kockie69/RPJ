@@ -344,8 +344,10 @@ void WVCOModule::step()
         haveCheckedFormat = true;
     }
     if (wvco->steppingFromUI != oldStepping){
-        substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
-        oldStepping = wvco->steppingFromUI;
+        if (wvco->steppingFromUI!=0) {
+            substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
+            oldStepping = wvco->steppingFromUI;
+        }
     }
 
     wvco->step();
