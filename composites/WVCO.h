@@ -130,6 +130,7 @@ public:
     int wfFromUI = 0;
     int steppingFromUI = 0;
     std::vector<std::vector<float>> R = {
+    {},
     {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
     {0.125,0.25, 0.5, 1.00,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
     {0.125, 0.25, 0.5, 1.00, 2.00, 4.00, 8.00, 16.00, 32.00},
@@ -218,6 +219,13 @@ public:
 
     static std::vector<std::string> getWaveformNames() {
         return {"Sine", "Wave folder", "Triangle<>Saw"};
+    }
+
+    static std::vector<std::string> getRatioNames(std::vector<float> R) {
+        std::vector<std::string> v; 
+        for (std::vector<float>::iterator it = R.begin() ; it != R.end(); ++it)
+            v.push_back(std::to_string(*it));
+        return v;
     }
 
     float convertOldShapeGain(float old) const;
@@ -324,32 +332,32 @@ inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV)
             ret = rack::math::clamp(ratio + ratioCV,0.f,10.f) * 3.2f;
             break;
         case 1: { //legacy
-            ret = getScaledRatio(R[0], ratio, ratioCV);
+            ret = getScaledRatio(R[1], ratio, ratioCV);
             break;
         }
         case 2: // legacy+suboctaves
         {
-            ret = getScaledRatio(R[1], ratio, ratioCV);
+            ret = getScaledRatio(R[2], ratio, ratioCV);
             break;
         }
         case 3: //octaves
         {
-            ret = getScaledRatio(R[2], ratio, ratioCV);
+            ret = getScaledRatio(R[3], ratio, ratioCV);
             break;
         }
         case 4: //Digitone opperator
         {
-            ret = getScaledRatio(R[3], ratio, ratioCV);
+            ret = getScaledRatio(R[4], ratio, ratioCV);
             break;
         }
         case 5: //Yamaha TX81Z
         {
-            ret = getScaledRatio(R[4], ratio, ratioCV);
+            ret = getScaledRatio(R[5], ratio, ratioCV);
             break;
         }
         case 6: //Yamaha DX7:
         {
-            ret = getScaledRatio(R[5], ratio, ratioCV);
+            ret = getScaledRatio(R[6], ratio, ratioCV);
             break;
         }
     }
@@ -622,13 +630,14 @@ inline void WVCO<TBase>::step()
     // clock the sub-sample rate tasks
     divn.step();
     divm.step();
-
+    
     stepn_fullRate();
     assert(numBanks_m > 0);
 
 	if (waveFormUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
 		if (wfFromUI+1 < 3)
 			wfFromUI = wfFromUI + 1;
+
 	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		if (wfFromUI - 1 >= 0)
 			wfFromUI = wfFromUI - 1;
@@ -636,6 +645,7 @@ inline void WVCO<TBase>::step()
     if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
 		if (steppingFromUI+1 < 7)
 			steppingFromUI = steppingFromUI + 1;
+    
 	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
 		if (steppingFromUI - 1 >= 0)
 			steppingFromUI = steppingFromUI - 1;

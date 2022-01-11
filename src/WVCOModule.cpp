@@ -14,6 +14,46 @@
 using Comp = WVCO<WidgetComposite>;
 using Input = ::rack::engine::Input;
 
+class RatioParamQuantity : public ParamQuantity {
+public:
+    RatioParamQuantity(const ParamQuantity& other, const std::vector<std::string>& str) : strings(str) {
+        ParamQuantity* base = this;
+        *base = other;
+    }
+
+    std::string getDisplayValueString() override {
+        float vDivider = strings.size()-1;
+        float KV = getValue();
+        float exactRatioVoltage = 0.f;
+        float nextExactRatioVoltage = 0.f;
+        float nextVSwitchingPoint = 0.f;
+        int ratioIndex = 0;
+        std::string str;
+
+        if (vDivider<0)
+            str = std::to_string(KV*3.2f);
+        else {
+            for (int i = 0 ; i != (vDivider+1) ; ++i) {
+	            if (i > 0) {
+		            exactRatioVoltage = i * (10/vDivider);
+	            }
+	            nextExactRatioVoltage = (i+1) * (10/vDivider);
+	            nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
+	            if (KV < nextVSwitchingPoint) {
+	                ratioIndex = i;
+		            break;
+	            }
+            }
+            str = strings[ratioIndex];
+        }
+        return str; 
+    }
+
+private:
+    std::vector<std::string> strings;
+};
+
+
 class DiscreteParamQuantity : public ParamQuantity {
 public:
     DiscreteParamQuantity(const ParamQuantity& other, const std::vector<std::string>& str) : strings(str) {
@@ -35,10 +75,19 @@ private:
     std::vector<std::string> strings;
 };
 
-inline void subsituteDiscreteParamQuantity(const std::vector<std::string>& strings, Module& module, unsigned int paramNumber) {
+inline void substituteDiscreteParamQuantity(const std::vector<std::string>& strings, Module& module, unsigned int paramNumber) {
     auto orig = module.paramQuantities[paramNumber];
 
      auto p = new DiscreteParamQuantity(*orig, strings);
+    
+    delete orig;
+    module.paramQuantities[paramNumber] = p;
+}
+
+inline void substituteRatioParamQuantity(const std::vector<std::string>& strings, Module& module, unsigned int paramNumber) {
+    auto orig = module.paramQuantities[paramNumber];
+
+     auto p = new RatioParamQuantity(*orig, strings);
     
     delete orig;
     module.paramQuantities[paramNumber] = p;
@@ -203,6 +252,7 @@ enum steppings {Off, quart, full};
 struct WVCOModule : Module
 {
 public:
+    int oldStepping = 0;
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
     std::string steppingTxt[7] = { "None", "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
@@ -247,7 +297,8 @@ WVCOModule::WVCOModule()
     onSampleRateChange();
     wvco->init();
 
-    subsituteDiscreteParamQuantity(Comp::getWaveformNames(), *this, Comp::WAVE_SHAPE_PARAM);
+    substituteDiscreteParamQuantity(Comp::getWaveformNames(), *this, Comp::WAVE_SHAPE_PARAM);
+    //substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
 }
 
 void WVCOModule::stampPatchAs2()
@@ -291,6 +342,10 @@ void WVCOModule::step()
         // WARN("checking on first call to step\n");
         checkForFormatUpgrade();
         haveCheckedFormat = true;
+    }
+    if (wvco->steppingFromUI != oldStepping){
+        substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
+        oldStepping = wvco->steppingFromUI;
     }
 
     wvco->step();
