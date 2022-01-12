@@ -302,26 +302,11 @@ inline void WVCO<TBase>::init() {
 
 template <class TBase>
 inline float WVCO<TBase>::getScaledRatio(std::vector<float> R,float ratio,float ratioCV) {
-float vDivider = R.size()-1;
-            //float KV = ratio * vDivider/32; //for FREQUENCY_MULTIPLIER_PARAM 0.f to 32.f - it's just KV = ratio if that would be 0.f to 10.f
-            float KV = ratio;
-            float AV = rack::math::clamp(KV + ratioCV,0.f,10.f);
-            float exactRatioVoltage = 0.f;
-            float nextExactRatioVoltage = 0.f;
-            float nextVSwitchingPoint = 0.f;
-            int ratioIndex = 0;
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-	            if (i > 0) {
-		            exactRatioVoltage = i * (10/vDivider);
-	            }
-	            nextExactRatioVoltage = (i+1) * (10/vDivider);
-	            nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-	            if (AV < nextVSwitchingPoint) {
-	            	ratioIndex = i;
-		            break;
-	            }
-            }
-            return R[ratioIndex];
+
+    float rDiv  = 10.f / (R.size()-1);
+    float AV = rack::math::clamp(ratio + ratioCV, 0.f, 10.f);
+    int ratioIndex = round(AV / rDiv);
+    return R[ratioIndex];
 }
 
 template <class TBase>
@@ -403,7 +388,7 @@ inline void WVCO<TBase>::stepm() {
 
     //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
     Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
-    freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());
+    freqMultiplier_m = 2.f * getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());
     //TBase::params[FREQUENCY_MULTIPLIER_PARAM].setDisplayValueString(std::to_string(freqMultiplier_m[0]));
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {

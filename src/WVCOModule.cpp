@@ -22,28 +22,14 @@ public:
     }
 
     std::string getDisplayValueString() override {
-        float vDivider = strings.size()-1;
+        float rDiv  = 10.f / (strings.size()-1);
         float KV = getValue();
-        float exactRatioVoltage = 0.f;
-        float nextExactRatioVoltage = 0.f;
-        float nextVSwitchingPoint = 0.f;
-        int ratioIndex = 0;
+        int ratioIndex = round(KV / rDiv);
         std::string str;
 
-        if (vDivider<0)
+        if (strings.size()==0)
             str = std::to_string(KV*3.2f);
         else {
-            for (int i = 0 ; i != (vDivider+1) ; ++i) {
-	            if (i > 0) {
-		            exactRatioVoltage = i * (10/vDivider);
-	            }
-	            nextExactRatioVoltage = (i+1) * (10/vDivider);
-	            nextVSwitchingPoint = (exactRatioVoltage + nextExactRatioVoltage) / 2;
-	            if (KV < nextVSwitchingPoint) {
-	                ratioIndex = i;
-		            break;
-	            }
-            }
             str = strings[ratioIndex];
         }
         return str; 
@@ -252,7 +238,7 @@ enum steppings {Off, quart, full};
 struct WVCOModule : Module
 {
 public:
-    int oldStepping = 0;
+    int oldStepping;
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
     std::string steppingTxt[7] = { "None", "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
@@ -289,7 +275,7 @@ WVCOModule::WVCOModule()
     configInput(Comp::RATIO_INPUT,"Ratio Modulation");
     configOutput(Comp::MAIN_OUTPUT,"Audio");
 
-
+    oldStepping = -1;
     wvco = std::make_shared<Comp>(this);
     std::shared_ptr<IComposite> icomp = Comp::getDescription();
     SqHelper::setupParams(icomp, this); 
@@ -298,7 +284,6 @@ WVCOModule::WVCOModule()
     wvco->init();
 
     substituteDiscreteParamQuantity(Comp::getWaveformNames(), *this, Comp::WAVE_SHAPE_PARAM);
-    //substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
 }
 
 void WVCOModule::stampPatchAs2()
@@ -344,10 +329,8 @@ void WVCOModule::step()
         haveCheckedFormat = true;
     }
     if (wvco->steppingFromUI != oldStepping){
-        if (wvco->steppingFromUI!=0) {
-            substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
-            oldStepping = wvco->steppingFromUI;
-        }
+        substituteRatioParamQuantity(Comp::getRatioNames(wvco->R[wvco->steppingFromUI]), *this, Comp::FREQUENCY_MULTIPLIER_PARAM);
+        oldStepping = wvco->steppingFromUI;
     }
 
     wvco->step();
