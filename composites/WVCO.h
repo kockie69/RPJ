@@ -382,12 +382,10 @@ inline void WVCO<TBase>::stepm() {
     basePitch += q;
     basePitch_m = float_4(basePitch);
 
-    //depth_m = .3f * LookupTable<float>::lookup(
-    //                    *audioTaperLookupParams,
-    //                    TBase::params[FM_DEPTH_PARAM].value * .01f);
     depth_m = .3f * LookupTable<float>::lookup(
                         *audioTaperLookupParams,
-                        1.f);
+                        TBase::params[FM_DEPTH_PARAM].value * .01f);
+
     //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
     Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
     freqMultiplier_m = 2.f * getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());

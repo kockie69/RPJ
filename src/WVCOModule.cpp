@@ -678,7 +678,7 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
         icomp,
         Vec(knobX2, knobY3),
         module,
-        Comp::LINEAR_FM_PARAM));
+        Comp::FM_DEPTH_PARAM));
     //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
 
   // 3 Fdbk
@@ -756,13 +756,13 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
     //addLabel(Vec(jacksX1 - 11, jacksY2 - labelAboveKnob), "V/Oct");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX1, jacksY4),
+        Vec(jacksX2, jacksY3),
         module,
         Comp::FM_INPUT));
     //addLabel(Vec(jacksX2 - 3, jacksY2 - labelAboveKnob), "FM");
 
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX2, jacksY3),
+        Vec(jacksX1, jacksY4),
         module,
         Comp::LINEAR_FM_INPUT));
     //addLabel(Vec(jacksX3 - 6, jacksY2 - labelAboveKnob), "LFM");
