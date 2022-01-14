@@ -386,29 +386,14 @@ void WVCOWidget::appendContextMenu(Menu *menu)
     MenuLabel *spacerLabel = new MenuLabel();
 	menu->addChild(spacerLabel);
     
-#if 0
-    MenuLabel *spacerLabel2 = new MenuLabel();
-    menu->addChild(spacerLabel2);
-    SqMenuItem_BooleanParam2 * item = new SqMenuItem_BooleanParam2(module, Comp::SNAP_PARAM);
-    item->text = "Envelope \"Snap\"";
-    menu->addChild(item);
-    item = new SqMenuItem_BooleanParam2(module, Comp::SNAP2_PARAM);
-    item->text = "Extra Envelope \"Snap\"";
-    menu->addChild(item);
-#endif
+    if (WvcoPatcher::shouldShowMenu(module)) {
+        auto item = new SqMenuItem( []() { return false; }, [this](){
+        assert(module);
+        WvcoPatcher::go(this, module);
+        });
 
-    menu->addChild(createIndexPtrSubmenuItem("Stepping", {"Off", "Quart", "Full"}, &module->stepping));
-
-    {
-        if (WvcoPatcher::shouldShowMenu(module)) {
-            auto item = new SqMenuItem( []() { return false; }, [this](){
-                assert(module);
-                WvcoPatcher::go(this, module);
-            });
-
-            item->text = "Hookup Modulator";
-            menu->addChild(item);
-        }
+        item->text = "Hookup Modulator";
+        menu->addChild(item);
     }
 }
 

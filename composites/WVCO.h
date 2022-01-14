@@ -698,7 +698,7 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             ret = {.0f, 1.0f, 0.5f, "VCA"};
             break;
         case WVCO<TBase>::FREQUENCY_MULTIPLIER_PARAM:
-            ret = {0.f, 10.f, 0, "Frequency Ratio"};
+            ret = {0.f, 10.f, 1.f/3.2f, "Frequency Ratio"};
             break;
         case WVCO<TBase>::FINE_TUNE_PARAM:
             ret = {-12.0f, 12.0f, 0, "Fine tune"};
