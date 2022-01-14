@@ -589,14 +589,20 @@ inline void WVCO<TBase>::stepn_fullRate()
         // TODO: add CV (use getNormalPolyVoltage)
         dsp[bank].outputLevel = baseOutputLevel_m;
         Port& p = TBase::inputs[GATE_INPUT];
+        Param& pa_linexp = TBase::params[LINEXP_PARAM];
+
+        float_4 cv = p.getVoltageSimd<float_4>(bank)/10.f;
+        if (!pa_linexp.getValue())
+            cv = rack::simd::pow(cv, 4.f);
+        cv = cv * 10.f;
 
         Param& pa_vca = TBase::params[VCA_PARAM];
         Param& pa_pi = TBase::params[POSINV_PARAM];
         
         if (pa_pi.getValue())
-            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) + ((1 - pa_vca.getValue()) * p.getVoltageSimd<float_4>(bank));
+            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) + ((1 - pa_vca.getValue()) * cv);
         else
-            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) - (pa_vca.getValue() * p.getVoltageSimd<float_4>(bank));
+            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) - (pa_vca.getValue() * cv);
     }
 }
 
