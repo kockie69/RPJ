@@ -603,9 +603,9 @@ inline void WVCO<TBase>::stepn_fullRate()
         Param& pa_pi = TBase::params[POSINV_PARAM];
         
         if (pa_pi.getValue())
-            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) + ((1 - pa_vca.getValue()) * cv);
+            dsp[bank].outputLevel = ((pa_vca.getValue() * 10.f) + ((1 - pa_vca.getValue()) * cv))/2.f;
         else
-            dsp[bank].outputLevel = (pa_vca.getValue() * 10.f) - (pa_vca.getValue() * cv);
+            dsp[bank].outputLevel = ((pa_vca.getValue() * 10.f) - (pa_vca.getValue() * cv))/2.f;
     }
 }
 
