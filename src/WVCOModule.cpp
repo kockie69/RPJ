@@ -1,5 +1,7 @@
 
 #include <sstream>
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
 #include "RPJ.hpp"
 #include "../composites/WidgetComposite.h"
 
@@ -241,7 +243,7 @@ public:
     int oldStepping;
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
-    std::string steppingTxt[7] = { "None", "Legacy", "Legacy+SubOctaves", "Octaves", "Digitone Operator", "Yamaha TX81Z", "Yamaha DX7"};
+    std::string steppingTxt[7] = { "None", "Legacy", "Legacy+Sub", "Octaves", "Digitone", "DX11", "DX7"};
 
     WVCOModule();
     /**
@@ -354,13 +356,27 @@ void WVCOModule::dataFromJson(json_t *rootJ) {
 }
 
 void WVCOModule::onAdd(const rack::engine::Module::AddEvent& e) {
-	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
-	// Read file...
+	std::string configPath = asset::user("RPJ.json");
+	INFO("Loading config file %s", configPath.c_str());
+	FILE* file = std::fopen(configPath.c_str(), "r");
+	if (file) {
+		//throw Exception("Could not open autosave patch %s", configPath.c_str());
+	    DEFER({std::fclose(file);});
+
+	    json_error_t error;
+	    json_t* rootJ = json_loadf(file, 0, &error);
+	    if (!rootJ)
+		    throw Exception("Failed to load config. JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
+	    DEFER({json_decref(rootJ);});
+    }
+    else
+        INFO("Could not load config file %s, using defaults", configPath.c_str()); 
 }
 
 void WVCOModule::onSave(const rack::engine::Module::SaveEvent& e) {
 	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
 	// Write file...
+
 }
 
 ////////////////////
@@ -408,7 +424,7 @@ void WVCOWidget::appendContextMenu(Menu *menu)
     }
 }
 
-const float dispX1 = 150;
+const float dispX1 = 138;
 const float dispY1 = 40;
 const float dispDeltaY = 48;
 const float dispY2 = dispY1 + dispDeltaY;
@@ -600,22 +616,12 @@ const float trimY = 276;
 const float trimX = 52;
 //const float labelAboveKnob = 20;
 
-class SqBlueButton : public ToggleButton 
-{
-public:
-    SqBlueButton()
-    {
-        addSvg("res/oval-button-up.svg");
-        addSvg("res/oval-button-down.svg");
-    }
-};
-
 void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
 
-    addParam(createParam<buttonMinSmall>(Vec(117,54),module, Comp::PARAM_WAVEFORM_DOWN));
-	addParam(createParam<buttonPlusSmall>(Vec(185,54),module, Comp::PARAM_WAVEFORM_UP));
-	addParam(createParam<buttonMinSmall>(Vec(117,103),module, Comp::PARAM_STEPPING_DOWN));
-	addParam(createParam<buttonPlusSmall>(Vec(185,103),module, Comp::PARAM_STEPPING_UP));
+    addParam(createParam<buttonMinSmall>(Vec(106,55),module, Comp::PARAM_WAVEFORM_DOWN));
+	addParam(createParam<buttonPlusSmall>(Vec(174,55),module, Comp::PARAM_WAVEFORM_UP));
+	addParam(createParam<buttonMinSmall>(Vec(106,104),module, Comp::PARAM_STEPPING_DOWN));
+	addParam(createParam<buttonPlusSmall>(Vec(174,104),module, Comp::PARAM_STEPPING_UP));
     
     // first row
     addParam(SqHelper::createParam<RPJKnob>(
@@ -626,12 +632,11 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
     //addLabel(Vec(knobX1 - 13, knobY1 - labelAboveKnob), "Octave");
 
-    addParam(SqHelper::createParam<RPJKnob>(
+    addParam(SqHelper::createParam<RPJKnobBig>(
         icomp,
-        Vec(knobX2, knobY1),
+        Vec(knobX2-6, knobY1),
         module,
         Comp::FREQUENCY_MULTIPLIER_PARAM));
-        //RPJ: Ratio in KitchenSink
     //addLabel(Vec(knobX2 - 6, knobY1 - labelAboveKnob), "Ratio");
 
     addParam(SqHelper::createParam<RPJKnob>(
@@ -643,13 +648,13 @@ void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
     addParam(SqHelper::createParam<Toggle2P>(
         icomp,
-        Vec(knobX2, knobY2), 
+        Vec(knobX2-3, knobY2), 
         module, 
         Comp::LINEXP_PARAM));
 
     addParam(SqHelper::createParam<Toggle2P>(
         icomp,
-        Vec(knobX3, knobY2), 
+        Vec(knobX3-3, knobY2), 
         module, 
         Comp::POSINV_PARAM));
 
@@ -706,7 +711,7 @@ const float jacksX2 = jacksX1 + jacksDeltaX;
 const float jacksX3 = jacksX2 + jacksDeltaX;
 const float jacksX4 = jacksX3 + jacksDeltaX;
 
-const float jacksY0 = 85;
+const float jacksY0 = 62;
 const float jacksY1 = 120;
 const float jacksY2 = 174;
 const float jacksY3 = 276;
@@ -716,7 +721,7 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
 
     //-------------------------------- first row ----------------------------------
     addInput(createInput<PJ301MPort>(
-        Vec(jacksX2, jacksY0),
+        Vec(jacksX1, jacksY0),
         module,
         Comp::RATIO_INPUT));
 
@@ -786,9 +791,7 @@ WVCOWidget::WVCOWidget(WVCOModule *mod) : module(mod)
 {
     setModule(module);
   //  box.size = Vec(14 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-    SqHelper::setPanel(this, "res/kitchen-sink-panel.svg");
-
-    //addLabel(Vec(60, 14), "Kitchen Sink");
+    SqHelper::setPanel(this, "res/pigeonplink.svg");
 
     // screws
     addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));

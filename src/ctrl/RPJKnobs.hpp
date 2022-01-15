@@ -1,5 +1,12 @@
 #include "rack.hpp"
 
+struct RPJKnobBig : RoundKnob {
+	RPJKnobBig() {
+		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnobBig.svg")));
+		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnobBig_bg.svg")));
+	}
+};
+
 struct RPJKnob : RoundKnob {
 	RPJKnob() {
 		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob.svg")));

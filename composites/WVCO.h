@@ -474,7 +474,8 @@ inline void WVCO<TBase>::updateFreq_n() {
             freq[i] = expLookup(pitch[i]);
         }
         Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
-        freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
+        if (ratioInputPort.isConnected())
+            freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
 
         freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
@@ -698,7 +699,7 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             ret = {.0f, 1.0f, 0.f, "Stepping Down"};
             break;
         case WVCO<TBase>::VCA_PARAM:
-            ret = {.0f, 1.0f, 0.5f, "VCA"};
+            ret = {.0f, 1.0f, 0.f, "VCA"};
             break;
         case WVCO<TBase>::FREQUENCY_MULTIPLIER_PARAM:
             ret = {0.f, 10.f, 1.f/3.2f, "Frequency Ratio"};
@@ -725,10 +726,10 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             ret = {0, 100, 0, "FM Feedback depth"};
             break;
         case WVCO<TBase>::LINEXP_PARAM:
-            ret = {0, 1, 0, "Linear or Logarythmic"};
+            ret = {0, 1, 1, "Linear or Logarythmic"};
             break;
         case WVCO<TBase>::POSINV_PARAM:
-            ret = {0, 1, 0, "Positive or Inverted"};
+            ret = {0, 1, 1, "Positive or Inverted"};
             break;  
         case WVCO<TBase>::OUTPUT_LEVEL_PARAM:
             ret = {0, 100, 100, "output Level"};
