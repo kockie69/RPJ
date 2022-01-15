@@ -474,8 +474,8 @@ inline void WVCO<TBase>::updateFreq_n() {
             freq[i] = expLookup(pitch[i]);
         }
         Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
-        if (ratioInputPort.isConnected())
-            freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
+
+        freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
 
         freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
