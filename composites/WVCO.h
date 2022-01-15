@@ -479,7 +479,7 @@ inline void WVCO<TBase>::updateFreq_n() {
 
         freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
-        freq = time*32;
+        freq = time*16;
 
         dsp[bank].normalizedFreq = freq / WVCODsp::oversampleRate;
     }
@@ -726,7 +726,7 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
             ret = {0, 100, 0, "FM Feedback depth"};
             break;
         case WVCO<TBase>::LINEXP_PARAM:
-            ret = {0, 1, 1, "Linear or Logarythmic"};
+            ret = {0, 1, 1, "Linear or Logarithmic"};
             break;
         case WVCO<TBase>::POSINV_PARAM:
             ret = {0, 1, 1, "Positive or Inverted"};
