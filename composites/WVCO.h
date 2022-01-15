@@ -581,7 +581,7 @@ inline void WVCO<TBase>::stepn_fullRate()
         if (enableAdsrFeedback) {
            //feedbackAmount *= adsr.get(bank);
            Port& p = TBase::inputs[GATE_INPUT];
-           feedbackAmount *= p.getVoltageSimd<float_4>(bank);
+           feedbackAmount *= p.getPolyVoltageSimd<float_4>(bank * 4);
         }
         if (feedbackConnected_m) {
             Port& feedbackPort = WVCO<TBase>::inputs[FEEDBACK_INPUT];
@@ -595,7 +595,7 @@ inline void WVCO<TBase>::stepn_fullRate()
         Port& p = TBase::inputs[GATE_INPUT];
         Param& pa_linexp = TBase::params[LINEXP_PARAM];
 
-        float_4 cv = p.getVoltageSimd<float_4>(bank)/10.f;
+        float_4 cv = p.getPolyVoltageSimd<float_4>(bank * 4)/10.f;
         if (!pa_linexp.getValue())
             cv = rack::simd::pow(cv, 4.f);
         cv = cv * 10.f;
