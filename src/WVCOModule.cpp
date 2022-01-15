@@ -251,7 +251,8 @@ public:
     void onSampleRateChange() override;
     json_t *dataToJson() override;
 	void dataFromJson(json_t *) override;
-
+    void onAdd(const AddEvent&) override;
+    void onSave(const SaveEvent&) override;
     std::shared_ptr<Comp> wvco;
   
 private:
@@ -350,6 +351,16 @@ void WVCOModule::dataFromJson(json_t *rootJ) {
 		wvco->wfFromUI = static_cast<int>(json_integer_value(nWaveJ));
     if (nSteppingJ)
         wvco->steppingFromUI = static_cast<int>(json_integer_value(nSteppingJ));
+}
+
+void WVCOModule::onAdd(const rack::engine::Module::AddEvent& e) {
+	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
+	// Read file...
+}
+
+void WVCOModule::onSave(const rack::engine::Module::SaveEvent& e) {
+	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
+	// Write file...
 }
 
 ////////////////////

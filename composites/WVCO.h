@@ -230,7 +230,7 @@ public:
 
     float convertOldShapeGain(float old) const;
     float getScaledRatio(std::vector<float>,float,float);
-    float getRatio(int, float,float);
+    float_4 getRatio(int, float,float_4);
 
 private:
     Divider divn;
@@ -310,40 +310,42 @@ inline float WVCO<TBase>::getScaledRatio(std::vector<float> R,float ratio,float 
 }
 
 template <class TBase>
-inline float WVCO<TBase>::getRatio(int steppingType, float ratio, float ratioCV) {
-    float ret;
-    switch (steppingType) {
-        case 0: //none
-            ret = rack::math::clamp(ratio + ratioCV,0.f,10.f) * 3.2f;
-            break;
-        case 1: { //legacy
-            ret = getScaledRatio(R[1], ratio, ratioCV);
-            break;
-        }
-        case 2: // legacy+suboctaves
-        {
-            ret = getScaledRatio(R[2], ratio, ratioCV);
-            break;
-        }
-        case 3: //octaves
-        {
-            ret = getScaledRatio(R[3], ratio, ratioCV);
-            break;
-        }
-        case 4: //Digitone opperator
-        {
-            ret = getScaledRatio(R[4], ratio, ratioCV);
-            break;
-        }
-        case 5: //Yamaha TX81Z
-        {
-            ret = getScaledRatio(R[5], ratio, ratioCV);
-            break;
-        }
-        case 6: //Yamaha DX7:
-        {
-            ret = getScaledRatio(R[6], ratio, ratioCV);
-            break;
+inline float_4 WVCO<TBase>::getRatio(int steppingType, float ratio, float_4 ratioCV) {
+    float_4 ret;
+    for (int i=0;i<4;i++) {
+        switch (steppingType) {
+            case 0: //none
+                ret[i] = rack::math::clamp(ratio + ratioCV[i],0.f,10.f) * 3.2f;
+                break;
+            case 1: { //legacy
+                ret[i] = getScaledRatio(R[1], ratio, ratioCV[i]);
+                break;
+            }
+            case 2: // legacy+suboctaves
+            {
+                ret[i] = getScaledRatio(R[2], ratio, ratioCV[i]);
+                break;
+            }
+            case 3: //octaves
+            {
+                ret[i] = getScaledRatio(R[3], ratio, ratioCV[i]);
+                break;
+            }
+            case 4: //Digitone opperator
+            {
+                ret[i] = getScaledRatio(R[4], ratio, ratioCV[i]);
+                break;
+            }
+            case 5: //Yamaha TX81Z
+            {
+                ret[i] = getScaledRatio(R[5], ratio, ratioCV[i]);
+                break;
+            }
+            case 6: //Yamaha DX7:
+            {
+                ret[i] = getScaledRatio(R[6], ratio, ratioCV[i]);
+                break;
+            }
         }
     }
     return ret;
@@ -365,10 +367,8 @@ inline float WVCO<TBase>::convertOldShapeGain(float old) const {
 
 template <class TBase>
 inline void WVCO<TBase>::stepm() {
-    // RPJ: This is disgusting!!!
-    numChannels_m = std::max<int>(TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels());
-    numChannels_m = std::max<int>(numChannels_m,TBase::inputs[FM_INPUT].getChannels());
-    numChannels_m = std::max<int>(1,numChannels_m);
+
+    numChannels_m = std::max<int>({1,TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels(),TBase::inputs[FM_INPUT].getChannels(),TBase::inputs[RATIO_INPUT].getChannels()});
     WVCO<TBase>::outputs[WVCO<TBase>::MAIN_OUTPUT].setChannels(numChannels_m);
     
     numBanks_m = numChannels_m / 4;
@@ -389,8 +389,7 @@ inline void WVCO<TBase>::stepm() {
                         TBase::params[FM_DEPTH_PARAM].value * .01f);
 
     //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
-    Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
-    freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltage());
+
     //TBase::params[FREQUENCY_MULTIPLIER_PARAM].setDisplayValueString(std::to_string(freqMultiplier_m[0]));
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {
@@ -474,6 +473,9 @@ inline void WVCO<TBase>::updateFreq_n() {
         for (int i = 0; i < 4; ++i) {
             freq[i] = expLookup(pitch[i]);
         }
+        Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
+        freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
+
         freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
         freq = time*32;
