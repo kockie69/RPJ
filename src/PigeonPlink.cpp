@@ -243,7 +243,7 @@ public:
     int oldStepping;
     steppings stepping;
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
-    std::string steppingTxt[7] = { "None", "Legacy", "Legacy+Sub", "Octaves", "Digitone", "DX11", "DX7"};
+    std::vector<std::string> steppingTxt = { "None", "Legacy", "Legacy+Sub", "Octaves", "Digitone", "DX11", "DX7"};
 
     PigeonPlinkModule();
     /**
@@ -359,18 +359,41 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
 	std::string configPath = asset::user("RPJ.json");
 	INFO("Loading config file %s", configPath.c_str());
 	FILE* file = std::fopen(configPath.c_str(), "r");
-	if (file) {
-		//throw Exception("Could not open autosave patch %s", configPath.c_str());
-	    DEFER({std::fclose(file);});
 
+	//	throw Exception("Could not open autosave patch %s", configPath.c_str());
+	DEFER({std::fclose(file);});
+    if (file) {
 	    json_error_t error;
 	    json_t* rootJ = json_loadf(file, 0, &error);
-	    if (!rootJ)
-		    throw Exception("Failed to load config. JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
-	    DEFER({json_decref(rootJ);});
+	    if (!rootJ) 
+	        throw Exception("Failed to load config. JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
+        DEFER({json_decref(rootJ);});
+        
+        steppingTxt = {};
+        wvco->R = {};
+        json_t *nSteppingJ = json_object_get(rootJ, "steppings");
+	    if (nSteppingJ) {
+            size_t nrSteppings = json_array_size(nSteppingJ);
+            for (int i=0;i<(int)nrSteppings;i++){
+                json_t* stepping = json_array_get(nSteppingJ,i);
+                if (stepping) {
+                    json_t *nNameJ = json_object_get(stepping, "name");
+                    if (nNameJ)
+                        steppingTxt[i]=json_string_value(nNameJ);
+                    json_t *nValuesJ = json_object_get(stepping, "values");
+                    if (nValuesJ) {
+                        size_t nrValues = json_array_size(nValuesJ);
+                        std::vector<float> tmp_vec;
+                        for (int j=0;j<(int)nrValues;j++){
+                            json_t* nValueJ = json_array_get(nValuesJ,j);
+                            tmp_vec.push_back(static_cast<float>(json_number_value(nValueJ)));
+                        }
+                        wvco->R.push_back(tmp_vec);
+                    }
+                }
+            }
+        }
     }
-    else
-        INFO("Could not load config file %s, using defaults", configPath.c_str()); 
 }
 
 void PigeonPlinkModule::onSave(const rack::engine::Module::SaveEvent& e) {
