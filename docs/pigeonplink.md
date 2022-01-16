@@ -36,6 +36,7 @@ Well...
 That's not all of them out there, we know. To give you the possibility to enter your own Steppings, there is a File called RPJ.json in your VCV User Folder.
 Just open it with a text-editor and add a comma and the following lines after the Segment about the DX7, so that it should look like this:
 
+```
 [...]
         {
             "name": "DX7",
@@ -49,6 +50,8 @@ Just open it with a text-editor and add a comma and the following lines after th
         } 
     ]
 }
+```
+
 You do not need to restart VCV for this, but the new stepping will appear only when a new Pigeon Plink is added to your patch.
 
 ## But there is more !!!
