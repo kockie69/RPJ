@@ -33,6 +33,26 @@ This may be a Stepping that needs validation, because there is no list of availa
 ### "DX7":
 Well...
 
+That's not all of them out there, we know. To give you the possibility to enter your own Steppings, there is a File called RPJ.json in your VCV User Folder.
+Just open it with a text-editor and add a comma and the following lines after the Segment about the DX7, so that it should look like this:
+
+[...]
+        {
+            "name": "DX7",
+            "values": [0.50,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+            ]
+        },
+        {
+            "name": "RosiesNumber",
+            "values": [32,16,8
+            ]
+        } 
+    ]
+}
+You do not need to restart VCV for this, but the new stepping will appear only when a new Pigeon Plink is added to your patch.
+
+## But there is more !!!
+
 In addition to this Ratio Madness you can modulate it!
 Think of changing timbres of an E-Piano sound, where a short attack "noise" is modulated somewhere between a Ratio of 10 and 20. Or a fat monophonic 4-Operator Lead Sound with ever changing overtones and harmonics - the Digitone Stepping is perfect for this. Or a Pad Sound, where the FM-Modulation shimmers in Octaves up.
 The modulation input accepts bipolar modulation sources. The modulation signal is added to the knob position. You can set the Ratio Knob to Zero and use a unipolar Modulation from 0-10V to modulate through all Steppings, or set the Knob to 50% and use a bipolar source (-5V to +5V) to achieve the same effect. With careful attenuation of your modulation signal you can achieve very subtle changes. Use a Sample&Hold to get a different timbre each time a note is triggered or use an envelope to scan through the steppings.
@@ -101,6 +121,13 @@ Connect to a mixer or the LFM-Input of another Pigeon Plink or wherever you like
 For a more indepth look at some of the controls, please also have a look at the [Kitchen Sink Manual](https://github.com/kockie69/SquinkyVCV-main/blob/master/docs/kitchen-sink.md)
 
 For a discussion about Pigeon Plink and Patch Ideas head over to the official community forum
+
+## A pedantic note about FM vs. PM
+Most modules and synthesizers that claim to do "FM" really use phase modulation. Even the DX-7 used PM. The advantages of phase modulation of frequency modulation are:
+
+PM Timbres stay the same as pitch is changed, whereas FM doesn't.
+FM can easily go out of tune when heavy amounts of FM are applied. PM doesn't have this problem.
+So we use phase modulation, as do most "FM" VCOs
 
 # Credits
 **Squinky Labs:** Without him/them we never would have created this module. We used [Kitchen Sink](https://github.com/kockie69/SquinkyVCV-main/blob/master/docs/kitchen-sink.md) as the base for our ideas and also made heavily use of the original code.
