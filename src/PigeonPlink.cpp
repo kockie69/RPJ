@@ -5,7 +5,7 @@
 #include "RPJ.hpp"
 #include "../composites/WidgetComposite.h"
 
-#include "../composites/WVCO.h"
+#include "pigeonplink.hpp"
 #include "ctrl/SqWidgets.h"
 #include "ctrl/RPJKnobs.hpp"
 #include "ctrl/SqHelper.h"
@@ -237,7 +237,7 @@ enum steppings {Off, quart, full};
 
 /**
  */
-struct WVCOModule : Module
+struct PigeonPlinkModule : Module
 {
 public:
     int oldStepping;
@@ -245,7 +245,7 @@ public:
     std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
     std::string steppingTxt[7] = { "None", "Legacy", "Legacy+Sub", "Octaves", "Digitone", "DX11", "DX7"};
 
-    WVCOModule();
+    PigeonPlinkModule();
     /**
      * Overrides of Module functions
      */
@@ -264,7 +264,7 @@ private:
 
 };
 
-WVCOModule::WVCOModule()
+PigeonPlinkModule::PigeonPlinkModule()
 {
     config(Comp::NUM_PARAMS, Comp::NUM_INPUTS, Comp::NUM_OUTPUTS, Comp::NUM_LIGHTS);
     configInput(Comp::GATE_INPUT,"Gate");
@@ -289,13 +289,13 @@ WVCOModule::WVCOModule()
     substituteDiscreteParamQuantity(Comp::getWaveformNames(), *this, Comp::WAVE_SHAPE_PARAM);
 }
 
-void WVCOModule::stampPatchAs2()
+void PigeonPlinkModule::stampPatchAs2()
 {
     // WARN("marking patch as 2.0\n");
     APP->engine->setParamValue(this, Comp::PATCH_VERSION_PARAM, 1); 
 }
 
-void WVCOModule::checkForFormatUpgrade()
+void PigeonPlinkModule::checkForFormatUpgrade()
 {
     const bool needsUpdate = APP->engine->getParamValue(this, Comp::PATCH_VERSION_PARAM) < .5;
     if (!needsUpdate) {
@@ -320,11 +320,11 @@ void WVCOModule::checkForFormatUpgrade()
     // WARN("finished update");
 }
 
-void WVCOModule::onSampleRateChange()
+void PigeonPlinkModule::onSampleRateChange()
 {
 }
 
-void WVCOModule::step()
+void PigeonPlinkModule::step()
 {
     if (!haveCheckedFormat) {
         // WARN("checking on first call to step\n");
@@ -339,14 +339,14 @@ void WVCOModule::step()
     wvco->step();
 }
 
-json_t *WVCOModule::dataToJson() {
+json_t *PigeonPlinkModule::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, "JSON_WAVE", json_integer(static_cast<int>(wvco->wfFromUI)));
     json_object_set_new(rootJ, "JSON_STEPPING", json_integer(static_cast<int>(wvco->steppingFromUI)));
 	return rootJ;
 }
 
-void WVCOModule::dataFromJson(json_t *rootJ) {
+void PigeonPlinkModule::dataFromJson(json_t *rootJ) {
 	json_t *nWaveJ = json_object_get(rootJ, "JSON_WAVE");
     json_t *nSteppingJ = json_object_get(rootJ, "JSON_STEPPING");
 	if (nWaveJ) 
@@ -355,7 +355,7 @@ void WVCOModule::dataFromJson(json_t *rootJ) {
         wvco->steppingFromUI = static_cast<int>(json_integer_value(nSteppingJ));
 }
 
-void WVCOModule::onAdd(const rack::engine::Module::AddEvent& e) {
+void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
 	std::string configPath = asset::user("RPJ.json");
 	INFO("Loading config file %s", configPath.c_str());
 	FILE* file = std::fopen(configPath.c_str(), "r");
@@ -373,7 +373,7 @@ void WVCOModule::onAdd(const rack::engine::Module::AddEvent& e) {
         INFO("Could not load config file %s, using defaults", configPath.c_str()); 
 }
 
-void WVCOModule::onSave(const rack::engine::Module::SaveEvent& e) {
+void PigeonPlinkModule::onSave(const rack::engine::Module::SaveEvent& e) {
 	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
 	// Write file...
 
@@ -383,9 +383,9 @@ void WVCOModule::onSave(const rack::engine::Module::SaveEvent& e) {
 // module widget
 ////////////////////
 
-struct WVCOWidget : ModuleWidget
+struct PigeonPlinkWidget : ModuleWidget
 {
-    WVCOWidget(WVCOModule *);
+    PigeonPlinkWidget(PigeonPlinkModule *);
     void appendContextMenu(Menu *menu) override;
 
  #ifdef _TEXT
@@ -400,15 +400,15 @@ struct WVCOWidget : ModuleWidget
     }
  #endif
 
-    void addDisplays(WVCOModule *module, std::shared_ptr<IComposite> icomp);
-    void addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp);
-    void addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp);
-    void addButtons(WVCOModule *module, std::shared_ptr<IComposite> icomp);
+    void addDisplays(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp);
+    void addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp);
+    void addJacks(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp);
+    void addButtons(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp);
 
-    WVCOModule* module = nullptr;
+    PigeonPlinkModule* module = nullptr;
 };
 
-void WVCOWidget::appendContextMenu(Menu *menu)
+void PigeonPlinkWidget::appendContextMenu(Menu *menu)
 {
     MenuLabel *spacerLabel = new MenuLabel();
 	menu->addChild(spacerLabel);
@@ -432,7 +432,7 @@ const float dispY2 = dispY1 + dispDeltaY;
 struct RPJDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
-	WVCOModule* module;
+	PigeonPlinkModule* module;
 	const int fh = 12; // font height
 
 	RPJDisplay(Vec pos) {
@@ -512,7 +512,7 @@ struct RPJDisplay : TransparentWidget {
 struct RPJSteppingDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
-	WVCOModule* module;
+	PigeonPlinkModule* module;
 	const int fh = 12; // font height
 
 	RPJSteppingDisplay(Vec pos) {
@@ -589,7 +589,7 @@ struct RPJSteppingDisplay : TransparentWidget {
 	}
 };
 
-void WVCOWidget::addDisplays(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
+void PigeonPlinkWidget::addDisplays(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
 	RPJDisplay * wfd = new RPJDisplay(Vec(dispX1,dispY1));
     wfd->module = module;
 	addChild(wfd);
@@ -616,7 +616,7 @@ const float trimY = 276;
 const float trimX = 52;
 //const float labelAboveKnob = 20;
 
-void WVCOWidget::addKnobs(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
+void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
 
     addParam(createParam<buttonMinSmall>(Vec(106,55),module, Comp::PARAM_WAVEFORM_DOWN));
 	addParam(createParam<buttonPlusSmall>(Vec(174,55),module, Comp::PARAM_WAVEFORM_UP));
@@ -717,7 +717,7 @@ const float jacksY2 = 174;
 const float jacksY3 = 276;
 const float jacksY4 = 327;
 
-void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp) {
+void PigeonPlinkWidget::addJacks(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
 
     //-------------------------------- first row ----------------------------------
     addInput(createInput<PJ301MPort>(
@@ -787,7 +787,7 @@ void WVCOWidget::addJacks(WVCOModule *module, std::shared_ptr<IComposite> icomp)
  * This is not shared by all modules in the DLL, just one
  */
 
-WVCOWidget::WVCOWidget(WVCOModule *mod) : module(mod)
+PigeonPlinkWidget::PigeonPlinkWidget(PigeonPlinkModule *mod) : module(mod)
 {
     setModule(module);
   //  box.size = Vec(14 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
@@ -807,6 +807,6 @@ WVCOWidget::WVCOWidget(WVCOModule *mod) : module(mod)
 
 }
 
-Model *modelWVCOModule = createModel<WVCOModule, WVCOWidget>("rpj-wvco");
+Model *modelPigeonPlink = createModel<PigeonPlinkModule, PigeonPlinkWidget>("PigeonPlink");
 
 

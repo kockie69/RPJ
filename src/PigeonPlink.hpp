@@ -77,7 +77,7 @@ float -> float_4 isn't free.
 
 //#ifndef _MSC_VER
 #if 1
-#include "ADSR16.h"
+#include "../composites/ADSR16.h"
 #include "../sqsrc/util/Divider.h"
 #include "../composites/IComposite.h"
 #include "../dsp/utils/LookupTable.h"

@@ -20,6 +20,6 @@ extern Model *modelGaza;
 extern Model *modelCircularRide;
 extern Model *modelDrillingHoles;
 extern Model *modelTuxOn;
-extern Model *modelWVCOModule;
+extern Model *modelPigeonPlink;
 
 
