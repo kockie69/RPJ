@@ -378,8 +378,8 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
                 json_t* stepping = json_array_get(nSteppingJ,i);
                 if (stepping) {
                     json_t *nNameJ = json_object_get(stepping, "name");
-                    if (nNameJ)
-                        steppingTxt[i]=json_string_value(nNameJ);
+                    if (nNameJ) 
+                        steppingTxt.push_back(json_string_value(nNameJ));
                     json_t *nValuesJ = json_object_get(stepping, "values");
                     if (nValuesJ) {
                         size_t nrValues = json_array_size(nValuesJ);
