@@ -5,7 +5,7 @@
 #include "RPJ.hpp"
 #include "../composites/WidgetComposite.h"
 
-#include "pigeonplink.hpp"
+#include "PigeonPlink.hpp"
 #include "ctrl/SqWidgets.h"
 #include "ctrl/RPJKnobs.hpp"
 #include "ctrl/SqHelper.h"
