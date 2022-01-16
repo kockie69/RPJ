@@ -368,7 +368,7 @@ inline float WVCO<TBase>::convertOldShapeGain(float old) const {
 template <class TBase>
 inline void WVCO<TBase>::stepm() {
 
-    numChannels_m = std::max<int>({1,TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels(),TBase::inputs[FM_INPUT].getChannels(),TBase::inputs[RATIO_INPUT].getChannels()});
+    numChannels_m = std::max<int>({1,TBase::inputs[LINEAR_FM_INPUT].getChannels(),TBase::inputs[VOCT_INPUT].getChannels(),TBase::inputs[GATE_INPUT].getChannels(),TBase::inputs[FM_INPUT].getChannels(),TBase::inputs[RATIO_INPUT].getChannels()});
     WVCO<TBase>::outputs[WVCO<TBase>::MAIN_OUTPUT].setChannels(numChannels_m);
     
     numBanks_m = numChannels_m / 4;
@@ -475,7 +475,7 @@ inline void WVCO<TBase>::updateFreq_n() {
         }
         Port& ratioInputPort = TBase::inputs[RATIO_INPUT];
 
-        freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getVoltageSimd<float_4>(baseChannel));
+        freqMultiplier_m = getRatio(steppingFromUI, TBase::params[FREQUENCY_MULTIPLIER_PARAM].getValue(),ratioInputPort.getPolyVoltage(baseChannel));
 
         freq *= freqMultiplier_m;
         float_4 time = rack::simd::clamp(freq * TBase::engineGetSampleTime(), -.5f, 0.5f);
