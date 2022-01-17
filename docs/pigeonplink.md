@@ -69,7 +69,7 @@ There are so many envelopes, function generators and LFOs out there, which can g
 
 ## The Controls:
 
-Ratio Knob (see above for detailed explanation):
+### Ratio Knob (see above for detailed explanation):
 A Ratio of 1.00 is always C4 (with 0V at V/Oct).
 Modulation Input is Bipolar and adds to the Value of the Knob, which represents a 0-10V Range. That is why the same position on different Steppings results in different ratios. Input is polyphonic, but a monophonic modulation can be used, which is then affecting all channels.
 
@@ -81,7 +81,7 @@ Let me quote the Kitchen Sink Manual on this one:
 ### Stepping Selection
 Use the + and - Buttons to toggle through the different Steppings mentioned above.
 
-VCA Knob (see above for detailed explanation):
+### VCA Knob (see above for detailed explanation):
 Range 0-10V where 10V results in an audio output with VCV-Standard-Levels of +/-5V Maximums.
 Lin/Exp Switch changes the response curve of the VCA from linear to exponential.
 Pos/Neg inverts the polarity of an incoming modulation Signal.

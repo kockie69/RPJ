@@ -22,6 +22,7 @@ public:
     std::string getDisplayValueString() override {
         return "";
     }
+
 };
 
 class RatioParamQuantity : public ParamQuantity {
