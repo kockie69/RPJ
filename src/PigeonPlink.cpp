@@ -16,6 +16,14 @@
 using Comp = WVCO<WidgetComposite>;
 using Input = ::rack::engine::Input;
 
+class TriggerParamQuantity : public ParamQuantity {
+public:
+
+    std::string getDisplayValueString() override {
+        return "";
+    }
+};
+
 class RatioParamQuantity : public ParamQuantity {
 public:
     RatioParamQuantity(const ParamQuantity& other, const std::vector<std::string>& str) : strings(str) {
@@ -267,6 +275,7 @@ private:
 PigeonPlinkModule::PigeonPlinkModule()
 {
     config(Comp::NUM_PARAMS, Comp::NUM_INPUTS, Comp::NUM_OUTPUTS, Comp::NUM_LIGHTS);
+    configBypass(Comp::LINEAR_FM_INPUT, Comp::MAIN_OUTPUT);
     configInput(Comp::GATE_INPUT,"Gate");
     configInput(Comp::LINEAR_FM_DEPTH_INPUT,"Linear Frequency Modulation Depth");
     configInput(Comp::FEEDBACK_INPUT,"Feedback");
@@ -277,12 +286,29 @@ PigeonPlinkModule::PigeonPlinkModule()
     configInput(Comp::SYNC_INPUT,"Sync");
     configInput(Comp::RATIO_INPUT,"Ratio Modulation");
     configOutput(Comp::MAIN_OUTPUT,"Audio");
+    configParam(Comp::VCA_PARAM, .0f, 1.0f, 0.f, "VCA");
+    configParam(Comp::FREQUENCY_MULTIPLIER_PARAM,0.f, 10.f, 1.f/3.2f, "Frequency Ratio");
+    configParam(Comp::FINE_TUNE_PARAM,-12.0f, 12.0f, 0, "Fine tune");
+    configParam(Comp::FM_DEPTH_PARAM,.0f, 100.0f, 0, "Frequency modulation");
+    configParam(Comp::LINEAR_FM_DEPTH_PARAM,0, 100, 0, "Through-zero FM Depth");
+    configParam(Comp::LINEAR_FM_PARAM,0, 100, 0, "Linear FM Modulation");
+    configParam(Comp::WAVESHAPE_GAIN_PARAM,0, 100, 0, "Shape modulation");
+    configParam(Comp::WAVE_SHAPE_PARAM,0, 2, 0, "Wave shape");
+    configParam(Comp::FEEDBACK_PARAM,0, 100, 0, "FM Feedback depth");
+    configParam(Comp::OUTPUT_LEVEL_PARAM,0, 100, 100, "output Level");
+    configParam(Comp::LINEXP_PARAM,0, 1, 1, "Linear or Logarithmic");
+    configParam(Comp::POSINV_PARAM,0, 1, 1, "Positive or Inverted");
+    configParam(Comp::PATCH_VERSION_PARAM,0, 10, 0, "patch version");
+    configParam<TriggerParamQuantity>(Comp::PARAM_STEPPING_DOWN,.0f, 1.0f, 0.f, "Previous Stepping");
+    configParam<TriggerParamQuantity>(Comp::PARAM_STEPPING_UP,.0f, 1.0f, 0.f, "Next Stepping");
+    configParam<TriggerParamQuantity>(Comp::PARAM_WAVEFORM_DOWN,.0f, 1.0f, 0.f, "Previous Waveform");
+    configParam<TriggerParamQuantity>(Comp::PARAM_WAVEFORM_UP,.0f, 1.0f, 0.f, "Next Waveform");
+
 
     oldStepping = -1;
     wvco = std::make_shared<Comp>(this);
     std::shared_ptr<IComposite> icomp = Comp::getDescription();
     SqHelper::setupParams(icomp, this); 
-
     onSampleRateChange();
     wvco->init();
 
@@ -517,7 +543,7 @@ struct RPJDisplay : TransparentWidget {
 		nvgStrokeWidth(args.vg, 1.f);
 		nvgStroke(args.vg);
 	}
-
+    
 	void drawValue(const DrawArgs &args, const char * txt) {
 		Vec c = Vec(box.size.x/2, box.size.y);
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));

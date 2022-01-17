@@ -13,6 +13,7 @@ struct buttonPlusSmall : SvgSwitch  {
 		}
 		SvgSwitch::drawLayer(args,layer);
 	}
+
 };
 
 struct buttonMinSmall : SvgSwitch  {
@@ -28,6 +29,7 @@ struct buttonMinSmall : SvgSwitch  {
 		}
 		SvgSwitch::drawLayer(args,layer);
 	}
+
 };
 
 class ToggleButton : public ::rack::app::SvgSwitch
