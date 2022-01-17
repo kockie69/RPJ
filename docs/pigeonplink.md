@@ -33,8 +33,50 @@ This may be a Stepping that needs validation, because there is no list of availa
 ### "DX7":
 Well...
 
-That's not all of them out there, we know. To give you the possibility to enter your own Steppings, there is a File called RPJ.json in your VCV User Folder.
-Just open it with a text-editor and add a comma and the following lines after the Segment about the DX7, so that it should look like this:
+That's not all of them out there, we know. To give you the possibility to enter your own Steppings, you can add a File called RPJ.json in your VCV User Folder. Create this file with your favourite text editor and add the following code-snippet:
+```
+{
+    "steppings": [
+        {
+            "name": "none",
+            "values": [
+            ]
+        },
+        {
+            "name": "legacy",
+            "values": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+            ]
+        },
+        {
+            "name": "Legacy+Sub",
+            "values": [0.125,0.25, 0.5, 1.00,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+            ]
+        },
+        {
+            "name": "Octaves",
+            "values": [0.125, 0.25, 0.5, 1.00, 2.00, 4.00, 8.00, 16.00, 32.00
+            ]
+        },
+        {
+            "name": "Digitone",
+            "values": [0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25, 4.50, 4.75, 5.00, 5.50, 6.00, 6.50, 7.00, 7.50, 8.00, 8.50, 9.00, 9.50, 10.00, 11.00, 12.00, 13.00, 14.00, 15.00, 16.00
+            ]
+        },
+        {
+            "name": "DX11",
+            "values": [0.50, 0.71, 0.78, 0.87, 1.00, 1.41, 1.57, 1.73, 2.00, 2.82, 3.00, 3.14, 3.46, 4.00, 4.24, 4.71, 5.00, 5.19, 5.65, 6.00, 6.28, 6.92, 7.00, 7.07, 7.85, 8.00, 8.48, 8.65, 9.00, 9.42, 9.89, 10.00, 10.38, 10.99, 11.00, 11.30, 12.00, 12.11, 12.56, 12.72, 13.00, 13.84, 14.00, 14.10, 14.13, 15.00, 15.55, 15.57, 15.70, 16.96, 17.27, 17.30, 18.37, 18.84, 19.03, 19.78, 20.41, 20.76, 21.20, 21.98, 22.49, 23.55, 24.22, 25.95
+            ]
+        },
+        {
+            "name": "DX7",
+            "values": [0.50,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+            ]
+        }
+    ]
+}
+```
+
+This will give you the same values as we have programmed for you by default, but to add your own steppings, again use your text-editor and add a comma and the following lines after the Segment about the DX7, so that it should look like this:
 
 ```
 [...]
