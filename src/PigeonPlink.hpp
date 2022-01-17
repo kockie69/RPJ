@@ -595,20 +595,27 @@ inline void WVCO<TBase>::step()
     assert(numBanks_m > 0);
 
 	if (waveFormUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		if (wfFromUI+1 < 3)
-			wfFromUI = wfFromUI + 1;
+		wfFromUI = (wfFromUI + 1) % 3;
 
-	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
-		if (wfFromUI - 1 >= 0)
-			wfFromUI = wfFromUI - 1;
+	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))){
+		wfFromUI -= 1;
+        if (wfFromUI < 0)
+            wfFromUI = 2;
+        else
+            wfFromUI %= 3;
+    }
     
-    if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		if (steppingFromUI+1 < (int)R.size())
-			steppingFromUI = steppingFromUI + 1;
-    
-	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
-		if (steppingFromUI - 1 >= 0)
-			steppingFromUI = steppingFromUI - 1;
+    if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+        steppingFromUI = (steppingFromUI + 1) % (int)R.size();
+    }
+
+	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		steppingFromUI -= 1;
+        if (steppingFromUI < 0)
+            steppingFromUI = (int)R.size() - 1;
+        else
+            steppingFromUI %= (int)R.size();
+    }
     
     // this could even be moves out of the "every sample" loop
     if (!syncInputConnected_m && !fmInputConnected_m) {
@@ -657,16 +664,16 @@ inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
     switch (i) {
         
         case WVCO<TBase>::PARAM_WAVEFORM_UP:
-            ret = {.0f, 1.0f, 0.f, "Waveform Up"};
+            ret = {.0f, 1.0f, 0.f, "Next Waveform"};
             break;
         case WVCO<TBase>::PARAM_WAVEFORM_DOWN:
-            ret = {.0f, 1.0f, 0.f, "Waveform Down"};
+            ret = {.0f, 1.0f, 0.f, "Previous Waveform"};
             break;
         case WVCO<TBase>::PARAM_STEPPING_UP:
-            ret = {.0f, 1.0f, 0.f, "Stepping Up"};
+            ret = {.0f, 1.0f, 0.f, "Next Stepping"};
             break;
         case WVCO<TBase>::PARAM_STEPPING_DOWN:
-            ret = {.0f, 1.0f, 0.f, "Stepping Down"};
+            ret = {.0f, 1.0f, 0.f, "Previous Stepping"};
             break;
         case WVCO<TBase>::VCA_PARAM:
             ret = {.0f, 1.0f, 0.f, "VCA"};
