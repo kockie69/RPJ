@@ -116,8 +116,8 @@ private:
         }
         auto otherOutput = getOutput(otherModuleWidget, Comp::MAIN_OUTPUT);
 
-        // RPJ: assert(myFMPort->type == PortWidget::INPUT);
-        // RPJ: assert(otherOutput->type == PortWidget::OUTPUT);
+        assert(myFMPort->type == Port::INPUT);
+        assert(otherOutput->type == Port::OUTPUT);
 
          //   (output, input)
         patchBetweenPorts(myModuleWidget, otherModuleWidget, otherOutput, myFMPort);
@@ -137,7 +137,7 @@ private:
             return;
         }
         PortWidget* source = getOutputThatConnectsToThisInput(myVOctPort);
-       
+
         patchBetweenPorts(myModuleWidget, otherModuleWidget, source, otherVOctPort);
     }
 
@@ -172,13 +172,13 @@ private:
     }
 
     static PortWidget* getOutputThatConnectsToThisInput(PortWidget* thisInput) {
-        // RPJ: assert(thisInput->type == PortWidget::INPUT);
+        assert(thisInput->type == Port::INPUT);
         auto cables = APP->scene->rack->getCablesOnPort(thisInput);
         assert(cables.size() == 1);
         auto cable = cables.begin();
         CableWidget* cw = *cable;
         PortWidget* ret =  cw->outputPort;
-        // RPJ: assert(ret->type == PortWidget::OUTPUT);
+        assert(ret->type == Port::OUTPUT);
         return ret;
     }
 
@@ -200,16 +200,11 @@ private:
             WARN("can't patch to input that is already patched");
             return;
         }
-        rack::engine::Cable* cable = new rack::engine::Cable;
-        cable->inputModule=host->getModule();
-        cable->outputModule=neighbour->getModule();
-        cable->id=-1;      
-        cable->outputId=output->portId;
-        cable->inputId=input->portId;
-        APP->engine->addCable(cable);
         rack::app::CableWidget* cw = new rack::app::CableWidget;
-	    cw->setCable(cable);
+	    cw->inputPort = input;
+        cw->outputPort = output;
 	    cw->color = APP->scene->rack->getNextCableColor();
+        cw->updateCable();
 	    if (cw->isComplete())
             APP->scene->rack->addCable(cw);
     }
