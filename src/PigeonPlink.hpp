@@ -263,7 +263,6 @@ private:
     bool enableAdsrFeedback = false;
     bool enableAdsrFM = false;
     bool enableAdsrShape = false;
-    dsp::SchmittTrigger waveFormUpTrigger,waveFormDownTrigger,steppingUpTrigger,steppingDownTrigger;
     float_4 getOscFreq(int bank);
 
     /**
@@ -439,7 +438,7 @@ inline void WVCO<TBase>::updateFreq_n() {
         pitch += v8Port.getPolyVoltageSimd<float_4>(baseChannel);
 
         Port& fmInputPort = TBase::inputs[FM_INPUT];
-        pitch += fmInputPort.getPolyVoltage(baseChannel) * depth_m;
+        pitch += fmInputPort.getPolyVoltageSimd<float_4>(baseChannel) * depth_m;
         for (int i = 0; i < 4; ++i) {
             freq[i] = expLookup(pitch[i]);
         }
@@ -593,30 +592,7 @@ inline void WVCO<TBase>::step()
     
     stepn_fullRate();
     assert(numBanks_m > 0);
-
-	if (waveFormUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		wfFromUI = (wfFromUI + 1) % 3;
-
-	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))){
-		wfFromUI -= 1;
-        if (wfFromUI < 0)
-            wfFromUI = 2;
-        else
-            wfFromUI %= 3;
-    }
-    
-    if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-        steppingFromUI = (steppingFromUI + 1) % (int)R.size();
-    }
-
-	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
-		steppingFromUI -= 1;
-        if (steppingFromUI < 0)
-            steppingFromUI = (int)R.size() - 1;
-        else
-            steppingFromUI %= (int)R.size();
-    }
-    
+  
     // this could even be moves out of the "every sample" loop
     if (!syncInputConnected_m && !fmInputConnected_m) {
         for (int bank = 0; bank < numBanks_m; ++bank) {
@@ -655,26 +631,13 @@ inline void WVCO<TBase>::step()
 
 template <class TBase>
 inline int WVCODescription<TBase>::getNumParams() {
-    return WVCO<TBase>::NUM_PARAMS;
+    return WVCO<TBase>::NUM_PARAMS-4;
 }
 
 template <class TBase>
 inline IComposite::Config WVCODescription<TBase>::getParamValue(int i) {
     Config ret(0, 1, 0, "");
-    switch (i) {
-        
-        case WVCO<TBase>::PARAM_WAVEFORM_UP:
-            ret = {.0f, 1.0f, 0.f, "Next Waveform"};
-            break;
-        case WVCO<TBase>::PARAM_WAVEFORM_DOWN:
-            ret = {.0f, 1.0f, 0.f, "Previous Waveform"};
-            break;
-        case WVCO<TBase>::PARAM_STEPPING_UP:
-            ret = {.0f, 1.0f, 0.f, "Next Stepping"};
-            break;
-        case WVCO<TBase>::PARAM_STEPPING_DOWN:
-            ret = {.0f, 1.0f, 0.f, "Previous Stepping"};
-            break;
+    switch (i) {      
         case WVCO<TBase>::VCA_PARAM:
             ret = {.0f, 1.0f, 0.f, "VCA"};
             break;

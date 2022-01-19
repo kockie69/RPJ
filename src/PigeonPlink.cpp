@@ -16,15 +16,6 @@
 using Comp = WVCO<WidgetComposite>;
 using Input = ::rack::engine::Input;
 
-class TriggerParamQuantity : public ParamQuantity {
-public:
-
-    std::string getDisplayValueString() override {
-        return "";
-    }
-
-};
-
 class RatioParamQuantity : public ParamQuantity {
 public:
     RatioParamQuantity(const ParamQuantity& other, const std::vector<std::string>& str) : strings(str) {
@@ -300,10 +291,10 @@ PigeonPlinkModule::PigeonPlinkModule()
     configParam(Comp::LINEXP_PARAM,0, 1, 1, "Linear or Logarithmic");
     configParam(Comp::POSINV_PARAM,0, 1, 1, "Positive or Inverted");
     configParam(Comp::PATCH_VERSION_PARAM,0, 10, 0, "patch version");
-    configParam<TriggerParamQuantity>(Comp::PARAM_STEPPING_DOWN,.0f, 1.0f, 0.f, "Previous Stepping");
-    configParam<TriggerParamQuantity>(Comp::PARAM_STEPPING_UP,.0f, 1.0f, 0.f, "Next Stepping");
-    configParam<TriggerParamQuantity>(Comp::PARAM_WAVEFORM_DOWN,.0f, 1.0f, 0.f, "Previous Waveform");
-    configParam<TriggerParamQuantity>(Comp::PARAM_WAVEFORM_UP,.0f, 1.0f, 0.f, "Next Waveform");
+    configParam(Comp::PARAM_STEPPING_DOWN,.0f, 1.0f, 0.f, "Previous Stepping");
+    configParam(Comp::PARAM_STEPPING_UP,.0f, 1.0f, 0.f, "Next Stepping");
+    configParam(Comp::PARAM_WAVEFORM_DOWN,.0f, 1.0f, 0.f, "Previous Waveform");
+    configParam(Comp::PARAM_WAVEFORM_UP,.0f, 1.0f, 0.f, "Next Waveform");
 
 
     oldStepping = -1;
@@ -429,6 +420,109 @@ void PigeonPlinkModule::onSave(const rack::engine::Module::SaveEvent& e) {
 
 }
 
+struct buttonMinStepping : SvgSwitch  {
+	buttonMinStepping() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_1.svg")));
+	}
+	
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
+
+	void onButton(const ButtonEvent & e) override {
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+		    module->wvco->steppingFromUI -= 1;
+            if (module->wvco->steppingFromUI < 0)
+                module->wvco->steppingFromUI = (int)module->wvco->R.size() -1;
+            else
+                module->wvco->wfFromUI %= (int)module->wvco->R.size();
+        }
+        SvgSwitch::onButton(e);
+	}
+	
+    PigeonPlinkModule* module;
+};
+
+struct buttonPlusStepping : SvgSwitch  {
+	buttonPlusStepping() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_1.svg")));
+	}
+	
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
+
+	void onButton(const ButtonEvent & e) override {
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+            module->wvco->steppingFromUI = ( module->wvco->steppingFromUI + 1) % (int)module->wvco->R.size();
+        }
+        SvgSwitch::onButton(e);
+    }
+
+	PigeonPlinkModule* module;
+};
+
+struct buttonMinWaveform : SvgSwitch  {
+	buttonMinWaveform() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_1.svg")));
+	}
+	
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
+
+	void onButton(const ButtonEvent & e) override {
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+		    module->wvco->wfFromUI -= 1;
+            if (module->wvco->wfFromUI < 0)
+                module->wvco->wfFromUI = 2;
+            else
+                module->wvco->wfFromUI %= 3;
+        }
+        SvgSwitch::onButton(e);
+	}
+	PigeonPlinkModule* module;
+};
+
+struct buttonPlusWaveform : SvgSwitch  {
+	buttonPlusWaveform() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_1.svg")));
+	}
+	
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
+
+	void onButton(const ButtonEvent & e) override {
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+            module->wvco->wfFromUI = (module->wvco->wfFromUI + 1) % 3;
+        }
+        SvgSwitch::onButton(e);
+	}
+	
+	PigeonPlinkModule* module;
+};
+
 ////////////////////
 // module widget
 ////////////////////
@@ -437,6 +531,10 @@ struct PigeonPlinkWidget : ModuleWidget
 {
     PigeonPlinkWidget(PigeonPlinkModule *);
     void appendContextMenu(Menu *menu) override;
+    buttonMinWaveform * bmw;
+    buttonPlusWaveform * bpw;
+    buttonMinStepping * bms;
+    buttonPlusStepping * bps;
 
  #ifdef _TEXT
     Label* addLabel(const Vec& v, const char* str, const NVGcolor& color = SqHelper::COLOR_BLACK)
@@ -559,6 +657,7 @@ struct RPJDisplay : TransparentWidget {
 	}
 };
 
+
 struct RPJSteppingDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
@@ -667,12 +766,23 @@ const float trimX = 52;
 //const float labelAboveKnob = 20;
 
 void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
+  
+    bmw = createParam<buttonMinWaveform>(Vec(106,55),module, Comp::PARAM_WAVEFORM_DOWN);
+    bmw->module = module;
+    addChild(bmw);
 
-    addParam(createParam<buttonMinSmall>(Vec(106,55),module, Comp::PARAM_WAVEFORM_DOWN));
-	addParam(createParam<buttonPlusSmall>(Vec(174,55),module, Comp::PARAM_WAVEFORM_UP));
-	addParam(createParam<buttonMinSmall>(Vec(106,104),module, Comp::PARAM_STEPPING_DOWN));
-	addParam(createParam<buttonPlusSmall>(Vec(174,104),module, Comp::PARAM_STEPPING_UP));
-    
+    bpw = createParam<buttonPlusWaveform>(Vec(174,55),module, Comp::PARAM_WAVEFORM_UP);
+    bpw->module = module;
+    addChild(bpw);
+
+    bms = createParam<buttonMinStepping>(Vec(106,104),module, Comp::PARAM_STEPPING_DOWN);
+    bms->module = module;
+    addChild(bms);
+
+    bps = createParam<buttonPlusStepping>(Vec(174,104),module, Comp::PARAM_STEPPING_UP);
+    bps->module = module;
+    addChild(bps);
+
     // first row
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
