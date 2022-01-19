@@ -423,8 +423,8 @@ void PigeonPlinkModule::onSave(const rack::engine::Module::SaveEvent& e) {
 struct buttonMinStepping : SvgSwitch  {
 	buttonMinStepping() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_1.svg")));
 	}
 	
 	void drawLayer(const DrawArgs &args, int layer) override {
@@ -451,8 +451,8 @@ struct buttonMinStepping : SvgSwitch  {
 struct buttonPlusStepping : SvgSwitch  {
 	buttonPlusStepping() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_1.svg")));
 	}
 	
 	void drawLayer(const DrawArgs &args, int layer) override {
@@ -475,8 +475,8 @@ struct buttonPlusStepping : SvgSwitch  {
 struct buttonMinWaveform : SvgSwitch  {
 	buttonMinWaveform() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMin_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_1.svg")));
 	}
 	
 	void drawLayer(const DrawArgs &args, int layer) override {
@@ -502,8 +502,8 @@ struct buttonMinWaveform : SvgSwitch  {
 struct buttonPlusWaveform : SvgSwitch  {
 	buttonPlusWaveform() {
 		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlus_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_1.svg")));
 	}
 	
 	void drawLayer(const DrawArgs &args, int layer) override {
@@ -767,19 +767,19 @@ const float trimX = 52;
 
 void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
   
-    bmw = createParam<buttonMinWaveform>(Vec(106,55),module, Comp::PARAM_WAVEFORM_DOWN);
+    bmw = createParam<buttonMinWaveform>(Vec(100,52),module, Comp::PARAM_WAVEFORM_DOWN);
     bmw->module = module;
     addChild(bmw);
 
-    bpw = createParam<buttonPlusWaveform>(Vec(174,55),module, Comp::PARAM_WAVEFORM_UP);
+    bpw = createParam<buttonPlusWaveform>(Vec(173,52),module, Comp::PARAM_WAVEFORM_UP);
     bpw->module = module;
     addChild(bpw);
 
-    bms = createParam<buttonMinStepping>(Vec(106,104),module, Comp::PARAM_STEPPING_DOWN);
+    bms = createParam<buttonMinStepping>(Vec(100,100),module, Comp::PARAM_STEPPING_DOWN);
     bms->module = module;
     addChild(bms);
 
-    bps = createParam<buttonPlusStepping>(Vec(174,104),module, Comp::PARAM_STEPPING_UP);
+    bps = createParam<buttonPlusStepping>(Vec(173,100),module, Comp::PARAM_STEPPING_UP);
     bps->module = module;
     addChild(bps);
 
