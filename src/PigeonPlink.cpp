@@ -237,7 +237,7 @@ struct PigeonPlinkModule : Module
 public:
     int oldStepping;
     steppings stepping;
-    std::string waveFormTxt[3] = { "sine", "fold", "T/S"};
+    std::vector<std::string> waveFormTxt = { "sine", "fold", "T/S"};
     std::vector<std::string> steppingTxt = { "None", "Legacy", "Legacy+Sub", "Octaves", "Digitone", "DX11", "DX7"};
 
     PigeonPlinkModule();
@@ -249,7 +249,6 @@ public:
     json_t *dataToJson() override;
 	void dataFromJson(json_t *) override;
     void onAdd(const AddEvent&) override;
-    void onSave(const SaveEvent&) override;
     std::shared_ptr<Comp> wvco;
   
 private:
@@ -286,11 +285,10 @@ PigeonPlinkModule::PigeonPlinkModule()
     configParam(Comp::LINEXP_PARAM,0, 1, 1, "Linear or Logarithmic");
     configParam(Comp::POSINV_PARAM,0, 1, 1, "Positive or Inverted");
     configParam(Comp::PATCH_VERSION_PARAM,0, 10, 0, "patch version");
-    configParam(Comp::PARAM_STEPPING_DOWN,.0f, 1.0f, 0.f, "Previous Stepping");
-    configParam(Comp::PARAM_STEPPING_UP,.0f, 1.0f, 0.f, "Next Stepping");
-    configParam(Comp::PARAM_WAVEFORM_DOWN,.0f, 1.0f, 0.f, "Previous Waveform");
-    configParam(Comp::PARAM_WAVEFORM_UP,.0f, 1.0f, 0.f, "Next Waveform");
-
+    configButton(Comp::PARAM_STEPPING_DOWN, "Previous Stepping type");
+    configButton(Comp::PARAM_STEPPING_UP, "Next Stepping type");
+    configButton(Comp::PARAM_WAVEFORM_DOWN, "Previous Waveform type");
+    configButton(Comp::PARAM_WAVEFORM_UP,"Next Waveform type");
 
     oldStepping = -1;
     wvco = std::make_shared<Comp>(this);
@@ -409,115 +407,6 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
     }
 }
 
-void PigeonPlinkModule::onSave(const rack::engine::Module::SaveEvent& e) {
-	std::string path = system::join(rack::engine::Module::createPatchStorageDirectory(), "config.json");
-	// Write file...
-
-}
-
-struct buttonMinStepping : SvgSwitch  {
-	buttonMinStepping() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_1.svg")));
-	}
-	
-	void drawLayer(const DrawArgs &args, int layer) override {
-		if (layer == 1) {
-			SvgSwitch::draw(args);
-		}
-		SvgSwitch::drawLayer(args,layer);
-	}
-
-	void onButton(const ButtonEvent & e) override {
-        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-		    module->wvco->steppingFromUI -= 1;
-            if (module->wvco->steppingFromUI < 0)
-                module->wvco->steppingFromUI = (int)module->wvco->R.size() -1;
-            else
-                module->wvco->wfFromUI %= (int)module->wvco->R.size();
-        }
-        SvgSwitch::onButton(e);
-	}
-	
-    PigeonPlinkModule* module;
-};
-
-struct buttonPlusStepping : SvgSwitch  {
-	buttonPlusStepping() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_1.svg")));
-	}
-	
-	void drawLayer(const DrawArgs &args, int layer) override {
-		if (layer == 1) {
-			SvgSwitch::draw(args);
-		}
-		SvgSwitch::drawLayer(args,layer);
-	}
-
-	void onButton(const ButtonEvent & e) override {
-        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-            module->wvco->steppingFromUI = ( module->wvco->steppingFromUI + 1) % (int)module->wvco->R.size();
-        }
-        SvgSwitch::onButton(e);
-    }
-
-	PigeonPlinkModule* module;
-};
-
-struct buttonMinWaveform : SvgSwitch  {
-	buttonMinWaveform() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonMinLarge_1.svg")));
-	}
-	
-	void drawLayer(const DrawArgs &args, int layer) override {
-		if (layer == 1) {
-			SvgSwitch::draw(args);
-		}
-		SvgSwitch::drawLayer(args,layer);
-	}
-
-	void onButton(const ButtonEvent & e) override {
-        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-		    module->wvco->wfFromUI -= 1;
-            if (module->wvco->wfFromUI < 0)
-                module->wvco->wfFromUI = 2;
-            else
-                module->wvco->wfFromUI %= 3;
-        }
-        SvgSwitch::onButton(e);
-	}
-	PigeonPlinkModule* module;
-};
-
-struct buttonPlusWaveform : SvgSwitch  {
-	buttonPlusWaveform() {
-		momentary=true;
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonPlusLarge_1.svg")));
-	}
-	
-	void drawLayer(const DrawArgs &args, int layer) override {
-		if (layer == 1) {
-			SvgSwitch::draw(args);
-		}
-		SvgSwitch::drawLayer(args,layer);
-	}
-
-	void onButton(const ButtonEvent & e) override {
-        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-            module->wvco->wfFromUI = (module->wvco->wfFromUI + 1) % 3;
-        }
-        SvgSwitch::onButton(e);
-	}
-	
-	PigeonPlinkModule* module;
-};
-
 ////////////////////
 // module widget
 ////////////////////
@@ -526,10 +415,6 @@ struct PigeonPlinkWidget : ModuleWidget
 {
     PigeonPlinkWidget(PigeonPlinkModule *);
     void appendContextMenu(Menu *menu) override;
-    buttonMinWaveform * bmw;
-    buttonPlusWaveform * bpw;
-    buttonMinStepping * bms;
-    buttonPlusStepping * bps;
 
  #ifdef _TEXT
     Label* addLabel(const Vec& v, const char* str, const NVGcolor& color = SqHelper::COLOR_BLACK)
@@ -762,21 +647,11 @@ const float trimX = 52;
 
 void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
   
-    bmw = createParam<buttonMinWaveform>(Vec(100,52),module, Comp::PARAM_WAVEFORM_DOWN);
-    bmw->module = module;
-    addChild(bmw);
-
-    bpw = createParam<buttonPlusWaveform>(Vec(173,52),module, Comp::PARAM_WAVEFORM_UP);
-    bpw->module = module;
-    addChild(bpw);
-
-    bms = createParam<buttonMinStepping>(Vec(100,100),module, Comp::PARAM_STEPPING_DOWN);
-    bms->module = module;
-    addChild(bms);
-
-    bps = createParam<buttonPlusStepping>(Vec(173,100),module, Comp::PARAM_STEPPING_UP);
-    bps->module = module;
-    addChild(bps);
+    // The little buttons to control the displays
+    addParam(createParam<ButtonMinBig>(Vec(100,52),module, Comp::PARAM_WAVEFORM_DOWN));
+    addParam(createParam<ButtonPlusBig>(Vec(173,52),module, Comp::PARAM_WAVEFORM_UP));
+    addParam(createParam<ButtonMinBig>(Vec(100,100),module, Comp::PARAM_STEPPING_DOWN));
+    addParam(createParam<ButtonPlusBig>(Vec(173,100),module, Comp::PARAM_STEPPING_UP));
 
     // first row
     addParam(SqHelper::createParam<RPJKnob>(
@@ -785,21 +660,17 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
         module,
         Comp::VCA_PARAM));
 
-    //addLabel(Vec(knobX1 - 13, knobY1 - labelAboveKnob), "Octave");
-
     addParam(SqHelper::createParam<RPJKnobBig>(
         icomp,
         Vec(knobX2-6, knobY1),
         module,
         Comp::FREQUENCY_MULTIPLIER_PARAM));
-    //addLabel(Vec(knobX2 - 6, knobY1 - labelAboveKnob), "Ratio");
 
     addParam(SqHelper::createParam<RPJKnob>(
         icomp,
         Vec(knobX4, knobY2),
         module,
         Comp::FINE_TUNE_PARAM));
-    //addLabel(Vec(knobX3 - 4, knobY1 - labelAboveKnob), "Fine");
 
     addParam(SqHelper::createParam<Toggle2P>(
         icomp,
@@ -820,7 +691,6 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
         Vec(knobX3, knobY3),
         module,
         Comp::OUTPUT_LEVEL_PARAM));
-    //addLabel(Vec(knobX1 - 8, knobY2 - labelAboveKnob), "Level");
 
     // 2 fm-0
     addParam(SqHelper::createParam<RPJKnob>(
@@ -828,14 +698,12 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
         Vec(knobX1, knobY3),
         module,
         Comp::LINEAR_FM_DEPTH_PARAM));
-    //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
   
       addParam(SqHelper::createParam<RPJKnob>(
         icomp,
         Vec(knobX2, knobY3),
         module,
         Comp::FM_DEPTH_PARAM));
-    //addLabel(Vec(knobX2 - 10, knobY2 - labelAboveKnob), "Depth");
 
   // 3 Fdbk
     addParam(SqHelper::createParam<RPJKnob>(
@@ -843,7 +711,6 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
         Vec(knobX3, knobY3),
         module,
         Comp::FEEDBACK_PARAM));
-    //addLabel(Vec(knobX3 - 6, knobY2 - labelAboveKnob), "Fbck");
 
     // 4 SHAPE
     addParam(SqHelper::createParam<RPJKnob>(
@@ -851,8 +718,6 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
         Vec(knobX4, knobY3),
         module,
         Comp::WAVESHAPE_GAIN_PARAM));
-   // addLabel(Vec(knobX4 - 10, knobY2 - labelAboveKnob), "Shape");
-
 
     // third row
 }
@@ -884,56 +749,47 @@ void PigeonPlinkWidget::addJacks(PigeonPlinkModule *module, std::shared_ptr<ICom
         Vec(jacksX1, jacksY2),
         module,
         Comp::GATE_INPUT));
-    ///addLabel(Vec(jacksX1 - 8, jacksY1 - labelAboveKnob), "Gate");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX1, jacksY3),
         module,
         Comp::LINEAR_FM_DEPTH_INPUT));
-    //addLabel(Vec(jacksX3 - 12, jacksY1 - labelAboveKnob), "Depth");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX3, jacksY3),
         module,
         Comp::FEEDBACK_INPUT));
-    //addLabel(Vec(jacksX4 - 8, jacksY1 - labelAboveKnob), "Fbck");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX4, jacksY3),
         module,
         Comp::SHAPE_INPUT));
-    //addLabel(Vec(jacksX5 - 12, jacksY1 - labelAboveKnob), "Shape");
 
     //----------------------------- second row -----------------------
     addInput(createInput<PJ301MPort>(
         Vec(jacksX2, jacksY4),
         module,
         Comp::VOCT_INPUT));
-    //addLabel(Vec(jacksX1 - 11, jacksY2 - labelAboveKnob), "V/Oct");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX2, jacksY3),
         module,
         Comp::FM_INPUT));
-    //addLabel(Vec(jacksX2 - 3, jacksY2 - labelAboveKnob), "FM");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX1, jacksY4),
         module,
         Comp::LINEAR_FM_INPUT));
-    //addLabel(Vec(jacksX3 - 6, jacksY2 - labelAboveKnob), "LFM");
 
     addInput(createInput<PJ301MPort>(
         Vec(jacksX3, jacksY4),
         module,
         Comp::SYNC_INPUT));
-    //addLabel(Vec(jacksX4 - 9, jacksY2 - labelAboveKnob), "Sync");
 
     addOutput(createOutput<PJ301MPort>(
         Vec(jacksX4, jacksY4),
         module,
         Comp::MAIN_OUTPUT));
-    //addLabel(Vec(jacksX5 - 7, jacksY2 - labelAboveKnob), "Out");
 }
 
 /**
@@ -945,7 +801,6 @@ void PigeonPlinkWidget::addJacks(PigeonPlinkModule *module, std::shared_ptr<ICom
 PigeonPlinkWidget::PigeonPlinkWidget(PigeonPlinkModule *mod) : module(mod)
 {
     setModule(module);
-  //  box.size = Vec(14 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
     SqHelper::setPanel(this, "res/pigeonplink.svg");
 
     // screws

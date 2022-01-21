@@ -129,6 +129,7 @@ class WVCO : public TBase {
 public:
     int wfFromUI = 0;
     int steppingFromUI = 0;
+    
     std::vector<std::vector<float>> R = {
     {},
     {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16},
@@ -142,10 +143,7 @@ public:
     {},
     {0,0.55556,1.11111,1.66667,2.22222,2.77778,3.33333,3.88889,4.44444,5.00000,5.55556,6.11111,6.66667,7.22222,7.77778,8.33333,8.88889,9.44444,10.00000}
     };
-    /*std::vector<std::vector<float>> Av2 = {
-    {},
-    {0.27778,0.83333,1.38889,1.94444,2.50000,3.05556,3.61111,4.16667,4.72222,5.27778,5.83333,6.38889,6.94444,7.50000,8.05556,8.61111,9.16667,9.72222}
-    };*/
+
     WVCO(Module* module) : TBase(module) {
     }
     WVCO() : TBase() {
@@ -263,6 +261,7 @@ private:
     bool enableAdsrFeedback = false;
     bool enableAdsrFM = false;
     bool enableAdsrShape = false;
+    dsp::SchmittTrigger waveFormUpTrigger,waveFormDownTrigger,steppingUpTrigger,steppingDownTrigger;
     float_4 getOscFreq(int bank);
 
     /**
@@ -357,9 +356,6 @@ inline void WVCO<TBase>::stepm() {
                         *audioTaperLookupParams,
                         TBase::params[FM_DEPTH_PARAM].value * .01f);
 
-    //freqMultiplier_m = float_4(std::round(TBase::params[FREQUENCY_MULTIPLIER_PARAM].value));
-
-    //TBase::params[FREQUENCY_MULTIPLIER_PARAM].setDisplayValueString(std::to_string(freqMultiplier_m[0]));
     baseFmDepth_m = float_4(WVCO<TBase>::params[LINEAR_FM_DEPTH_PARAM].value * .003f);
     {
         Port& depthCVPort = WVCO<TBase>::inputs[LINEAR_FM_DEPTH_INPUT];
@@ -382,7 +378,6 @@ inline void WVCO<TBase>::stepm() {
         ratioInputConnected_m = ratioInputPort.isConnected();
     }
 
-    //int wfFromUI = (int)std::round(TBase::params[WAVE_SHAPE_PARAM].value);
     WVCODsp::WaveForm wf = WVCODsp::WaveForm(wfFromUI);
     baseShapeGain = TBase::params[WAVESHAPE_GAIN_PARAM].value / 100;
 
@@ -548,7 +543,6 @@ inline void WVCO<TBase>::stepn_fullRate()
         float_4 feedbackAmount = baseFeedback_m;
         ;
         if (enableAdsrFeedback) {
-           //feedbackAmount *= adsr.get(bank);
            Port& p = TBase::inputs[GATE_INPUT];
            feedbackAmount *= p.getPolyVoltageSimd<float_4>(bank * 4);
         }
@@ -593,6 +587,29 @@ inline void WVCO<TBase>::step()
     stepn_fullRate();
     assert(numBanks_m > 0);
   
+  	if (waveFormUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
+		wfFromUI = (wfFromUI + 1) % 3;
+
+	if (waveFormDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_WAVEFORM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))){
+		wfFromUI -= 1;
+        if (wfFromUI < 0)
+            wfFromUI = 2;
+        else
+            wfFromUI %= 3;
+    }
+
+    if (steppingUpTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+        steppingFromUI = (steppingFromUI + 1) % (int)R.size();
+    }
+
+	if (steppingDownTrigger.process(rescale(WVCO<TBase>::params[PARAM_STEPPING_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		steppingFromUI -= 1;
+        if (steppingFromUI < 0)
+            steppingFromUI = (int)R.size() - 1;
+        else
+            steppingFromUI %= (int)R.size();
+    }
+
     // this could even be moves out of the "every sample" loop
     if (!syncInputConnected_m && !fmInputConnected_m) {
         for (int bank = 0; bank < numBanks_m; ++bank) {

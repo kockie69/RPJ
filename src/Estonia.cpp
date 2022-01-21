@@ -16,8 +16,8 @@ Estonia::Estonia() {
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
 	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
-	configParam(PARAM_UP, 0.0, 1.0, 0.0);
-	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configButton(PARAM_UP, "Next Algorithm");
+	configButton(PARAM_DOWN, "Previous Algorithm");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kLowShelf;
 	strAlgorithm = "LowShelf";
@@ -53,10 +53,12 @@ void Estonia::processChannel(Input& in, Output& out) {
 
 void Estonia::process(const ProcessArgs &args) {
 
-	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		afp.algorithm = filterAlgorithm::kHiShelf;	
-	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		afp.algorithm = filterAlgorithm::kLowShelf;
+	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f)) || downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) { 
+		if (afp.algorithm != filterAlgorithm::kHiShelf)
+			afp.algorithm = filterAlgorithm::kHiShelf;
+		else
+			afp.algorithm = filterAlgorithm::kLowShelf;	
+	}
 	strAlgorithm = EstoniaAlgorithmTxt[static_cast<int>(afp.algorithm)];
 
 	if (outputs[OUTPUT_MAIN].isConnected() && inputs[INPUT_MAIN].isConnected()) {

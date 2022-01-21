@@ -14,8 +14,8 @@ CircularRide::CircularRide() {
     configParam(PARAM_DRY, -60.f, 12.f,-3.f, "Dry","dB");
     configParam(PARAM_WET, -60.f, 12.f,-3.f, "Wet","dB");
 	configParam<DetectAlgorithmQuantity>(PARAM_ALGORITHM, 0.f, 1.f, 0.f, "Algorithm");
-	configParam(PARAM_UP, 0.0, 1.0, 0.0);
-	configParam(PARAM_DOWN, 0.0, 1.0, 0.0);
+	configButton(PARAM_UP,"Next Algorithm");
+	configButton(PARAM_DOWN,"Previous Algorithm");
     configParam(PARAM_TYPE, 0.f, 1.f,0.f, "Delay Update Type");
 	configParam(PARAM_LPFFC, 0.0909f, 1.f, 0.5f, "fc"," Hz", 2048, 10);
 	configParam(PARAM_HPFFC, 0.0909f, 1.f, 0.5f, "fc"," Hz", 2048, 10);
@@ -63,13 +63,18 @@ void CircularRide::processChannel(Input& inl, Input& inr, Output& outl, Output& 
 void CircularRide::process(const ProcessArgs &args) {
 
 	if (upTrigger.process(rescale(params[PARAM_UP].getValue(), 1.f, 0.1f, 0.f, 1.f))) 
-		if (static_cast<int>(adp.algorithm)+1 < static_cast<int>(delayAlgorithm::numDelayAlgorithms))
-			adp.algorithm = static_cast<delayAlgorithm>(static_cast<int>(adp.algorithm) + 1);
+		adp.algorithm = static_cast<delayAlgorithm>((static_cast<int>(adp.algorithm) + 1) % (int)delayAlgorithm::numDelayAlgorithms);
 
-	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f)))
-		if (static_cast<int>(adp.algorithm) - 1 >= 0)
-			adp.algorithm = static_cast<delayAlgorithm>(static_cast<int>(adp.algorithm) - 1);
-	
+	if (downTrigger.process(rescale(params[PARAM_DOWN].getValue(), 1.f, 0.1f, 0.f, 1.f))) {
+		int x = static_cast<int>(adp.algorithm);
+		x -= 1;
+		if (x <0)
+			x = (int)delayAlgorithm::numDelayAlgorithms -1;
+		else
+			x %= static_cast<int>(adp.algorithm);
+		adp.algorithm = static_cast<delayAlgorithm>(x);	
+	}
+
 	strAlgorithm = delayAlgorithmTxt[static_cast<int>(adp.algorithm)];
 	
 	if ((outputs[OUTPUT_LEFT].isConnected() || outputs[OUTPUT_RIGHT].isConnected()) && (inputs[INPUT_LEFT].isConnected() || inputs[INPUT_RIGHT].isConnected())) {
@@ -269,26 +274,6 @@ void AlgorithmDisplay::drawValue(const DrawArgs &args, const char * txt) {
 	nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));
 	nvgText(args.vg, c.x, c.y+fh-1, txt, NULL);
 }
-
-/*Toggle2P::Toggle2P() {
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_0.svg")));
-	addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SW_Toggle_2.svg")));
-
-	// no shadow for switches
-	shadow->opacity = 0.0f;
-	neg = pos = 0;
-}*/
-
-// handle the manually entered values
-/*void Toggle2P::onChange(const event::Change &e) {
-
-	SvgSwitch::onChange(e);
-
-	if (getParamQuantity()->getValue() > 0.5f)
-		getParamQuantity()->setValue(1.0f);
-	else
-		getParamQuantity()->setValue(0.0f);
-}*/
 
 json_t *CircularRide::dataToJson() {
 	json_t *rootJ=json_object();
