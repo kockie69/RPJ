@@ -248,7 +248,7 @@ public:
     void onSampleRateChange() override;
     json_t *dataToJson() override;
 	void dataFromJson(json_t *) override;
-    //void onAdd(const AddEvent&) override;
+    void onAdd(const AddEvent&) override;
     std::shared_ptr<Comp> wvco;
   
 private:
@@ -366,7 +366,7 @@ void PigeonPlinkModule::dataFromJson(json_t *rootJ) {
         wvco->steppingFromUI = static_cast<int>(json_integer_value(nSteppingJ));
 }
 
-/*void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
+void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
 	std::string configPath = asset::user("RPJ.json");
 	FILE* file = std::fopen(configPath.c_str(), "r");
 
@@ -407,7 +407,8 @@ void PigeonPlinkModule::dataFromJson(json_t *rootJ) {
     }
     else
         INFO("Config file %s does not exist, using default settings", configPath.c_str());
-}*/
+    Module::onAdd(e);
+}
 
 ////////////////////
 // module widget
