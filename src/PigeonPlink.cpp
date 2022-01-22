@@ -368,12 +368,12 @@ void PigeonPlinkModule::dataFromJson(json_t *rootJ) {
 
 void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
 	std::string configPath = asset::user("RPJ.json");
-	INFO("Loading config file %s", configPath.c_str());
 	FILE* file = std::fopen(configPath.c_str(), "r");
 
 	//	throw Exception("Could not open autosave patch %s", configPath.c_str());
 	DEFER({std::fclose(file);});
     if (file) {
+        INFO("Loading config file %s", configPath.c_str());
 	    json_error_t error;
 	    json_t* rootJ = json_loadf(file, 0, &error);
 	    if (!rootJ) 
@@ -405,6 +405,8 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
             }
         }
     }
+    else
+        INFO("Config file %s does not exist, using default settings", configPath.c_str());
 }
 
 ////////////////////

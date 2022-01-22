@@ -5,7 +5,7 @@
 
 Lavender::Lavender() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
+	configParam(PARAM_FC, 20.f, 20480.f, 1000.f, "fc"," Hz");
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
 	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
@@ -45,36 +45,31 @@ void Lavender::processChannel(Input& in, Output& lpfOut, Output& hpfOut, Output&
 	int channels = std::max(in.getChannels(), 1);
 	simd::float_4 v[4];
 	for (int c = 0; c < channels; c += 4) {
-		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		v[c/4] = in.getPolyVoltageSimd<simd::float_4>(c);
 	}
 	
-	simd::float_4 output;
 	lpfOut.setChannels(channels);
 	hpfOut.setChannels(channels);
 	bpfOut.setChannels(channels);
 	bsfOut.setChannels(channels);
 
 	for (int c = 0; c < channels; c += 4) {
-		v[c/4] = simd::float_4::load(in.getVoltages(c));
+		v[c/4] = in.getPolyVoltageSimd<simd::float_4>(c);
 		if (lpfOut.isConnected()) {
 			LPFaudioFilter[c/4].setParameters(LPFafp);
-			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(lpfOut.getVoltages(c));
+			lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v[c/4]),-10.f,10.f),c);
 		}
 		if (hpfOut.isConnected()) {
 			HPFaudioFilter[c/4].setParameters(HPFafp);
-			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(hpfOut.getVoltages(c));
+			hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v[c/4]),-10.f,10.f),c);
 		}
 		if (bpfOut.isConnected()) {
 			BPFaudioFilter[c/4].setParameters(BPFafp);
-			output = BPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(bpfOut.getVoltages(c));
+			bpfOut.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v[c/4]),-10.f,10.f),c);
 		}
 		if (bsfOut.isConnected()) {
 			BSFaudioFilter[c/4].setParameters(BSFafp);
-			output = BSFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(bsfOut.getVoltages(c));
+			bsfOut.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v[c/4]),-10.f,10.f),c);
 		}
 	}
 }
@@ -84,13 +79,13 @@ void Lavender::process(const ProcessArgs &args) {
 
 		float cvfc = 1.f;
 		if (inputs[INPUT_CVFC].isConnected())
-			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 10.0);
+			cvfc = abs(inputs[INPUT_CVFC].getVoltage() / 100.0);
 	
 		float cvq = 1.f;
 		if (inputs[INPUT_CVQ].isConnected())
 			cvq = abs(inputs[INPUT_CVQ].getVoltage() / 10.0);
  	
- 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
+ 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = clamp(params[PARAM_FC].getValue() * cvfc,20.f, 20480.f); 
 		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = params[PARAM_Q].getValue() * cvq;
 		LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 		LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();

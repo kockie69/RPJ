@@ -72,6 +72,7 @@ public:
 		// --- let biquad do the grunt-work
 		//
 		// return (dry) + (processed): x(n)*d0 + y(n)*c0
+
 		return coeffArray[d0] * xn + coeffArray[c0] * biquad.processAudioSample(xn);
 	}
 
