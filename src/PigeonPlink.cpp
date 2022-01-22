@@ -371,15 +371,15 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
 	FILE* file = std::fopen(configPath.c_str(), "r");
 
 	//	throw Exception("Could not open autosave patch %s", configPath.c_str());
-	DEFER({std::fclose(file);});
     if (file) {
         INFO("Loading config file %s", configPath.c_str());
 	    json_error_t error;
 	    json_t* rootJ = json_loadf(file, 0, &error);
-	    if (!rootJ) 
-	        throw Exception("Failed to load config. JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
-        DEFER({json_decref(rootJ);});
         
+	    if (!rootJ) {
+	        throw Exception("Failed to load config. JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
+            fclose(file);
+        }
         steppingTxt = {};
         wvco->R = {};
         json_t *nSteppingJ = json_object_get(rootJ, "steppings");
@@ -403,6 +403,8 @@ void PigeonPlinkModule::onAdd(const rack::engine::Module::AddEvent& e) {
                     }
                 }
             }
+            fclose(file);
+            json_decref(nSteppingJ);
         }
     }
     else
