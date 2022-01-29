@@ -5,9 +5,7 @@ const double kSqrtTwo = pow(2.0, 0.5);
 enum class filterAlgorithm {
 	kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kButterLPF2, kButterHPF2, kButterBPF2,
 	kButterBSF2, kMMALPF2, kMMALPF2B, kLowShelf, kHiShelf, kNCQParaEQ, kCQParaEQ, kLWRLPF2, kLWRHPF2,
-	kAPF1, kAPF2, kResonA, kResonB, kMatchLP2A, kMatchLP2B, kMatchBP2A, kMatchBP2B,
-	kImpInvLP1, kImpInvLP2, numFilterAlgorithms
-}; 
+	kAPF1, kAPF2, kResonA, kResonB, kImpInvLP1, kImpInvLP2, numFilterAlgorithms }; 
 
 
 struct AudioFilterParameters
@@ -27,13 +25,14 @@ struct AudioFilterParameters
 	}*/
 
 	// --- individual parameters
-	filterAlgorithm algorithm = filterAlgorithm::kMatchLP2A; ///< filter algorithm
+	filterAlgorithm algorithm = filterAlgorithm::kLPF1; ///< filter algorithm
 
 	double fc = 100.0; ///< filter cutoff or center frequency (Hz)
 	double Q = 0.707; ///< filter Q
 	double boostCut_dB = 0.0; ///< filter gain; note not used in all types
 	double wet = 0;
 	double dry = 1;
+	double drive = 1;
 	biquadAlgorithm bqa;
 };
 
@@ -197,7 +196,7 @@ protected:
 			return true;
 		}
 		// --- kMatchLP2A = TIGHT fit LPF vicanek algo
-		else if (algorithm == filterAlgorithm::kMatchLP2A)
+		/*else if (algorithm == filterAlgorithm::kMatchLP2A)
 		{
 			// http://vicanek.de/articles/BiquadFits.pdf
 			double theta_c = 2.0*M_PI*fc / sampleRate;
@@ -386,7 +385,7 @@ protected:
 
 			// --- we updated
 			return true;
-		}
+		}*/
 		else if (algorithm == filterAlgorithm::kLPF1)
 		{
 			// --- see book for formulae

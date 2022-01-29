@@ -22,4 +22,3 @@ extern Model *modelDrillingHoles;
 extern Model *modelTuxOn;
 extern Model *modelPigeonPlink;
 
-

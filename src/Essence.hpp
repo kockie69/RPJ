@@ -35,7 +35,7 @@ struct Essence : Module {
 	};
 
 		Essence();
-		void processChannel(Input&, Output&);
+		void processChannel(int, Input&, Output&);
 		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
 		json_t *dataToJson() override;

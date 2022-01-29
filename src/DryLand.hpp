@@ -12,12 +12,15 @@ struct DryLand : Module {
 		PARAM_CVFC,
 		PARAM_DRY,
 		PARAM_WET,
+		PARAM_DRIVE,
+		PARAM_CVDRIVE,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
 		INPUT_CVFC,
+		INPUT_CVDRIVE,
 		NUM_INPUTS,
 	};
 
@@ -37,7 +40,7 @@ struct DryLand : Module {
 		AudioFilter<rack::simd::float_4> LPFaudioFilter[4];
 		AudioFilter<rack::simd::float_4> HPFaudioFilter[4];
 		void process(const ProcessArgs &) override;
-		void processChannel(Input&, Output&, Output&);
+		void processChannel(int, Input&, Output&, Output&);
 		void onSampleRateChange() override; 
 		AudioFilterParameters LPFafp,HPFafp;
 		biquadAlgorithm bqa;

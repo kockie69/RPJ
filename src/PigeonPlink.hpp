@@ -77,7 +77,7 @@ float -> float_4 isn't free.
 
 //#ifndef _MSC_VER
 #if 1
-#include "../composites/ADSR16.h"
+//#include "../composites/ADSR16.h"
 #include "../sqsrc/util/Divider.h"
 #include "../composites/IComposite.h"
 #include "../dsp/utils/LookupTable.h"
@@ -234,7 +234,7 @@ private:
     Divider divn;
     Divider divm;
     WVCODsp dsp[4];
-    ADSR16 adsr;
+    //ADSR16 adsr;
 
     std::function<float(float)> expLookup = ObjectCache<float>::getExp2Ex();
     std::shared_ptr<LookupTableParams<float>> audioTaperLookupParams = ObjectCache<float>::getAudioTaper();
@@ -258,9 +258,6 @@ private:
     float_4 baseOutputLevel_m = 1;  // 0..x
     float_4 baseOffset_m = 0;
 
-    bool enableAdsrFeedback = false;
-    bool enableAdsrFM = false;
-    bool enableAdsrShape = false;
     dsp::SchmittTrigger waveFormUpTrigger,waveFormDownTrigger,steppingUpTrigger,steppingDownTrigger;
     float_4 getOscFreq(int bank);
 
@@ -289,7 +286,7 @@ private:
 
 template <class TBase>
 inline void WVCO<TBase>::init() {
-    adsr.setNumChannels(1);  // just to prime the pump, will write true value later
+    //adsr.setNumChannels(1);  // just to prime the pump, will write true value later
     divn.setup(4, [this]() {
         stepn_lowerRate();
     });
@@ -454,7 +451,7 @@ inline void WVCO<TBase>::updateShapes_n() {
     for (int bank = 0; bank < numBanks_m; ++bank) {
         const int baseChannel = bank * 4;
 
-        float_4 envMult = (enableAdsrShape) ? adsr.get(bank) : 1;
+        float_4 envMult = 1;
         simd_assertLE(envMult, float_4(2));
         simd_assertGE(envMult, float_4(0));
 
@@ -533,7 +530,7 @@ inline void WVCO<TBase>::stepn_fullRate()
             gates[i] = gate;
         }
 
-        adsr.step(gates, TBase::engineGetSampleTime());
+        //adsr.step(gates, TBase::engineGetSampleTime());
     }
 
     // ----------------------------------------------------------------------------
@@ -541,11 +538,7 @@ inline void WVCO<TBase>::stepn_fullRate()
     // This is the new, cleaner version.
     for (int bank = 0; bank < numBanks_m; ++bank) {
         float_4 feedbackAmount = baseFeedback_m;
-        ;
-        if (enableAdsrFeedback) {
-           Port& p = TBase::inputs[GATE_INPUT];
-           feedbackAmount *= p.getPolyVoltageSimd<float_4>(bank * 4);
-        }
+
         if (feedbackConnected_m) {
             Port& feedbackPort = WVCO<TBase>::inputs[FEEDBACK_INPUT];
             feedbackAmount *= feedbackPort.getPolyVoltageSimd<float_4>(bank * 4) * float_4(.1f);
@@ -628,9 +621,7 @@ inline void WVCO<TBase>::step()
             // TODO:much of this could be done in stepn
             // TODO: add depth CV
             float_4 fmInputScaling = baseFmDepth_m;
-            if (enableAdsrFM) {
-                fmInputScaling *= adsr.get(bank);
-            }
+
             if (fmDepthConnected_m) {
                 Port& depthPort = WVCO<TBase>::inputs[LINEAR_FM_DEPTH_INPUT];
                 fmInputScaling *= depthPort.getPolyVoltageSimd<float_4>(baseChannel) * float_4(.1f);

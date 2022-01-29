@@ -11,6 +11,8 @@ Gaza::Gaza() {
     configParam(PARAM_REL, 1.f, 2000.f,500.f, "Release"," mSec");
     configParam(PARAM_THRES, -20.f, 0.f,-6.f, "Threshold");
     configParam(PARAM_SENS, 0.5f, 5.f,1.f, "Sensitivity");
+	configInput(INPUT_MAIN,"Main");
+	configOutput(OUTPUT_MAIN,"Main");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	for (int i=0;i<4;i++) {
 		envelopeFollower[i].reset(APP->engine->getSampleRate());

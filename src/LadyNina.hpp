@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=8;
 
 const char *JSON_GAIN_KEY="Gain";
 const char *JSON_NLP_KEY="Nlp";
@@ -13,10 +13,13 @@ const char *JSON_MATCH_KEY="Match";
 struct LadyNina : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
+		PARAM_CVFC,
 		PARAM_Q,
+		PARAM_CVQ,
+		PARAM_DRY,
+		PARAM_WET,
+		PARAM_CVB,
 		PARAM_BOOSTCUT_DB,
 		NUM_PARAMS,
 	};
@@ -47,7 +50,7 @@ struct LadyNina : Module {
 		void onSampleRateChange() override;
 		ZVAFilter<rack::simd::float_4> LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
 		void process(const ProcessArgs &) override;
-		void processChannel(Input&, Output&, Output&, Output&, Output&);
+		void processChannel(int, Input&, Output&, Output&, Output&, Output&);
 		ZVAFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
 		bool gain, nlp, osc, match;
 };

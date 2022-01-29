@@ -37,11 +37,10 @@ struct Brave : Module {
 		Brave();
 		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
-		void processChannel(Input&, Output&);
+		void processChannel(int, Input&, Output&);
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override; 
-		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
 		biquadAlgorithm bqa;
 };

@@ -3,13 +3,21 @@
 #include "ctrl/RPJKnobs.hpp"
 
 Brave::Brave() {
+	const float minFreq = (std::log2(dsp::FREQ_C4 / 20480.f) + 5) / 10;
+	const float maxFreq = (std::log2(20480.f / dsp::FREQ_C4) + 5) / 10;
+	const float defaultFreq = (0.f + 5) / 10;
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
-	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
-	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
+	configParam(PARAM_FC, minFreq, maxFreq, defaultFreq, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
+	configParam(PARAM_CVFC, -1.f, 1.0f, 0.0f, "Cutoff frequency CV", "%", 0.f, 100.f);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "dB","Boost/Cut");
-	configParam(PARAM_CVB, 0.f, 1.0f, 0.0f, "CV Q");
+	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "Boost/Cut","dB");
+	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "CV Resonance");
+	configParam(PARAM_CVB, -1.f, 1.0f, 0.0f, "CV Boost/Cut");
+	configInput(INPUT_CVB,"Boost/Cut CV");
+	configInput(INPUT_CVQ,"Resonance CV");
+	configInput(INPUT_CVFC,"Frequency Cutoff CV");
+	configInput(INPUT_MAIN,"Main");
+	configOutput(OUTPUT_MAIN,"Filter");
 	configBypass(INPUT_MAIN, OUTPUT_MAIN);
 	afp.algorithm = filterAlgorithm::kNCQParaEQ;
 	for (int i=0;i<4;i++) {
@@ -23,38 +31,51 @@ void Brave::onSampleRateChange() {
 	}
 }
 
-void Brave::processChannel(Input& in, Output& out) {
+void Brave::processChannel(int c, Input& in, Output& out) {
 		
-	// Get input
-	int channels = std::max(in.getChannels(), 1);
-	simd::float_4 v[4];
-	simd::float_4 output;
-	out.setChannels(channels);
+	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 
-	for (int c = 0; c < channels; c += 4) {
-		v[c/4] = simd::float_4::load(in.getVoltages(c));
-		if (out.isConnected()) {
-			audioFilter[c/4].setParameters(afp);
-			output = audioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(out.getVoltages(c));
-		}
-	}
+	audioFilter[c/4].setParameters(afp);
+	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
 }
 
 void Brave::process(const ProcessArgs &args) {
 
 	if (outputs[OUTPUT_MAIN].isConnected()) {
+
+		int channels = std::max(inputs[INPUT_MAIN].getChannels(), 1);
+
+		outputs[OUTPUT_MAIN].setChannels(channels);
+
+		for (int c = 0; c < channels; c += 4) {
 	
-		float cvfc = inputs[INPUT_CVFC].isConnected() ? inputs[INPUT_CVFC].getVoltage() : 1.f;
-		float cvq = inputs[INPUT_CVQ].isConnected() ? inputs[INPUT_CVQ].getVoltage() : 1.f;
-		float cvb = inputs[INPUT_CVB].isConnected() ? inputs[INPUT_CVB].isConnected() : 1.f;
- 	
-		afp.fc = pow(2048,params[PARAM_FC].getValue()) * 10 * cvfc;
-		afp.Q = params[PARAM_Q].getValue() * cvq;
-		afp.boostCut_dB = params[PARAM_BOOSTCUT_DB].getValue() *cvb;
-		afp.bqa = bqa;
+			float freqParam = params[PARAM_FC].getValue();
+			// Rescale for backward compatibility
+			freqParam = freqParam * 10.f - 5.f;
+			float freqCvParam = params[PARAM_CVFC].getValue();
+			// Get pitch
+			simd::float_4 pitch = freqParam + inputs[INPUT_CVFC].getPolyVoltageSimd<simd::float_4>(c) * freqCvParam;
+			// Set cutoff
+			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
+
+			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
+ 			afp.fc = cutoff.v[0];
+
+			double cvb = 1.f;
+			double cvq = 1.f;
+
+			if (inputs[INPUT_CVQ].isConnected())
+				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+
+			if (inputs[INPUT_CVB].isConnected())
+				cvb = inputs[INPUT_CVB].getVoltage() / 10.0;	
+ 
+			afp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
+			afp.boostCut_dB = clamp((params[PARAM_BOOSTCUT_DB].getValue() * cvb * 20.f) + params[PARAM_CVB].getValue(),-20.f,20.f);
+			afp.bqa = bqa;
 		
-		processChannel(inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
+			processChannel(c,inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
+		}
 	}
 }
 
@@ -69,18 +90,44 @@ struct BraveModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		addInput(createInput<PJ301MPort>(Vec(33, 258), module, Brave::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(33, 315), module, Brave::OUTPUT_MAIN));
-		
-		addParam(createParam<RPJKnob>(Vec(8, 80), module, Brave::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 82), module, Brave::INPUT_CVFC));
-		addParam(createParam<RPJKnob>(Vec(8, 140), module, Brave::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 142), module, Brave::INPUT_CVQ));
-		addParam(createParam<RPJKnob>(Vec(8, 200), module, Brave::PARAM_BOOSTCUT_DB));
-		addInput(createInput<PJ301MPort>(Vec(55, 202), module, Brave::INPUT_CVB));	
+		// First do the knobs
+		const float knobX1 = 3;
+		const float knobX2 = 60;
+
+
+		const float knobY1 = 47;
+		const float knobY2 = 50;
+		const float knobY3 = 122;
+		const float knobY4 = 125;
+		const float knobY5 = 197;
+		const float knobY6 = 200;
+
+
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY1), module, Brave::PARAM_CVFC));	
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY2), module, Brave::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY3), module, Brave::PARAM_CVQ));
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY4), module, Brave::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY5), module, Brave::PARAM_CVB));
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY6), module, Brave::PARAM_BOOSTCUT_DB));
+
+		// Next do the Jacks
+		const float jackX1 = 33.5f;
+		const float jackX2 = 62;
+
+		const float jackY1 = 78;
+		const float jackY2 = 153;
+		const float jackY3 = 228;
+		const float jackY4 = 278;
+		const float jackY5 = 325;
+
+		addInput(createInput<PJ301MPort>(Vec(jackX2, jackY3), module, Brave::INPUT_CVB));
+		addInput(createInput<PJ301MPort>(Vec(jackX1, jackY4), module, Brave::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(jackX1, jackY5), module, Brave::OUTPUT_MAIN));	
+		addInput(createInput<PJ301MPort>(Vec(jackX2, jackY1), module, Brave::INPUT_CVFC));
+		addInput(createInput<PJ301MPort>(Vec(jackX2, jackY2), module, Brave::INPUT_CVQ));
 	}
 
-		void appendContextMenu(Menu *menu) override {
+	void appendContextMenu(Menu *menu) override {
 		Brave * module = dynamic_cast<Brave*>(this->module);
 
 		menu->addChild(new MenuSeparator());

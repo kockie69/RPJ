@@ -131,7 +131,7 @@ public:
 
 		// --- if RMS, do the SQRT
 		if (audioDetectorParameters.detectMode == TLD_AUDIO_DETECT_MODE_RMS)
-			currEnvelope = pow(currEnvelope, 0.5);
+			currEnvelope = rack::simd::sqrt(currEnvelope);
 
 		// --- if not dB, we are done
 		if (!audioDetectorParameters.detect_dB)

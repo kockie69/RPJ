@@ -3,20 +3,19 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=8;
 
 struct Lavender : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
 		PARAM_CVFC,
 		PARAM_Q,
 		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
+		PARAM_DRIVE,
+		PARAM_CVDRIVE,
 		NUM_PARAMS,
 	};
 
@@ -24,6 +23,7 @@ struct Lavender : Module {
 		INPUT_MAIN,
 		INPUT_CVFC,
 		INPUT_CVQ,
+		INPUT_CVDRIVE,
 		NUM_INPUTS,
 	};
 
@@ -40,7 +40,7 @@ struct Lavender : Module {
 	};
 
 		Lavender();
-		void processChannel(Input&, Output&, Output&, Output&, Output&);
+		void processChannel(int, Input&, Output&, Output&, Output&, Output&);
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		AudioFilter<rack::simd::float_4> LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];

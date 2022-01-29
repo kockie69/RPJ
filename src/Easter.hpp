@@ -42,7 +42,7 @@ struct Easter : Module {
 		void onSampleRateChange() override;
 		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
-		void processChannel(Input&, Output&);
+		void processChannel(int,Input&, Output&);
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
 		biquadAlgorithm bqa;

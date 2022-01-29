@@ -8,9 +8,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="40"
-   height="40"
-   viewBox="0 0 10.583333 10.583334"
+   width="50"
+   height="50"
+   viewBox="0 0 13.229166 13.229168"
    version="1.1"
    id="svg8"
    sodipodi:docname="RPJKnobBig_bg.svg"
@@ -70,7 +70,7 @@
        y1="1.9999999e-05"
        x2="14.17379"
        y2="28.347719"
-       gradientTransform="matrix(0.3733401,0,0,0.3733401,0.00418834,0.00415956)">
+       gradientTransform="matrix(0.46667512,0,0,0.46667512,0.00419378,0.0041578)">
       <stop
          offset="0"
          style="stop-color:#B0ACAE"
@@ -98,7 +98,7 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.36"
+     inkscape:zoom="8.47"
      inkscape:cx="16.150728"
      inkscape:cy="15.709143"
      inkscape:document-units="mm"
@@ -149,16 +149,16 @@
          id="g842">
         <circle
            fill="url(#SVGID_1_)"
-           cx="5.2958331"
-           cy="5.2958331"
+           cx="6.6187501"
+           cy="6.6187501"
            id="circle6624"
-           style="fill:url(#SVGID_1_-3);stroke:none;stroke-width:0.0917182;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           r="5.2916665" />
+           style="fill:url(#SVGID_1_-3);stroke:none;stroke-width:0.114647;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           r="6.6145835" />
         <path
            fill="#ffffff"
-           d="M 5.3040626,5.2895664 3.9348041,0.17942156 C 3.4882222,0.29908136 3.0592507,0.47676829 2.6588584,0.7079368 2.2584661,0.93910533 1.8900988,1.2217611 1.5631798,1.5486838 Z"
+           d="M 6.6290368,6.6109165 4.9174636,0.22323531 C 4.3592363,0.37281006 3.8230219,0.59491873 3.3225314,0.88387935 2.8220411,1.17284 2.3615819,1.5261598 1.9529332,1.9348132 Z"
            id="path6626"
-           style="opacity:0.791434;fill:#ffffff;fill-opacity:0.897275;stroke:none;stroke-width:0.373339" />
+           style="opacity:0.791434;fill:#ffffff;fill-opacity:0.897275;stroke:none;stroke-width:0.466673" />
         <path
            style="opacity:0.31;fill:#b1adae;fill-opacity:0.780392;stroke:none;stroke-width:0.156478"
            d=""
@@ -196,20 +196,20 @@
            transform="scale(0.26458333)" />
         <path
            fill="#ffffff"
-           d="M 5.3040626,5.2895664 4.1969757,1.3591985 C 3.7503941,1.4788583 3.5398998,1.3506772 3.1395075,1.5818455 2.7391151,1.8130141 2.6766161,1.9645836 2.3496972,2.2915064 Z"
+           d="M 6.6290368,6.6109165 5.2451781,1.6979565 C 4.6869511,1.8475313 4.4238333,1.6873049 3.9233429,1.9762653 3.4228524,2.265226 3.3447286,2.4546879 2.9360799,2.8633414 Z"
            id="path6626-4"
-           style="opacity:1;fill:#050605;fill-opacity:0.253669;stroke:none;stroke-width:0.373339"
+           style="opacity:1;fill:#050605;fill-opacity:0.253669;stroke:none;stroke-width:0.466673"
            sodipodi:nodetypes="ccscc" />
         <path
            fill="#ffffff"
-           d="M 5.3040626,5.2895664 6.6733221,10.399712 C 7.1199037,10.280055 7.5488754,10.102365 7.9492676,9.8711966 8.3496599,9.6400272 8.7180269,9.3573715 9.0449459,9.0304498 Z"
+           d="M 6.6290368,6.6109165 8.3406111,12.998599 C 8.8988386,12.849028 9.4350528,12.626915 9.9355428,12.337954 10.436034,12.048993 10.896492,11.695673 11.305141,11.287021 Z"
            id="path6626-2"
-           style="fill:#ffffff;fill-opacity:0.67086;stroke:none;stroke-width:0.373339" />
+           style="fill:#ffffff;fill-opacity:0.67086;stroke:none;stroke-width:0.466673" />
         <path
            fill="#ffffff"
-           d="M 5.3040626,5.2895664 6.3983258,9.4644933 C 6.7949392,9.2268995 8.0812152,8.5932828 8.4028188,8.261132 c 0.321602,-0.3321509 -0.2246786,0.4040724 0,0 z"
+           d="m 6.6290368,6.6109165 1.3678291,5.2186585 c 0.4957669,-0.296992 2.1036121,-1.089013 2.5056161,-1.504201 0.402002,-0.4151887 -0.280848,0.50509 0,0 z"
            id="path6626-4-4"
-           style="fill:#050605;fill-opacity:0.18239;stroke:none;stroke-width:0.373339"
+           style="fill:#050605;fill-opacity:0.18239;stroke:none;stroke-width:0.466673"
            sodipodi:nodetypes="ccscc" />
       </g>
     </g>

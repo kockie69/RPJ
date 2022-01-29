@@ -35,7 +35,7 @@ struct Estonia : Module {
 	};
 
 		Estonia();
-		void processChannel(Input&, Output&);
+		void processChannel(int, Input&, Output&);
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override;

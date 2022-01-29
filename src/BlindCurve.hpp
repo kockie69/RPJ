@@ -27,19 +27,23 @@ struct BlindCurve : Module {
 	enum LightsIds {
 		NUM_LIGHTS,
 	};
-		BlindCurve();
-		void onSampleRateChange() override;
-		AudioDetector<rack::simd::float_4> audioDetector[4];
-		void process(const ProcessArgs &) override;
-		void processChannel(Input&, Output&);
-		AudioDetectorParameters adp;
+
+	enum outputTypes {
+		LINEAR,
+		LOG,	
+	};
+
+	BlindCurve();
+	void onSampleRateChange() override;
+	void process(const ProcessArgs &) override;
+	void processChannel(int, Input&, Output&);
+	AudioDetector<rack::simd::float_4> audioDetector[4];
+	AudioDetectorParameters adp;
+	bool clamping;
+	outputTypes outputType; 
 };
 
 struct DetectModeQuantity : public rack::engine::ParamQuantity {
 	public:
     	std::string getDisplayValueString() override;
-
-	private:
-		int value;
-		std::string v;
 };

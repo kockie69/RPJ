@@ -4,11 +4,26 @@
 
 
 LadyNina::LadyNina() {
+	const float minFreq = (std::log2(dsp::FREQ_C4 / 20480.f) + 5) / 10;
+	const float maxFreq = (std::log2(20480.f / dsp::FREQ_C4) + 5) / 10;
+	const float defaultFreq = (0.f + 5) / 10;
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-
-	configParam(PARAM_FC, 0.0909f, 1.f, 0.5f, "Frequency", " Hz", 2048, 10);
+	configParam(PARAM_FC, minFreq, maxFreq, defaultFreq, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
+	configParam(PARAM_CVFC, -1.f, 1.0f, 0.0f, "Cutoff frequency CV", "%", 0.f, 100.f);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_BOOSTCUT_DB,  -20.f, 20.f, 0.f, "Boost/Cut"," dB");
+	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "CV Q");
+	configParam(PARAM_CVB, -1.f, 1.0f, 0.0f, "Drive CV", "%", 0, 100);
+	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry", "%", 0.f, 100.f);
+	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet", "%", 0.f, 100.f);
+	configParam(PARAM_BOOSTCUT_DB, -20.f, 20.f, 0.f, "Boost/Cut","dB");
+	configInput(INPUT_CVFC, "Cutoff CV");
+	configInput(INPUT_CVQ, "Quality CV");
+	configInput(INPUT_CVBCDB,"Boost/Cut CV");
+	configInput(INPUT_MAIN,"Main");
+	configOutput(OUTPUT_LPFMAIN, "Low Pass Filter");
+	configOutput(OUTPUT_HPFMAIN, "High Pass Filter");
+	configOutput(OUTPUT_BPFMAIN, "Band Pass Filter");
+	configOutput(OUTPUT_BSFMAIN, "Band Stop Filter");
 	for (int i=0;i<4;i++) {
 		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
 		HPFaudioFilter[i].reset(APP->engine->getSampleRate());
@@ -31,40 +46,23 @@ void LadyNina::onSampleRateChange() {
 	}
 }
 
-void LadyNina::processChannel(Input& in, Output& lpfout, Output& hpfout, Output& bpfout, Output& bsfout) {
+void LadyNina::processChannel(int c,Input& in, Output& lpfout, Output& hpfout, Output& bpfout, Output& bsfout) {
 		
-	// Get input
-	int channels = std::max(in.getChannels(), 1);
-	simd::float_4 v[4];
-	simd::float_4 output;
-	lpfout.setChannels(channels);
-	hpfout.setChannels(channels);
-	bpfout.setChannels(channels);
-	bsfout.setChannels(channels);
+	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
+	
+	LPFaudioFilter[c/4].setParameters(LPFafp);
+	lpfout.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
 
-	for (int c = 0; c < channels; c += 4) {
-		v[c/4] = simd::float_4::load(in.getVoltages(c));
-		if (lpfout.isConnected()) {
-			LPFaudioFilter[c/4].setParameters(LPFafp);
-			output = LPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(lpfout.getVoltages(c));
-		}
-		if (hpfout.isConnected()) {
-			HPFaudioFilter[c/4].setParameters(HPFafp);
-			output = HPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(hpfout.getVoltages(c));
-		}
-		if (bpfout.isConnected()) {
-			BPFaudioFilter[c/4].setParameters(BPFafp);
-			output = BPFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(bpfout.getVoltages(c));
-		}
-		if (bsfout.isConnected()) {
-			BSFaudioFilter[c/4].setParameters(BSFafp);
-			output = BSFaudioFilter[c/4].processAudioSample(v[c/4]);
-			output.store(bsfout.getVoltages(c));
-		}
-	}
+
+	HPFaudioFilter[c/4].setParameters(HPFafp);
+	hpfout.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+
+
+	BPFaudioFilter[c/4].setParameters(BPFafp);
+	bpfout.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+
+	BSFaudioFilter[c/4].setParameters(BSFafp);
+	bsfout.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
 }
 
 void LadyNina::process(const ProcessArgs &args) {
@@ -73,21 +71,43 @@ void LadyNina::process(const ProcessArgs &args) {
 		outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) &&
 		inputs[INPUT_MAIN].isConnected()) {
 
-		float cvfc = inputs[INPUT_CVFC].getVoltage()/10.f;
-		float cvq = inputs[INPUT_CVQ].getVoltage() * 2.f;
+		int channels = std::max(inputs[INPUT_MAIN].getChannels(), 1);
 
-	 	float cvbcdb = inputs[INPUT_CVBCDB].getVoltage() * 2.f;
+		outputs[OUTPUT_LPFMAIN].setChannels(channels);
+		outputs[OUTPUT_HPFMAIN].setChannels(channels);
+		outputs[OUTPUT_BPFMAIN].setChannels(channels);
+		outputs[OUTPUT_BSFMAIN].setChannels(channels);
 
- 		LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = pow(2048,clamp(params[PARAM_FC].getValue()+cvfc,0.0909f,1.f)) * 10;
-		LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp(params[PARAM_Q].getValue()+cvq,0.707f, 20.0f);
-		LPFafp.filterOutputGain_dB = HPFafp.filterOutputGain_dB = BPFafp.filterOutputGain_dB = BSFafp.filterOutputGain_dB = clamp(params[PARAM_BOOSTCUT_DB].getValue() + cvbcdb,-20.f,20.f);
-		LPFafp.enableGainComp = HPFafp.enableGainComp = BPFafp.enableGainComp = BSFafp.enableGainComp = gain;
-		LPFafp.enableNLP = HPFafp.enableNLP = BPFafp.enableNLP = BSFafp.enableNLP = nlp;
-		LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
-		LPFafp.matchAnalogNyquistLPF = match;
+		for (int c = 0; c < channels; c += 4) {
 
-		processChannel(inputs[INPUT_MAIN], outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
+			double cvq = 0.f;
 
+			if (inputs[INPUT_CVQ].isConnected())
+				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+ 	
+			float freqParam = params[PARAM_FC].getValue();
+			// Rescale for backward compatibility
+			freqParam = freqParam * 10.f - 5.f;
+			float freqCvParam = params[PARAM_CVFC].getValue();
+			// Get pitch
+			simd::float_4 pitch = freqParam + inputs[INPUT_CVFC].getPolyVoltageSimd<simd::float_4>(c) * freqCvParam;
+			// Set cutoff
+			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
+
+			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
+			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff.v[0];
+	 		
+			float cvbcdb = inputs[INPUT_CVBCDB].getVoltage();
+ 			LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
+			
+			LPFafp.filterOutputGain_dB = HPFafp.filterOutputGain_dB = BPFafp.filterOutputGain_dB = BSFafp.filterOutputGain_dB = clamp(params[PARAM_BOOSTCUT_DB].getValue() + cvbcdb*20,-20.f,20.f);
+			LPFafp.enableGainComp = HPFafp.enableGainComp = BPFafp.enableGainComp = BSFafp.enableGainComp = gain;
+			LPFafp.enableNLP = HPFafp.enableNLP = BPFafp.enableNLP = BSFafp.enableNLP = nlp;
+			LPFafp.selfOscillate = HPFafp.selfOscillate = BPFafp.selfOscillate = BSFafp.selfOscillate = osc;
+			LPFafp.matchAnalogNyquistLPF = match;
+
+			processChannel(c, inputs[INPUT_MAIN], outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
+		}
 	}
 }
 
@@ -104,18 +124,45 @@ struct LadyNinaModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		addInput(createInput<PJ301MPort>(Vec(10, 240), module, LadyNina::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 240), module, LadyNina::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 280), module, LadyNina::OUTPUT_HPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(10, 320), module, LadyNina::OUTPUT_BPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(55, 320), module, LadyNina::OUTPUT_BSFMAIN));
+		// First do the knobs
+		const float knobX1 = 15;
+		const float knobX2 = 87;
 
-		addParam(createParam<RPJKnob>(Vec(8, 60), module, LadyNina::PARAM_FC));
-		addInput(createInput<PJ301MPort>(Vec(55, 62), module, LadyNina::INPUT_CVFC));
-		addParam(createParam<RPJKnob>(Vec(8, 115), module, LadyNina::PARAM_Q));
-		addInput(createInput<PJ301MPort>(Vec(55, 117), module, LadyNina::INPUT_CVQ));
-		addParam(createParam<RPJKnob>(Vec(8, 170), module, LadyNina::PARAM_BOOSTCUT_DB));
-		addInput(createInput<PJ301MPort>(Vec(55, 172), module, LadyNina::INPUT_CVBCDB));
+		const float knobY1 = 47;
+		const float knobY2 = 50;
+		const float knobY3 = 122;
+		const float knobY4 = 125;
+		const float knobY5 = 197;
+		const float knobY6 = 200;
+
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY2), module, LadyNina::PARAM_FC));
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY1), module, LadyNina::PARAM_CVFC));
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY4), module, LadyNina::PARAM_Q));
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY3), module, LadyNina::PARAM_CVQ));
+		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY6), module, LadyNina::PARAM_BOOSTCUT_DB));
+		addParam(createParam<RPJKnob>(Vec(knobX2, knobY5), module, LadyNina::PARAM_CVB));
+
+		// Next do the Jacks
+		const float jackX1 = 8;
+		const float jackX2 = 35;
+		const float jackX3 = 49;
+		const float jackX4 = 62;
+		const float jackX5 = 89;
+
+		const float jackY1 = 78;
+		const float jackY2 = 153;
+		const float jackY3 = 228;
+		const float jackY4 = 278;
+		const float jackY5 = 325;
+
+		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY1), module, LadyNina::INPUT_CVFC));
+		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY2), module, LadyNina::INPUT_CVQ));
+		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY3), module, LadyNina::INPUT_CVBCDB));		
+		addInput(createInput<PJ301MPort>(Vec(jackX3, jackY4), module, LadyNina::INPUT_MAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(jackX1, jackY5), module, LadyNina::OUTPUT_LPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(jackX2, jackY5), module, LadyNina::OUTPUT_HPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(jackX4, jackY5), module, LadyNina::OUTPUT_BPFMAIN));
+		addOutput(createOutput<PJ301MPort>(Vec(jackX5, jackY5), module, LadyNina::OUTPUT_BSFMAIN));
 	}
 
 	void appendContextMenu(Menu *menu) override {
