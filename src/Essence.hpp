@@ -42,7 +42,7 @@ struct Essence : Module {
 		void dataFromJson(json_t *) override;
 		void onSampleRateChange() override; 
 		AudioFilterParameters afp;
-		biquadAlgorithm bqa;
+		biquadAlgorithm bqaUI;
 };
 
 

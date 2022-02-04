@@ -44,7 +44,7 @@ struct Gazpacho : Module {
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp;
-		biquadAlgorithm bqa;
+		biquadAlgorithm bqaUI;
 };
 
 

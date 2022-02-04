@@ -16,9 +16,9 @@ Easter::Easter() {
 	const float maxFreq = (std::log2(20480.f / dsp::FREQ_C4) + 5) / 10;
 	const float defaultFreq = (0.f + 5) / 10;
 	configParam(PARAM_FC, minFreq, maxFreq, defaultFreq, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
-	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
+	configParam(PARAM_CVFC, -1.f, 1.0f, 0.0f, "Cutoff frequency CV", "%", 0.f, 100.f);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_CVQ, 0.f, 1.0f, 0.0f, "CV Q");
+	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "Quality CV", "%", 0.f, 100.f);
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry");
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet");
 	configButton(PARAM_UP, "Next Algorithm");
@@ -33,7 +33,7 @@ Easter::Easter() {
 	}
 	afp.algorithm = filterAlgorithm::kResonA;
 	strAlgorithm = "ResonA";
-	bqa=biquadAlgorithm::kDirect;
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void Easter::onSampleRateChange() {
@@ -44,9 +44,8 @@ void Easter::onSampleRateChange() {
 
 void Easter::processChannel(int c,Input& in, Output& out) {
 		
-	simd::float_4 v = in.getPolyVoltage(c);
 	audioFilter[c/4].setParameters(afp);
-	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(in.getPolyVoltage(c)),-5.f,5.f),c);
 }
 
 void Easter::process(const ProcessArgs &args) {
@@ -78,16 +77,17 @@ void Easter::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
-			afp.fc = cutoff.v[0];
+			afp.fc = cutoff;
 
-			float cvq = 1.f;
+			rack::simd::float_4 cvq = 0.f;
 			if (inputs[INPUT_CVQ].isConnected())
-				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
-	 		
-			afp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
+				cvq = inputs[INPUT_CVQ].getPolyVoltageSimd<simd::float_4>(c) / 10.0;
+ 		
+			afp.Q = rack::simd::clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
+			
 			afp.dry = params[PARAM_DRY].getValue();
 			afp.wet = params[PARAM_WET].getValue();
-			afp.bqa = bqa;
+			afp.bqa = bqaUI;
 
 			processChannel(c,inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 		}
@@ -162,7 +162,7 @@ struct EasterModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator());
 
-		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
 
 	}
 };
@@ -170,7 +170,7 @@ struct EasterModuleWidget : ModuleWidget {
 json_t *Easter::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_RESONATOR_TYPE_KEY, json_integer(static_cast<int>(afp.algorithm)));
-	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqaUI)));
 	return rootJ;
 }
 
@@ -181,7 +181,7 @@ void Easter::dataFromJson(json_t *rootJ) {
 		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
 	}
 	if (nBiquadAlgorithmJ) {
-		bqa=static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+		bqaUI=static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

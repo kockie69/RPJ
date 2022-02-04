@@ -37,7 +37,7 @@ TheWeb::TheWeb() {
 	HPFafp.algorithm=filterAlgorithm::kButterHPF2;
 	BPFafp.algorithm=filterAlgorithm::kButterBPF2;
 	BSFafp.algorithm=filterAlgorithm::kButterBSF2;
-	bqa=biquadAlgorithm::kDirect;
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void TheWeb::onSampleRateChange() {
@@ -80,10 +80,10 @@ void TheWeb::process(const ProcessArgs &args) {
 
 		for (int c = 0; c < channels; c += 4) {
 
-			double cvq = 1.f;
+			rack::simd::float_4 cvq = 0.f;
 
 			if (inputs[INPUT_CVQ].isConnected())
-				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+				cvq = inputs[INPUT_CVQ].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;
  	
 			float freqParam = params[PARAM_FC].getValue();
 			// Rescale for backward compatibility
@@ -95,13 +95,13 @@ void TheWeb::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
-			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff.v[0];
+			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff;
 			
 			LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
 
 			LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 			LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
-			LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
+			LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqaUI;
 
 			processChannel(c, inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
 
@@ -165,21 +165,21 @@ struct TheWebModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator());
 
-		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
 
 	}
 };
 
 json_t *TheWeb::dataToJson() {
 	json_t *rootJ=json_object();
-	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqaUI)));
 	return rootJ;
 }
 
 void TheWeb::dataFromJson(json_t *rootJ) {
 	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nBiquadAlgorithmJ) {
-		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+		bqaUI = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

@@ -48,7 +48,7 @@ struct Lavender : Module {
 		void onSampleRateChange() override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
-		biquadAlgorithm bqa;
+		biquadAlgorithm bqaUI;
 };
 
 

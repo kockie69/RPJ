@@ -43,7 +43,7 @@ struct DryLand : Module {
 		void processChannel(int, Input&, Output&, Output&);
 		void onSampleRateChange() override; 
 		AudioFilterParameters LPFafp,HPFafp;
-		biquadAlgorithm bqa;
+		biquadAlgorithm bqaUI;
 };
 
 

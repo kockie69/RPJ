@@ -40,8 +40,8 @@ bool checkFloatUnderflow(T& value)
 
 
 bool reset(double _sampleRate) {
-		memset(&stateArray[0], 0, sizeof(double)*numStates);
-		return true;  // handled = true
+	memset(&stateArray[0], 0, sizeof(double)*numStates);
+	return true;  // handled = true
 }
 
 bool canProcessAudioFrame() { 
@@ -56,7 +56,7 @@ void setParameters(const BiquadParameters& _parameters) {
     parameters = _parameters; 
 }
 
-double* getCoefficients() {
+rack::simd::float_4* getCoefficients() {
 	// --- read/write access to the array (not used)
 	return &coeffArray[0];
 }
@@ -66,12 +66,12 @@ T* getStateArray() {
 	return &stateArray[0];
 }
 
-void setCoefficients(double* coeffs){
+void setCoefficients(rack::simd::float_4* coeffs){
 // --- fast block memory copy:
-	memcpy(&coeffArray[0], &coeffs[0], sizeof(double)*numCoeffs);
+	memcpy(&coeffArray[0], &coeffs[0], sizeof(rack::simd::float_4)*numCoeffs);
 }
 
-double getG_value() { 
+T getG_value() { 
     return coeffArray[a0]; 
 }
 
@@ -159,7 +159,7 @@ T processAudioSample(T xn) {
 
 protected:
 	/** array of coefficients */
-	double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	rack::simd::float_4 coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 	/** array of state (z^-1) registers */
 	T stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };

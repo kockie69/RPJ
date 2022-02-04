@@ -45,7 +45,7 @@ struct Easter : Module {
 		void processChannel(int,Input&, Output&);
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
-		biquadAlgorithm bqa;
+		biquadAlgorithm bqaUI;
 		std::string strAlgorithm;
 };
 

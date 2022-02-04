@@ -43,6 +43,7 @@ struct Estonia : Module {
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
+		biquadAlgorithm bqaUI;
 		std::string strAlgorithm;
 };
 

@@ -11,7 +11,7 @@ Lavender::Lavender() {
 	configParam(PARAM_FC, minFreq, maxFreq, defaultFreq, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
 	configParam(PARAM_CVFC, -1.f, 1.0f, 0.0f, "Cutoff frequency CV", "%", 0.f, 100.f);
 	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
-	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "CV Q");
+	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "Quality CV", "%", 0.f, 100.f);
 	configParam(PARAM_CVDRIVE, -1.f, 1.0f, 0.0f, "Drive CV", "%", 0, 100);
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry", "%", 0.f, 100.f);
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet", "%", 0.f, 100.f);
@@ -39,7 +39,7 @@ Lavender::Lavender() {
 	HPFafp.algorithm=filterAlgorithm::kHPF2;
 	BPFafp.algorithm=filterAlgorithm::kBPF2;
 	BSFafp.algorithm=filterAlgorithm::kBSF2;
-	bqa=biquadAlgorithm::kDirect;
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void Lavender::onSampleRateChange() {
@@ -84,11 +84,11 @@ void Lavender::process(const ProcessArgs &args) {
 
 		for (int c = 0; c < channels; c += 4) {
 
-			double cvdrive = 0.f;
-			double cvq = 0.f;
+			rack::simd::float_4 cvdrive = 0.f;
+			rack::simd::float_4 cvq = 0.f;
 
 			if (inputs[INPUT_CVQ].isConnected())
-				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+				cvq = inputs[INPUT_CVQ].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0f;
  	
 			float freqParam = params[PARAM_FC].getValue();
 			// Rescale for backward compatibility
@@ -100,15 +100,15 @@ void Lavender::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
-			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff.v[0];
+			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff;
 			
 			LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
 			LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();
 			LPFafp.wet = HPFafp.wet = BPFafp.wet = BSFafp.wet = params[PARAM_WET].getValue();
-			LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqa;
+			LPFafp.bqa = HPFafp.bqa = BPFafp.bqa = BSFafp.bqa = bqaUI;
 
 			if (inputs[INPUT_CVDRIVE].isConnected())
-				cvdrive = inputs[INPUT_CVDRIVE].getVoltage() / 10.0;
+				cvdrive = inputs[INPUT_CVDRIVE].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0f;
 			LPFafp.drive = HPFafp.drive = BPFafp.drive = BSFafp.drive = clamp((params[PARAM_CVDRIVE].getValue() * cvdrive) + params[PARAM_DRIVE].getValue(),0.f,1.f);
 
 			processChannel(c, inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
@@ -177,21 +177,21 @@ struct LavenderModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator());
 
-		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
 
 	}
 };
 
 json_t *Lavender::dataToJson() {
 	json_t *rootJ=json_object();
-	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqaUI)));
 	return rootJ;
 }
 
 void Lavender::dataFromJson(json_t *rootJ) {
 	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nBiquadAlgorithmJ) {
-		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+		bqaUI = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

@@ -27,13 +27,13 @@ struct AudioFilterParameters
 	// --- individual parameters
 	filterAlgorithm algorithm = filterAlgorithm::kLPF1; ///< filter algorithm
 
-	double fc = 100.0; ///< filter cutoff or center frequency (Hz)
-	double Q = 0.707; ///< filter Q
-	double boostCut_dB = 0.0; ///< filter gain; note not used in all types
-	double wet = 0;
-	double dry = 1;
-	double drive = 1;
-	biquadAlgorithm bqa;
+	rack::simd::float_4 fc = 100.0; ///< filter cutoff or center frequency (Hz)
+	rack::simd::float_4 Q = 0.707; ///< filter Q
+	rack::simd::float_4 boostCut_dB = 0.0; ///< filter gain; note not used in all types
+	rack::simd::float_4 wet = 0.f;
+	rack::simd::float_4 dry = 1.f;
+	rack::simd::float_4 drive = 1.f;
+	biquadAlgorithm bqa = kDirect;
 };
 
 template <typename T>
@@ -46,7 +46,7 @@ public:
 	/** --- set sample rate, then update coeffs */
 
 	bool reset(double _sampleRate) {
-			
+
 		bqp = biquad.getParameters();
 
 		bqp.biquadCalcType = audioFilterParameters.bqa; 
@@ -71,7 +71,6 @@ public:
 		// --- let biquad do the grunt-work
 		//
 		// return (dry) + (processed): x(n)*d0 + y(n)*c0
-
 		return coeffArray[d0] * xn + coeffArray[c0] * biquad.processAudioSample(xn);
 	}
 
@@ -90,28 +89,17 @@ public:
 
 	/** --- set parameters */
 	void setParameters(const AudioFilterParameters& parameters) {
-		if (audioFilterParameters.algorithm != parameters.algorithm ||
-			audioFilterParameters.boostCut_dB != parameters.boostCut_dB ||
-			audioFilterParameters.fc != parameters.fc ||
-			audioFilterParameters.Q != parameters.Q ||
-			audioFilterParameters.dry != parameters.dry ||
-			audioFilterParameters.wet != parameters.wet ||
-			audioFilterParameters.bqa != parameters.bqa)
-		{
-			// --- save new params
-			audioFilterParameters = parameters;
-			bqp.biquadCalcType = audioFilterParameters.bqa; 
-			biquad.setParameters(bqp);
-		}
-		else
-			return;
+
+		audioFilterParameters = parameters;
+		bqp.biquadCalcType = audioFilterParameters.bqa;
+		biquad.setParameters(bqp);
 
 		// --- don't allow 0 or (-) values for Q
-		if (audioFilterParameters.Q <= 0)
-			audioFilterParameters.Q = 0.707;
+		rack::simd::ifelse(audioFilterParameters.Q <= 0, 0.707,audioFilterParameters.Q);
 
 		// --- update coeffs
 		calculateFilterCoeffs();
+
 	}
 
 	/** --- helper for Harma filters (phaser) */
@@ -127,7 +115,7 @@ protected:
 	Biquad<T> biquad; ///< the biquad object
 
 	// --- array to hold coeffs (we need them too)
-	double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; ///< our local copy of biquad coeffs
+	rack::simd::float_4 coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; ///< our local copy of biquad coeffs
 
 	// --- object parameters
 	AudioFilterParameters audioFilterParameters; ///< parameters
@@ -137,7 +125,7 @@ protected:
 	bool calculateFilterCoeffs()
 	{
 		// --- clear coeff array
-		memset(&coeffArray[0], 0, sizeof(double)*numCoeffs);
+		memset(&coeffArray[0], 0, sizeof(rack::simd::float_4)*numCoeffs);
 
 		// --- set default pass-through
 		coeffArray[a0] = 1.0;
@@ -147,9 +135,9 @@ protected:
 
 		// --- grab these variables, to make calculations look more like the book
 		filterAlgorithm algorithm = audioFilterParameters.algorithm;
-		double fc = audioFilterParameters.fc;
-		double Q = audioFilterParameters.Q;
-		double boostCut_dB = audioFilterParameters.boostCut_dB;
+		rack::simd::float_4 fc = audioFilterParameters.fc;
+		rack::simd::float_4 Q = audioFilterParameters.Q;
+		rack::simd::float_4 boostCut_dB = audioFilterParameters.boostCut_dB;
 
 		// --- decode filter type and calculate accordingly
 		// --- impulse invariabt LPF, matches closely with one-pole version,
@@ -157,8 +145,8 @@ protected:
 		if (algorithm == filterAlgorithm::kImpInvLP1)
 		{
 			double Tee = 1.0 / sampleRate;
-			double omega = 2.0*M_PI*fc;
-			double eT = exp(-Tee*omega);
+			rack::simd::float_4 omega = 2.0*M_PI*fc;
+			rack::simd::float_4 eT = rack::simd::exp(-Tee*omega);
 
 			coeffArray[a0] = 1.0 - eT; // <--- normalized by 1-e^aT
 			coeffArray[a1] = 0.0;
@@ -175,14 +163,14 @@ protected:
 		}
 		else if (algorithm == filterAlgorithm::kImpInvLP2)
 		{
-			double alpha = 2.0*M_PI*fc / sampleRate;
-			double p_Re = -alpha / (2.0*Q);
-			double zeta = 1.0 / (2.0 * Q);
-			double p_Im = alpha*pow((1.0 - (zeta*zeta)), 0.5);
+			rack::simd::float_4 alpha = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 p_Re = -alpha / (2.0*Q);
+			rack::simd::float_4 zeta = 1.0 / (2.0 * Q);
+			rack::simd::float_4 p_Im = alpha*pow((1.0 - (zeta*zeta)), 0.5);
 			double c_Re = 0.0;
-			double c_Im = alpha / (2.0*pow((1.0 - (zeta*zeta)), 0.5));
+			rack::simd::float_4 c_Im = alpha / (2.0*pow((1.0 - (zeta*zeta)), 0.5));
 
-			double eP_re = exp(p_Re);
+			rack::simd::float_4 eP_re = rack::simd::exp(p_Re);
 			coeffArray[a0] = c_Re;
 			coeffArray[a1] = -2.0*(c_Re*cos(p_Im) + c_Im*sin(p_Im))*exp(p_Re);
 			coeffArray[a2] = 0.0;
@@ -389,8 +377,8 @@ protected:
 		else if (algorithm == filterAlgorithm::kLPF1)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double gamma = cos(theta_c) / (1.0 + sin(theta_c));
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 gamma = cos(theta_c) / (1.0 + sin(theta_c));
 
 			// --- update coeffs
 			coeffArray[a0] = (1.0 - gamma) / 2.0;
@@ -408,8 +396,8 @@ protected:
 		else if (algorithm == filterAlgorithm::kHPF1)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double gamma = cos(theta_c) / (1.0 + sin(theta_c));
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 gamma = cos(theta_c) / (1.0 + sin(theta_c));
 
 			// --- update coeffs
 			coeffArray[a0] = (1.0 + gamma) / 2.0;
@@ -427,14 +415,14 @@ protected:
 		else if (algorithm == filterAlgorithm::kLPF2)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double d = 1.0 / Q;
-			double betaNumerator = 1.0 - ((d / 2.0)*(sin(theta_c)));
-			double betaDenominator = 1.0 + ((d / 2.0)*(sin(theta_c)));
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 d = 1.0 / Q;
+			rack::simd::float_4 betaNumerator = 1.0 - ((d / 2.0)*(sin(theta_c)));
+			rack::simd::float_4 betaDenominator = 1.0 + ((d / 2.0)*(sin(theta_c)));
 
-			double beta = 0.5*(betaNumerator / betaDenominator);
-			double gamma = (0.5 + beta)*(cos(theta_c));
-			double alpha = (0.5 + beta - gamma) / 2.0;
+			rack::simd::float_4 beta = 0.5*(betaNumerator / betaDenominator);
+			rack::simd::float_4 gamma = (0.5 + beta)*(cos(theta_c));
+			rack::simd::float_4 alpha = (0.5 + beta - gamma) / 2.0;
 
 			// --- update coeffs
 			coeffArray[a0] = alpha;
@@ -452,15 +440,15 @@ protected:
 		else if (algorithm == filterAlgorithm::kHPF2)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double d = 1.0 / Q;
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 d = 1.0 / Q;
 
-			double betaNumerator = 1.0 - ((d / 2.0)*(sin(theta_c)));
-			double betaDenominator = 1.0 + ((d / 2.0)*(sin(theta_c)));
+			rack::simd::float_4 betaNumerator = 1.0 - ((d / 2.0)*(sin(theta_c)));
+			rack::simd::float_4 betaDenominator = 1.0 + ((d / 2.0)*(sin(theta_c)));
 
-			double beta = 0.5*(betaNumerator / betaDenominator);
-			double gamma = (0.5 + beta)*(cos(theta_c));
-			double alpha = (0.5 + beta + gamma) / 2.0;
+			rack::simd::float_4 beta = 0.5*(betaNumerator / betaDenominator);
+			rack::simd::float_4 gamma = (0.5 + beta)*(cos(theta_c));
+			rack::simd::float_4 alpha = (0.5 + beta + gamma) / 2.0;
 
 			// --- update coeffs
 			coeffArray[a0] = alpha;
@@ -478,8 +466,9 @@ protected:
 		else if (algorithm == filterAlgorithm::kBPF2)
 		{
 			// --- see book for formulae
-			double K = tan(M_PI*fc / sampleRate);
-			double delta = K*K*Q + K + Q;
+			rack::simd::float_4 K = tan(M_PI*fc / sampleRate);
+			rack::simd::float_4
+			delta = K*K*Q + K + Q;
 
 			// --- update coeffs
 			coeffArray[a0] = K / delta;;
@@ -497,8 +486,8 @@ protected:
 		else if (algorithm == filterAlgorithm::kBSF2)
 		{
 			// --- see book for formulae
-			double K = tan(M_PI*fc / sampleRate);
-			double delta = K*K*Q + K + Q;
+			rack::simd::float_4 K = tan(M_PI*fc / sampleRate);
+			rack::simd::float_4 delta = K*K*Q + K + Q;
 
 			// --- update coeffs
 			coeffArray[a0] = Q*(1 + K*K) / delta;
@@ -516,8 +505,8 @@ protected:
 		else if (algorithm == filterAlgorithm::kButterLPF2)
 		{
 			// --- see book for formulae
-			double theta_c = M_PI*fc / sampleRate;
-			double C = 1.0 / tan(theta_c);
+			rack::simd::float_4 theta_c = M_PI*fc / sampleRate;
+			rack::simd::float_4 C = 1.0 / tan(theta_c);
 
 			// --- update coeffs
 			coeffArray[a0] = 1.0 / (1.0 + kSqrtTwo*C + C*C);
@@ -535,8 +524,8 @@ protected:
 		else if (algorithm == filterAlgorithm::kButterHPF2)
 		{
 			// --- see book for formulae
-			double theta_c = M_PI*fc / sampleRate;
-			double C = tan(theta_c);
+			rack::simd::float_4 theta_c = M_PI*fc / sampleRate;
+			rack::simd::float_4 C = tan(theta_c);
 
 			// --- update coeffs
 			coeffArray[a0] = 1.0 / (1.0 + kSqrtTwo*C + C*C);
@@ -554,13 +543,13 @@ protected:
 		else if (algorithm == filterAlgorithm::kButterBPF2)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double BW = fc / Q;
-			double delta_c = M_PI*BW / sampleRate;
-			if (delta_c >= 0.95*M_PI / 2.0) delta_c = 0.95*M_PI / 2.0;
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 BW = fc / Q;
+			rack::simd::float_4 delta_c = M_PI*BW / sampleRate;
+			delta_c = rack::simd::ifelse(delta_c >= 0.95*M_PI / 2.0,0.95*M_PI / 2.0,delta_c);
 
-			double C = 1.0 / tan(delta_c);
-			double D = 2.0*cos(theta_c);
+			rack::simd::float_4 C = 1.0 / tan(delta_c);
+			rack::simd::float_4 D = 2.0*cos(theta_c);
 
 			// --- update coeffs
 			coeffArray[a0] = 1.0 / (1.0 + C);
@@ -578,13 +567,13 @@ protected:
 		else if (algorithm == filterAlgorithm::kButterBSF2)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double BW = fc / Q;
-			double delta_c = M_PI*BW / sampleRate;
-			if (delta_c >= 0.95*M_PI / 2.0) delta_c = 0.95*M_PI / 2.0;
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 BW = fc / Q;
+			rack::simd::float_4 delta_c = M_PI*BW / sampleRate;
+			delta_c = rack::simd::ifelse(delta_c >= 0.95*M_PI / 2.0,0.95*M_PI / 2.0,delta_c);
 
-			double C = tan(delta_c);
-			double D = 2.0*cos(theta_c);
+			rack::simd::float_4 C = tan(delta_c);
+			rack::simd::float_4 D = 2.0*cos(theta_c);
 
 			// --- update coeffs
 			coeffArray[a0] = 1.0 / (1.0 + C);
@@ -602,26 +591,23 @@ protected:
 		else if (algorithm == filterAlgorithm::kMMALPF2 || algorithm == filterAlgorithm::kMMALPF2B)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double resonance_dB = 0;
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 resonance_dB = 0;
 
-			if (Q > 0.707)
-			{
-				double peak = Q*Q / pow(Q*Q - 0.25, 0.5);
-				resonance_dB = 20.0*log10(peak);
-			}
+			rack::simd::float_4 peak = rack::simd::ifelse(Q > 0.707, Q*Q / rack::simd::sqrt(Q*Q - 0.25),0);
+			resonance_dB = rack::simd::ifelse(Q > 0.707,20.0*log10(peak),0);
 
 			// --- intermediate vars
-			double resonance = (cos(theta_c) + (sin(theta_c) * sqrt(pow(10.0, (resonance_dB / 10.0)) - 1))) / ((pow(10.0, (resonance_dB / 20.0)) * sin(theta_c)) + 1);
-			double g = pow(10.0, (-resonance_dB / 40.0));
+			rack::simd::float_4 resonance = (cos(theta_c) + (sin(theta_c) * sqrt(pow(10.0, (resonance_dB / 10.0)) - 1))) / ((pow(10.0, (resonance_dB / 20.0)) * sin(theta_c)) + 1);
+			rack::simd::float_4 g = pow(10.0, (-resonance_dB / 40.0));
 
 			// --- kMMALPF2B disables the GR with increase in Q
 			if (algorithm == filterAlgorithm::kMMALPF2B)
 				g = 1.0;
 
-			double filter_b1 = (-2.0) * resonance * cos(theta_c);
-			double filter_b2 = resonance * resonance;
-			double filter_a0 = g * (1 + filter_b1 + filter_b2);
+			rack::simd::float_4 filter_b1 = (-2.0) * resonance * cos(theta_c);
+			rack::simd::float_4 filter_b2 = resonance * resonance;
+			rack::simd::float_4 filter_a0 = g * (1 + filter_b1 + filter_b2);
 
 			// --- update coeffs
 			coeffArray[a0] = filter_a0;
@@ -639,12 +625,12 @@ protected:
 		else if (algorithm == filterAlgorithm::kLowShelf)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double mu = pow(10.0, boostCut_dB / 20.0);
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 mu = pow(10.0, boostCut_dB / 20.0);
 
-			double beta = 4.0 / (1.0 + mu);
-			double delta = beta*tan(theta_c / 2.0);
-			double gamma = (1.0 - delta) / (1.0 + delta);
+			rack::simd::float_4 beta = 4.0 / (1.0 + mu);
+			rack::simd::float_4 delta = beta*tan(theta_c / 2.0);
+			rack::simd::float_4 gamma = (1.0 - delta) / (1.0 + delta);
 
 			// --- update coeffs
 			coeffArray[a0] = (1.0 - gamma) / 2.0;
@@ -664,12 +650,12 @@ protected:
 		}
 		else if (algorithm == filterAlgorithm::kHiShelf)
 		{
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double mu = pow(10.0, boostCut_dB / 20.0);
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 mu = pow(10.0, boostCut_dB / 20.0);
 
-			double beta = (1.0 + mu) / 4.0;
-			double delta = beta*tan(theta_c / 2.0);
-			double gamma = (1.0 - delta) / (1.0 + delta);
+			rack::simd::float_4 beta = (1.0 + mu) / 4.0;
+			rack::simd::float_4 delta = beta*tan(theta_c / 2.0);
+			rack::simd::float_4 gamma = (1.0 - delta) / (1.0 + delta);
 
 			coeffArray[a0] = (1.0 + gamma) / 2.0;
 			coeffArray[a1] = -coeffArray[a0];
@@ -689,24 +675,24 @@ protected:
 		else if (algorithm == filterAlgorithm::kCQParaEQ)
 		{
 			// --- see book for formulae
-			double K = tan(M_PI*fc / sampleRate);
-			double Vo = pow(10.0, boostCut_dB / 20.0);
-			bool bBoost = boostCut_dB >= 0 ? true : false;
+			rack::simd::float_4 K = tan(M_PI*fc / sampleRate);
+			rack::simd::float_4 Vo = pow(10.0, boostCut_dB / 20.0);
+			rack::simd::float_4 bBoost = rack::simd::ifelse(boostCut_dB >= 0,1.f,0.f);
 
-			double d0 = 1.0 + (1.0 / Q)*K + K*K;
-			double e0 = 1.0 + (1.0 / (Vo*Q))*K + K*K;
-			double alpha = 1.0 + (Vo / Q)*K + K*K;
-			double beta = 2.0*(K*K - 1.0);
-			double gamma = 1.0 - (Vo / Q)*K + K*K;
-			double delta = 1.0 - (1.0 / Q)*K + K*K;
-			double eta = 1.0 - (1.0 / (Vo*Q))*K + K*K;
+			rack::simd::float_4 d0 = 1.0 + (1.0 / Q)*K + K*K;
+			rack::simd::float_4 e0 = 1.0 + (1.0 / (Vo*Q))*K + K*K;
+			rack::simd::float_4 alpha = 1.0 + (Vo / Q)*K + K*K;
+			rack::simd::float_4 beta = 2.0*(K*K - 1.0);
+			rack::simd::float_4 gamma = 1.0 - (Vo / Q)*K + K*K;
+			rack::simd::float_4 delta = 1.0 - (1.0 / Q)*K + K*K;
+			rack::simd::float_4 eta = 1.0 - (1.0 / (Vo*Q))*K + K*K;
 
 			// --- update coeffs
-			coeffArray[a0] = bBoost ? alpha / d0 : d0 / e0;
-			coeffArray[a1] = bBoost ? beta / d0 : beta / e0;
-			coeffArray[a2] = bBoost ? gamma / d0 : delta / e0;
-			coeffArray[b1] = bBoost ? beta / d0 : beta / e0;
-			coeffArray[b2] = bBoost ? delta / d0 : eta / e0;
+			coeffArray[a0] = rack::simd::ifelse(bBoost==1.f,alpha / d0, d0 / e0);
+			coeffArray[a1] = rack::simd::ifelse(bBoost==1.f,beta / d0 , beta / e0);
+			coeffArray[a2] = rack::simd::ifelse(bBoost==1.f,gamma / d0 , delta / e0);
+			coeffArray[b1] = rack::simd::ifelse(bBoost==1.f,beta / d0 , beta / e0);
+			coeffArray[b2] = rack::simd::ifelse(bBoost==1.f,delta / d0 , eta / e0);
 
 			// --- update on calculator
 			biquad.setCoefficients(coeffArray);
@@ -717,21 +703,21 @@ protected:
 		else if (algorithm == filterAlgorithm::kNCQParaEQ)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double mu = pow(10.0, boostCut_dB / 20.0);
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 mu = pow(10.0, boostCut_dB / 20.0);
 
 			// --- clamp to 0.95 pi/2 (you can experiment with this)
-			double tanArg = theta_c / (2.0 * Q);
-			if (tanArg >= 0.95*M_PI / 2.0) tanArg = 0.95*M_PI / 2.0;
+			rack::simd::float_4 tanArg = theta_c / (2.0 * Q);
+			tanArg = rack::simd::ifelse(tanArg >= 0.95*M_PI / 2.0,0.95*M_PI / 2.0,tanArg);
 
 			// --- intermediate variables (you can condense this if you wish)
-			double zeta = 4.0 / (1.0 + mu);
-			double betaNumerator = 1.0 - zeta*tan(tanArg);
-			double betaDenominator = 1.0 + zeta*tan(tanArg);
+			rack::simd::float_4 zeta = 4.0 / (1.0 + mu);
+			rack::simd::float_4 betaNumerator = 1.0 - zeta*tan(tanArg);
+			rack::simd::float_4 betaDenominator = 1.0 + zeta*tan(tanArg);
 
-			double beta = 0.5*(betaNumerator / betaDenominator);
-			double gamma = (0.5 + beta)*(cos(theta_c));
-			double alpha = (0.5 - beta);
+			rack::simd::float_4 beta = 0.5*(betaNumerator / betaDenominator);
+			rack::simd::float_4 gamma = (0.5 + beta)*(cos(theta_c));
+			rack::simd::float_4 alpha = (0.5 - beta);
 
 			// --- update coeffs
 			coeffArray[a0] = alpha;
@@ -752,13 +738,13 @@ protected:
 		else if (algorithm == filterAlgorithm::kLWRLPF2)
 		{
 			// --- see book for formulae
-			double omega_c = M_PI*fc;
-			double theta_c = M_PI*fc / sampleRate;
+			rack::simd::float_4 omega_c = M_PI*fc;
+			rack::simd::float_4 theta_c = M_PI*fc / sampleRate;
 
-			double k = omega_c / tan(theta_c);
-			double denominator = k*k + omega_c*omega_c + 2.0*k*omega_c;
-			double b1_Num = -2.0*k*k + 2.0*omega_c*omega_c;
-			double b2_Num = -2.0*k*omega_c + k*k + omega_c*omega_c;
+			rack::simd::float_4 k = omega_c / tan(theta_c);
+			rack::simd::float_4 denominator = k*k + omega_c*omega_c + 2.0*k*omega_c;
+			rack::simd::float_4 b1_Num = -2.0*k*k + 2.0*omega_c*omega_c;
+			rack::simd::float_4 b2_Num = -2.0*k*omega_c + k*k + omega_c*omega_c;
 
 			// --- update coeffs
 			coeffArray[a0] = omega_c*omega_c / denominator;
@@ -776,13 +762,13 @@ protected:
 		else if (algorithm == filterAlgorithm::kLWRHPF2)
 		{
 			// --- see book for formulae
-			double omega_c = M_PI*fc;
-			double theta_c = M_PI*fc / sampleRate;
+			rack::simd::float_4 omega_c = M_PI*fc;
+			rack::simd::float_4 theta_c = M_PI*fc / sampleRate;
 
-			double k = omega_c / tan(theta_c);
-			double denominator = k*k + omega_c*omega_c + 2.0*k*omega_c;
-			double b1_Num = -2.0*k*k + 2.0*omega_c*omega_c;
-			double b2_Num = -2.0*k*omega_c + k*k + omega_c*omega_c;
+			rack::simd::float_4 k = omega_c / tan(theta_c);
+			rack::simd::float_4 denominator = k*k + omega_c*omega_c + 2.0*k*omega_c;
+			rack::simd::float_4 b1_Num = -2.0*k*k + 2.0*omega_c*omega_c;
+			rack::simd::float_4 b2_Num = -2.0*k*omega_c + k*k + omega_c*omega_c;
 
 			// --- update coeffs
 			coeffArray[a0] = k*k / denominator;
@@ -800,9 +786,9 @@ protected:
 		else if (algorithm == filterAlgorithm::kAPF1)
 		{
 			// --- see book for formulae
-			double alphaNumerator = tan((M_PI*fc) / sampleRate) - 1.0;
-			double alphaDenominator = tan((M_PI*fc) / sampleRate) + 1.0;
-			double alpha = alphaNumerator / alphaDenominator;
+			rack::simd::float_4 alphaNumerator = tan((M_PI*fc) / sampleRate) - 1.0;
+			rack::simd::float_4 alphaDenominator = tan((M_PI*fc) / sampleRate) + 1.0;
+			rack::simd::float_4 alpha = alphaNumerator / alphaDenominator;
 
 			// --- update coeffs
 			coeffArray[a0] = alpha;
@@ -820,15 +806,15 @@ protected:
 		else if (algorithm == filterAlgorithm::kAPF2)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double BW = fc / Q;
-			double argTan = M_PI*BW / sampleRate;
-			if (argTan >= 0.95*M_PI / 2.0) argTan = 0.95*M_PI / 2.0;
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 BW = fc / Q;
+			rack::simd::float_4 argTan = M_PI*BW / sampleRate;
+			argTan = rack::simd::ifelse(argTan >= 0.95*M_PI / 2.0, 0.95*M_PI / 2.0,argTan);
 
-			double alphaNumerator = tan(argTan) - 1.0;
-			double alphaDenominator = tan(argTan) + 1.0;
-			double alpha = alphaNumerator / alphaDenominator;
-			double beta = -cos(theta_c);
+			rack::simd::float_4 alphaNumerator = tan(argTan) - 1.0;
+			rack::simd::float_4 alphaDenominator = tan(argTan) + 1.0;
+			rack::simd::float_4 alpha = alphaNumerator / alphaDenominator;
+			rack::simd::float_4 beta = -cos(theta_c);
 
 			// --- update coeffs
 			coeffArray[a0] = -alpha;
@@ -846,11 +832,11 @@ protected:
 		else if (algorithm == filterAlgorithm::kResonA)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double BW = fc / Q;
-			double filter_b2 = exp(-2.0*M_PI*(BW / sampleRate));
-			double filter_b1 = ((-4.0*filter_b2) / (1.0 + filter_b2))*cos(theta_c);
-			double filter_a0 = (1.0 - filter_b2)*sqrt((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)));
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 BW = fc / Q;
+			rack::simd::float_4 filter_b2 = exp(-2.0*M_PI*(BW / sampleRate));
+			rack::simd::float_4 filter_b1 = ((-4.0*filter_b2) / (1.0 + filter_b2))*cos(theta_c);
+			rack::simd::float_4 filter_a0 = (1.0 - filter_b2)*sqrt((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)));
 
 			// --- update coeffs
 			coeffArray[a0] = filter_a0;
@@ -868,11 +854,11 @@ protected:
 		else if (algorithm == filterAlgorithm::kResonB)
 		{
 			// --- see book for formulae
-			double theta_c = 2.0*M_PI*fc / sampleRate;
-			double BW = fc / Q;
-			double filter_b2 = exp(-2.0*M_PI*(BW / sampleRate));
-			double filter_b1 = ((-4.0*filter_b2) / (1.0 + filter_b2))*cos(theta_c);
-			double filter_a0 = 1.0 - pow(filter_b2, 0.5); // (1.0 - filter_b2)*pow((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)), 0.5);
+			rack::simd::float_4 theta_c = 2.0*M_PI*fc / sampleRate;
+			rack::simd::float_4 BW = fc / Q;
+			rack::simd::float_4 filter_b2 = exp(-2.0*M_PI*(BW / sampleRate));
+			rack::simd::float_4 filter_b1 = ((-4.0*filter_b2) / (1.0 + filter_b2))*cos(theta_c);
+			rack::simd::float_4 filter_a0 = 1.0 - sqrt(filter_b2); // (1.0 - filter_b2)*pow((1.0 - (filter_b1*filter_b1) / (4.0 * filter_b2)), 0.5);
 
 			// --- update coeffs
 			coeffArray[a0] = filter_a0;

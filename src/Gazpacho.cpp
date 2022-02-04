@@ -27,7 +27,7 @@ Gazpacho::Gazpacho() {
 	}
 	LPFafp.algorithm=filterAlgorithm::kLWRLPF2;
 	HPFafp.algorithm=filterAlgorithm::kLWRHPF2;
-	bqa=biquadAlgorithm::kDirect;
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void Gazpacho::onSampleRateChange() {
@@ -62,7 +62,7 @@ void Gazpacho::process(const ProcessArgs &args) {
 
 		for (int c = 0; c < channels; c += 4) {
 
-			double cvdrive = 0.f;
+			rack::simd::float_4 cvdrive = 0.f;
 			
 			float freqParam = params[PARAM_FC].getValue();
 			// Rescale for backward compatibility
@@ -74,14 +74,16 @@ void Gazpacho::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
- 			LPFafp.fc = HPFafp.fc = cutoff.v[0];			LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
+ 			LPFafp.fc = HPFafp.fc = cutoff;			
+			LPFafp.dry = HPFafp.dry = params[PARAM_DRY].getValue();
 			LPFafp.wet = HPFafp.wet = params[PARAM_WET].getValue();
-			LPFafp.bqa = HPFafp.bqa = bqa;
+			LPFafp.bqa = HPFafp.bqa = bqaUI;
+		
 		
 			if (inputs[INPUT_CVDRIVE].isConnected())
-				cvdrive = inputs[INPUT_CVDRIVE].getVoltage() / 10.0;
+				cvdrive = inputs[INPUT_CVDRIVE].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;
 			LPFafp.drive = HPFafp.drive = clamp((params[PARAM_CVDRIVE].getValue() * cvdrive) + params[PARAM_DRIVE].getValue(),0.f,1.f);
-
+			
 			processChannel(c,inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN]);
 
 		}
@@ -143,21 +145,21 @@ struct GazpachoModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator());
 
-		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
 
 	}
 };
 
 json_t *Gazpacho::dataToJson() {
 	json_t *rootJ=json_object();
-	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqaUI)));
 	return rootJ;
 }
 
 void Gazpacho::dataFromJson(json_t *rootJ) {
 	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nBiquadAlgorithmJ) {
-		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+		bqaUI = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

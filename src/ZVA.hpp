@@ -1,23 +1,30 @@
 #include "rack.hpp"
 
-inline double dB2Raw(double dB)
+template<typename T>
+inline T dB2Raw(T dB)
 {
 	return pow(10.0, (dB / 20.0));
 }
 
-inline double raw2dB(double raw)
+template<typename T>
+inline T raw2dB(T raw)
 {
 	return 20.0*log10(raw);
 }
 
-inline double peakGainFor_Q(double Q)
+template<typename T>
+inline T peakGainFor_Q(T Q)
 {
 	// --- no resonance at or below unity
-	if (Q <= 0.707) return 1.0;
-	return (Q*Q) / (pow((Q*Q - 0.25), 0.5));
+	//if (Q <= 0.707) return 1.0;
+	//return (Q*Q) / (pow((Q*Q - 0.25), 0.5));
+
+	return rack::simd::ifelse(Q <= 0.707,1.0,(Q*Q) / (pow((Q*Q - 0.25), 0.5)));
+
 }
 
-inline double dBPeakGainFor_Q(double Q)
+template<typename T>
+inline T dBPeakGainFor_Q(T Q)
 {
 	return raw2dB(peakGainFor_Q(Q));
 }
@@ -51,8 +58,8 @@ struct ZVAFilterParameters
 
 	vaFilterAlgorithm filterAlgorithm = vaFilterAlgorithm::kSVF_LP;	///< va filter algorithm
 	rack::simd::float_4 fc = 1000.0;						///< va filter fc
-	double Q = 0.707;						///< va filter Q
-	double filterOutputGain_dB = 0.0;		///< va filter gain (normally unused)
+	rack::simd::float_4 Q = 0.707;						///< va filter Q
+	rack::simd::float_4 filterOutputGain_dB = 0.0;		///< va filter gain (normally unused)
 	bool enableGainComp = false;			///< enable gain compensation (see book)
 	bool matchAnalogNyquistLPF = false;		///< match analog gain at Nyquist
 	bool selfOscillate = false;				///< enable selfOscillation
@@ -83,18 +90,18 @@ ZVAFilterParameters getParameters()
 
 void setParameters(const ZVAFilterParameters& params)
 {
-	T mask = rack::simd::operator!=(params.fc,zvaFilterParameters.fc);
+	//T mask = rack::simd::operator!=(params.fc,zvaFilterParameters.fc);
 
-	if ((bool)rack::simd::movemask(mask) ||
-		params.Q != zvaFilterParameters.Q ||
-		params.selfOscillate != zvaFilterParameters.selfOscillate ||
-		params.matchAnalogNyquistLPF != zvaFilterParameters.matchAnalogNyquistLPF)
-	{
+//	if ((bool)rack::simd::movemask(mask) ||
+//		params.Q != zvaFilterParameters.Q ||
+//		params.selfOscillate != zvaFilterParameters.selfOscillate ||
+//		params.matchAnalogNyquistLPF != zvaFilterParameters.matchAnalogNyquistLPF)
+//	{
 			zvaFilterParameters = params;
 			calculateFilterCoeffs();
-	}
-	else
-		zvaFilterParameters = params;
+//	}
+//	else
+//		zvaFilterParameters = params;
 }
 
 bool canProcessAudioFrame() { return false; }
@@ -109,12 +116,9 @@ T processAudioSample(T xn)
 	//     NOTE: you can change that logic here!
 	if (zvaFilterParameters.enableGainComp)
 	{
-		double peak_dB = dBPeakGainFor_Q(zvaFilterParameters.Q);
-		if (peak_dB > 0.0)
-		{
-			double halfPeak_dBGain = dB2Raw(-peak_dB / 2.0);
-			xn *= halfPeak_dBGain;
-		}
+		T peak_dB = dBPeakGainFor_Q(zvaFilterParameters.Q);
+		
+		xn *= ifelse(peak_dB > 0.0,dB2Raw(-peak_dB / 2.0),1);
 	}
 
 	// --- for 1st order filters:
@@ -178,7 +182,7 @@ T processAudioSample(T xn)
 	integrator_z[0] = alpha*hpf + bpf;
 	integrator_z[1] = alpha*bpf + lpf;
 
-	double filterOutputGain = pow(10.0, zvaFilterParameters.filterOutputGain_dB / 20.0);
+	T filterOutputGain = pow(10.0, zvaFilterParameters.filterOutputGain_dB / 20.0);
 
 	// return our selected type
 	if (filterAlgorithm == vaFilterAlgorithm::kSVF_LP)
@@ -202,7 +206,7 @@ T processAudioSample(T xn)
 void calculateFilterCoeffs()
 {
 	T fc = zvaFilterParameters.fc;
-	double Q = zvaFilterParameters.Q;
+	T Q = zvaFilterParameters.Q;
 	vaFilterAlgorithm filterAlgorithm = zvaFilterParameters.filterAlgorithm;
 
 	// --- normal Zavalishin SVF calculations here
@@ -223,7 +227,7 @@ void calculateFilterCoeffs()
 	else // state variable variety
 	{
 		// --- note R is the traditional analog damping factor zeta
-		double R = zvaFilterParameters.selfOscillate ? 0.0 : 1.0 / (2.0*Q);
+		T R = zvaFilterParameters.selfOscillate ? 0.0 : 1.0 / (2.0*Q);
 		alpha0 = 1.0 / (1.0 + 2.0*R*g + g*g);
 		alpha = g;
 		rho = 2.0*R + g;

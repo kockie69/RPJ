@@ -23,6 +23,7 @@ Essence::Essence() {
 	for (int i = 0;i<4;i++) {
 		audioFilter[i].reset(APP->engine->getSampleRate());
 	}
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void Essence::onSampleRateChange() {
@@ -58,23 +59,22 @@ void Essence::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
- 			afp.fc = cutoff.v[0];
+ 			afp.fc = cutoff;
 
-			double cvb = 1.f;
-			double cvq = 1.f;
+			simd::float_4 cvb = 0.f;
+			simd::float_4 cvq = 0.f;
 
 			if (inputs[INPUT_CVQ].isConnected())
-				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+				cvq = inputs[INPUT_CVQ].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;
 
 			if (inputs[INPUT_CVB].isConnected())
-				cvb = inputs[INPUT_CVB].getVoltage() / 10.0;	
+				cvb = inputs[INPUT_CVB].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;	
  
 			afp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
-			afp.boostCut_dB = clamp((params[PARAM_BOOSTCUT_DB].getValue() * cvb * 20.f) + params[PARAM_CVB].getValue(),-20.f,20.f);
+			afp.boostCut_dB = clamp((params[PARAM_CVB].getValue() * cvb * 20.f) + params[PARAM_BOOSTCUT_DB].getValue(),-20.f,20.f);
 			afp.wet = 1;
 			afp.dry = 0;
-			afp.bqa = bqa;
-		
+			afp.bqa = bqaUI;
 			processChannel(c,inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 		}
 	}
@@ -132,21 +132,21 @@ struct EssenceModuleWidget : ModuleWidget {
 
 		menu->addChild(new MenuSeparator());
 
-		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqa));
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
 
 	}
 };
 
 json_t *Essence::dataToJson() {
 	json_t *rootJ=json_object();
-	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqa)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(this->bqaUI)));
 	return rootJ;
 }
 
 void Essence::dataFromJson(json_t *rootJ) {
 	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nBiquadAlgorithmJ) {
-		bqa = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
+		this->bqaUI = static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

@@ -30,6 +30,7 @@ Estonia::Estonia() {
 	for (int i = 0;i<4;i++) {
 		audioFilter[i].reset(APP->engine->getSampleRate());
 	}
+	bqaUI=biquadAlgorithm::kDirect;
 }
 
 void Estonia::onSampleRateChange() {
@@ -73,15 +74,15 @@ void Estonia::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
- 			afp.fc = cutoff.v[0];
+ 			afp.fc = cutoff;
 
-			double cvb = 1.f;
+			rack::simd::float_4 cvb = 0.f;
 
 			if (inputs[INPUT_CVB].isConnected())
-				cvb = inputs[INPUT_CVB].getVoltage() / 10.0;	
+				cvb = inputs[INPUT_CVB].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;	
  
-			afp.boostCut_dB = clamp((params[PARAM_BOOSTCUT_DB].getValue() * cvb * 20.f) + params[PARAM_CVB].getValue(),-20.f,20.f);
-	
+			afp.boostCut_dB = clamp((params[PARAM_CVB].getValue() * cvb * 20.f) + params[PARAM_BOOSTCUT_DB].getValue(),-20.f,20.f);
+			afp.bqa = bqaUI;
 			processChannel(c,inputs[INPUT_MAIN],outputs[OUTPUT_MAIN]);
 		}
 	}
@@ -144,18 +145,32 @@ struct EstoniaModuleWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(Vec(jackX2, jackY1), module, Estonia::INPUT_CVFC));
 		addInput(createInput<PJ301MPort>(Vec(jackX2, jackY2), module, Estonia::INPUT_CVB));	
 	}
+
+		void appendContextMenu(Menu *menu) override {
+		Estonia * module = dynamic_cast<Estonia*>(this->module);
+
+		menu->addChild(new MenuSeparator());
+
+		menu->addChild(createIndexPtrSubmenuItem("Structure", {"Direct", "Canonical", "TransposeDirect", "TransposeCanonical"}, &module->bqaUI));
+
+	}
 };
 
 json_t *Estonia::dataToJson() {
 	json_t *rootJ=json_object();
 	json_object_set_new(rootJ, JSON_FILTER_ALGORITHM_KEY, json_integer(static_cast<int>(afp.algorithm)));
+	json_object_set_new(rootJ, JSON_BIQUAD_ALGORYTHM, json_integer(static_cast<int>(bqaUI)));
 	return rootJ;
 }
 
 void Estonia::dataFromJson(json_t *rootJ) {
 	json_t *nAlgorithmJ = json_object_get(rootJ, JSON_FILTER_ALGORITHM_KEY);
+	json_t *nBiquadAlgorithmJ = json_object_get(rootJ, JSON_BIQUAD_ALGORYTHM);
 	if (nAlgorithmJ) {
 		afp.algorithm=static_cast<filterAlgorithm>(json_integer_value(nAlgorithmJ));
+	}
+	if (nBiquadAlgorithmJ) {
+		bqaUI=static_cast<biquadAlgorithm>(json_integer_value(nBiquadAlgorithmJ));
 	}
 }
 

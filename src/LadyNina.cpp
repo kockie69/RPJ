@@ -80,10 +80,10 @@ void LadyNina::process(const ProcessArgs &args) {
 
 		for (int c = 0; c < channels; c += 4) {
 
-			double cvq = 0.f;
+			rack::simd::float_4 cvq = 0.f;
 
 			if (inputs[INPUT_CVQ].isConnected())
-				cvq = inputs[INPUT_CVQ].getVoltage() / 10.0;
+				cvq = inputs[INPUT_CVQ].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0;
  	
 			float freqParam = params[PARAM_FC].getValue();
 			// Rescale for backward compatibility
@@ -95,9 +95,9 @@ void LadyNina::process(const ProcessArgs &args) {
 			simd::float_4 cutoff = dsp::FREQ_C4 * simd::pow(2.f, pitch);
 
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
-			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff.v[0];
+			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff;
 	 		
-			float cvbcdb = inputs[INPUT_CVBCDB].getVoltage();
+			rack::simd::float_4 cvbcdb = inputs[INPUT_CVBCDB].getPolyVoltageSimd<rack::simd::float_4>(c);
  			LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
 			
 			LPFafp.filterOutputGain_dB = HPFafp.filterOutputGain_dB = BPFafp.filterOutputGain_dB = BSFafp.filterOutputGain_dB = clamp(params[PARAM_BOOSTCUT_DB].getValue() + cvbcdb*20,-20.f,20.f);
