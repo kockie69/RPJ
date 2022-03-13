@@ -7,6 +7,13 @@ struct RPJKnobBig : RoundKnob {
 	}
 };
 
+struct RPJKnobSmall : RoundKnob {
+	RPJKnobSmall() {
+		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnobSmall.svg")));
+		bg->setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnobSmall_bg.svg")));
+	}
+};
+
 struct RPJKnob : RoundKnob {
 	RPJKnob() {
 		setSvg(Svg::load(asset::plugin(pluginInstance, "res/RPJKnob.svg")));

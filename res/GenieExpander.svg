@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="132.08mm"
+   height="128.5mm"
+   viewBox="0 0 132.08 128.5"
+   version="1.1"
+   id="svg849"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="Geniedisplay.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview851"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.1575153"
+     inkscape:cx="397.40294"
+     inkscape:cy="269.1109"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs846" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       width="132.55309"
+       height="129.48532"
+       fill="#353535"
+       id="rect838"
+       x="0.19664359"
+       y="-0.022759965"
+       style="fill:#272724;fill-opacity:1;stroke-width:0.433818" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.11416;stroke-opacity:1"
+       id="rect1918-3"
+       width="128.2852"
+       height="125.4007"
+       x="2.3305852"
+       y="2.0195489"
+       ry="8.6584301" />
+  </g>
+</svg>

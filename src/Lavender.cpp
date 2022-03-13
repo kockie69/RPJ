@@ -1,6 +1,7 @@
 #include "RPJ.hpp"
 #include "Lavender.hpp"
 #include "ctrl/RPJKnobs.hpp"
+#include "ctrl/RPJPorts.hpp"
 
 
 Lavender::Lavender() {
@@ -16,18 +17,18 @@ Lavender::Lavender() {
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry", "%", 0.f, 100.f);
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet", "%", 0.f, 100.f);
 	configParam(PARAM_DRIVE, 0.f, 1.0f, 0.3f, "Drive", "%", 0, 100, 100);
-	configBypass(INPUT_MAIN, OUTPUT_LPFMAIN);
-	configBypass(INPUT_MAIN, OUTPUT_HPFMAIN);
-	configBypass(INPUT_MAIN, OUTPUT_BPFMAIN);
-	configBypass(INPUT_MAIN, OUTPUT_BSFMAIN);
+	configBypass(INPUT_MAIN, OUTPUT_LPF);
+	configBypass(INPUT_MAIN, OUTPUT_HPF);
+	configBypass(INPUT_MAIN, OUTPUT_BPF);
+	configBypass(INPUT_MAIN, OUTPUT_BSF);
 	configInput(INPUT_MAIN,"Main Audio");
 	configInput(INPUT_CVFC, "Frequency Cutoff CV");
 	configInput(INPUT_CVQ, "Resonance CV");
 	configInput(INPUT_CVDRIVE, "Drive CV");
-	configOutput(OUTPUT_LPFMAIN,"Low Pass Filter");
-	configOutput(OUTPUT_HPFMAIN,"High Pass Filter");
-	configOutput(OUTPUT_BPFMAIN,"Band Pass Filter");
-	configOutput(OUTPUT_BSFMAIN,"Band Stop Filter");
+	configOutput(OUTPUT_LPF,"Low Pass Filter");
+	configOutput(OUTPUT_HPF,"High Pass Filter");
+	configOutput(OUTPUT_BPF,"Band Pass Filter");
+	configOutput(OUTPUT_BSF,"Band Stop Filter");
 
 	for (int i = 0;i<4;i++) {
 		LPFaudioFilter[i].reset(APP->engine->getSampleRate());
@@ -73,14 +74,14 @@ void Lavender::processChannel(int c,Input& in, Output& lpfOut, Output& hpfOut, O
 }
 
 void Lavender::process(const ProcessArgs &args) {
-	if (outputs[OUTPUT_LPFMAIN].isConnected() || outputs[OUTPUT_HPFMAIN].isConnected() || outputs[OUTPUT_BPFMAIN].isConnected() || outputs[OUTPUT_BSFMAIN].isConnected()) {
+	if (outputs[OUTPUT_LPF].isConnected() || outputs[OUTPUT_HPF].isConnected() || outputs[OUTPUT_BPF].isConnected() || outputs[OUTPUT_BSF].isConnected()) {
 
 		int channels = std::max(inputs[INPUT_MAIN].getChannels(), 1);
 
-		outputs[OUTPUT_LPFMAIN].setChannels(channels);
-		outputs[OUTPUT_HPFMAIN].setChannels(channels);
-		outputs[OUTPUT_BPFMAIN].setChannels(channels);
-		outputs[OUTPUT_BSFMAIN].setChannels(channels);
+		outputs[OUTPUT_LPF].setChannels(channels);
+		outputs[OUTPUT_HPF].setChannels(channels);
+		outputs[OUTPUT_BPF].setChannels(channels);
+		outputs[OUTPUT_BSF].setChannels(channels);
 
 		for (int c = 0; c < channels; c += 4) {
 
@@ -111,7 +112,7 @@ void Lavender::process(const ProcessArgs &args) {
 				cvdrive = inputs[INPUT_CVDRIVE].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0f;
 			LPFafp.drive = HPFafp.drive = BPFafp.drive = BSFafp.drive = clamp((params[PARAM_CVDRIVE].getValue() * cvdrive) + params[PARAM_DRIVE].getValue(),0.f,1.f);
 
-			processChannel(c, inputs[INPUT_MAIN],outputs[OUTPUT_LPFMAIN],outputs[OUTPUT_HPFMAIN],outputs[OUTPUT_BPFMAIN],outputs[OUTPUT_BSFMAIN]);
+			processChannel(c, inputs[INPUT_MAIN],outputs[OUTPUT_LPF],outputs[OUTPUT_HPF],outputs[OUTPUT_BPF],outputs[OUTPUT_BSF]);
 		}
 	}
 }
@@ -127,49 +128,50 @@ struct LavenderModuleWidget : ModuleWidget {
 
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
-		// First do the knobs
-		const float knobX1 = 6;
-		const float knobX2 = 15;
-		const float knobX3 = 87;
+		const float knobX1 = 8.5;
+		const float knobX2 = 11.4;
+		const float knobX3 = 36;
+		const float knobX4 = 47;
+		const float knobX5 = 48;
+		const float knobX6 = 85.2;
+		const float knobX7 = 88.2;
 
-		const float knobY1 = 47;
-		const float knobY2 = 50;
-		const float knobY3 = 122;
-		const float knobY4 = 125;
-		const float knobY5 = 197;
-		const float knobY6 = 200;
-		const float knobY7 = 275;
+		const float knobY1 = 27.5;
+		const float knobY2 = 98;
+		const float knobY3 = 150;
+		const float knobY4 = 205;
+		const float knobY5 = 269;
 
-		addParam(createParam<RPJKnobBig>(Vec(knobX2, knobY2), module, Lavender::PARAM_FC));
-		addParam(createParam<RPJKnob>(Vec(knobX3, knobY1), module, Lavender::PARAM_CVFC));
-		addParam(createParam<RPJKnobBig>(Vec(knobX2, knobY4), module, Lavender::PARAM_Q));
-		addParam(createParam<RPJKnob>(Vec(knobX3, knobY3), module, Lavender::PARAM_CVQ));
-		addParam(createParam<RPJKnobBig>(Vec(knobX2, knobY6), module, Lavender::PARAM_DRIVE));
-		addParam(createParam<RPJKnob>(Vec(knobX3, knobY5), module, Lavender::PARAM_CVDRIVE));
-		addParam(createParam<RPJKnob>(Vec(knobX1, knobY7), module, Lavender::PARAM_WET));
-		addParam(createParam<RPJKnob>(Vec(knobX3, knobY7), module, Lavender::PARAM_DRY));
+		addParam(createParam<RPJKnobBig>(Vec(knobX3, knobY1), module, Lavender::PARAM_FC));
+		addParam(createParam<RPJKnobSmall>(Vec(knobX2, knobY4), module, Lavender::PARAM_CVFC));
+		addParam(createParam<RPJKnob>(Vec(knobX4, knobY2), module, Lavender::PARAM_Q));
+		addParam(createParam<RPJKnobSmall>(Vec(knobX7, knobY4), module, Lavender::PARAM_CVQ));
+		addParam(createParam<RPJKnob>(Vec(knobX4, knobY3), module, Lavender::PARAM_DRIVE));
+		addParam(createParam<RPJKnobSmall>(Vec(knobX5, knobY4), module, Lavender::PARAM_CVDRIVE));
+		addParam(createParam<RPJKnob>(Vec(knobX1, knobY5), module, Lavender::PARAM_WET));
+		addParam(createParam<RPJKnob>(Vec(knobX6, knobY5), module, Lavender::PARAM_DRY));
 
 		// Next do the Jacks
-		const float jackX1 = 8;
-		const float jackX2 = 35;
-		const float jackX3 = 49;
-		const float jackX4 = 62;
-		const float jackX5 = 89;
+		const float jackX1 = 5.5;
+		const float jackX2 = 10;		
+		const float jackX3 = 34;
+		const float jackX4 = 49;
+		const float jackX5 = 63;
+		const float jackX6 = 87;
+		const float jackX7 = 92;
 
-		const float jackY1 = 78;
-		const float jackY2 = 153;
-		const float jackY3 = 228;
-		const float jackY4 = 278;
-		const float jackY5 = 325;
+		const float jackY1 = 233;
+		const float jackY2 = 272;
+		const float jackY3 = 311;
 
-		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY1), module, Lavender::INPUT_CVFC));
-		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY2), module, Lavender::INPUT_CVQ));
-		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY3), module, Lavender::INPUT_CVDRIVE));		
-		addInput(createInput<PJ301MPort>(Vec(jackX3, jackY4), module, Lavender::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX1, jackY5), module, Lavender::OUTPUT_LPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX2, jackY5), module, Lavender::OUTPUT_HPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX4, jackY5), module, Lavender::OUTPUT_BPFMAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX5, jackY5), module, Lavender::OUTPUT_BSFMAIN));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY1), module, Lavender::INPUT_CVFC));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX6, jackY1), module, Lavender::INPUT_CVQ));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX4, jackY1), module, Lavender::INPUT_CVDRIVE));		
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX4, jackY2), module, Lavender::INPUT_MAIN));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX1, jackY3), module, Lavender::OUTPUT_LPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX3, jackY3), module, Lavender::OUTPUT_HPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX5, jackY3), module, Lavender::OUTPUT_BPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX7, jackY3), module, Lavender::OUTPUT_BSF));
 	}
 
 	void appendContextMenu(Menu *menu) override {

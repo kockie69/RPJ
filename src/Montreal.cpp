@@ -1,7 +1,7 @@
 #include "RPJ.hpp"
 #include "Montreal.hpp"
 #include "ctrl/RPJKnobs.hpp"
-
+#include "ctrl/RPJPorts.hpp"
 
 Montreal::Montreal() {
 	const float minFreq = (std::log2(dsp::FREQ_C4 / 20480.f) + 5) / 10;
@@ -45,17 +45,26 @@ void Montreal::onSampleRateChange() {
 void Montreal::processChannel(int c, Input& in, Output& lpfOut, Output& hpfOut, Output& bpfOut, Output& bsfOut) {
 
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
-	wdfIdealRLCLPF[c/4].setParameters(wdfp);
-	lpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCLPF[c/4].processAudioSample(v),-5.f,5.f),c);
 
-	wdfIdealRLCHPF[c/4].setParameters(wdfp);
-	hpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCHPF[c/4].processAudioSample(v),-5.f,5.f),c);
+	if (lpfOut.isConnected()) {
+		wdfIdealRLCLPF[c/4].setParameters(wdfp);
+		lpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCLPF[c/4].processAudioSample(v),-5.f,5.f),c);
+	}
 
-	wdfIdealRLCBPF[c/4].setParameters(wdfp);
-	bpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBPF[c/4].processAudioSample(v),-5.f,5.f),c);
+	if (hpfOut.isConnected()) {
+		wdfIdealRLCHPF[c/4].setParameters(wdfp);
+		hpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCHPF[c/4].processAudioSample(v),-5.f,5.f),c);
+	}
 
-	wdfIdealRLCBSF[c/4].setParameters(wdfp);
-	bsfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBSF[c/4].processAudioSample(v),-5.f,5.f),c);
+	if (bpfOut.isConnected()) {
+		wdfIdealRLCBPF[c/4].setParameters(wdfp);
+		bpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBPF[c/4].processAudioSample(v),-5.f,5.f),c);
+	}
+
+	if (bsfOut.isConnected()) {
+		wdfIdealRLCBSF[c/4].setParameters(wdfp);
+		bsfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBSF[c/4].processAudioSample(v),-5.f,5.f),c);
+	}
 }
 
 void Montreal::process(const ProcessArgs &args) {
@@ -109,39 +118,40 @@ struct MontrealModuleWidget : ModuleWidget {
 		box.size = Vec(MODULE_WIDTH*RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
 
 		// First do the knobs
-		const float knobX1 = 15;
-		const float knobX2 = 87;
+		const float knobX1 = 11.4;
+		const float knobX2 = 36;
+		const float knobX3 = 47;
+		const float knobX4 = 88.2;
 
-		const float knobY1 = 47;
-		const float knobY2 = 50;
-		const float knobY3 = 122;
-		const float knobY4 = 125;
+		const float knobY1 = 27.5;
+		const float knobY2 = 98;
+		const float knobY3 = 205;
 
-
-		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY2), module, Montreal::PARAM_FC));
-		addParam(createParam<RPJKnob>(Vec(knobX2, knobY1), module, Montreal::PARAM_CVFC));
-		addParam(createParam<RPJKnobBig>(Vec(knobX1, knobY4), module, Montreal::PARAM_Q));
-		addParam(createParam<RPJKnob>(Vec(knobX2, knobY3), module, Montreal::PARAM_CVQ));
+		addParam(createParam<RPJKnobBig>(Vec(knobX2, knobY1), module, Montreal::PARAM_FC));
+		addParam(createParam<RPJKnobSmall>(Vec(knobX1, knobY3), module, Montreal::PARAM_CVFC));
+		addParam(createParam<RPJKnob>(Vec(knobX3, knobY2), module, Montreal::PARAM_Q));
+		addParam(createParam<RPJKnobSmall>(Vec(knobX4, knobY3), module, Montreal::PARAM_CVQ));
 
 		// Next do the Jacks
-		const float jackX1 = 8;
-		const float jackX2 = 35;
-		const float jackX3 = 49;
-		const float jackX4 = 62;
-		const float jackX5 = 89;
+		const float jackX1 = 5.5;
+		const float jackX2 = 10;		
+		const float jackX3 = 34;
+		const float jackX4 = 49;
+		const float jackX5 = 63;
+		const float jackX6 = 87;
+		const float jackX7 = 92;
 
-		const float jackY1 = 78;
-		const float jackY2 = 153;
-		const float jackY3 = 278;
-		const float jackY4 = 325;
+		const float jackY1 = 233;
+		const float jackY2 = 272;
+		const float jackY3 = 311;
 
-		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY1), module, Montreal::INPUT_CVFC));
-		addInput(createInput<PJ301MPort>(Vec(jackX5, jackY2), module, Montreal::INPUT_CVQ));
-		addInput(createInput<PJ301MPort>(Vec(jackX3, jackY3), module, Montreal::INPUT_MAIN));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX1, jackY4), module, Montreal::OUTPUT_LPF));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX2, jackY4), module, Montreal::OUTPUT_HPF));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX4, jackY4), module, Montreal::OUTPUT_BPF));
-		addOutput(createOutput<PJ301MPort>(Vec(jackX5, jackY4), module, Montreal::OUTPUT_BSF));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY1), module, Montreal::INPUT_CVFC));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX6, jackY1), module, Montreal::INPUT_CVQ));
+		addInput(createInput<RPJPJ301MPort>(Vec(jackX4, jackY2), module, Montreal::INPUT_MAIN));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX1, jackY3), module, Montreal::OUTPUT_LPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX3, jackY3), module, Montreal::OUTPUT_HPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX5, jackY3), module, Montreal::OUTPUT_BPF));
+		addOutput(createOutput<RPJPJ301MPort>(Vec(jackX7, jackY3), module, Montreal::OUTPUT_BSF));
 	}
 
 };

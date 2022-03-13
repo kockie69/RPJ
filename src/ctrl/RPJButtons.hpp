@@ -1,5 +1,20 @@
 #include "rack.hpp"
 
+struct ButtonBig : SvgSwitch  {
+	ButtonBig() {
+		momentary=true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_1.svg")));
+	}
+	
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			SvgSwitch::draw(args);
+		}
+		SvgSwitch::drawLayer(args,layer);
+	}
+};
+
 struct ButtonMinBig : SvgSwitch  {
 	ButtonMinBig() {
 		momentary=true;

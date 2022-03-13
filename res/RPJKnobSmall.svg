@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="7.5mm"
+   height="7.5mm"
+   viewBox="0 0 7.5 7.5"
+   version="1.1"
+   id="svg348544"
+   inkscape:version="1.2-dev (7498f51b, 2022-02-04)"
+   sodipodi:docname="RPJKnobSmall.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview348546"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:blackoutopacity="0.0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="6.5619509"
+     inkscape:cx="-28.192835"
+     inkscape:cy="19.582591"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs348541">
+    <linearGradient
+       id="SVGID_1_-3-5"
+       gradientUnits="userSpaceOnUse"
+       x1="14.17379"
+       y1="1.9999999e-05"
+       x2="14.17379"
+       y2="28.347719"
+       gradientTransform="matrix(0.28220983,0,0,0.28220983,10.991475,102.82296)">
+      <stop
+         offset="0"
+         style="stop-color:#B0ACAE"
+         id="stop6619-4" />
+      <stop
+         offset="1"
+         style="stop-color:#000000"
+         id="stop6621-9" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-81.529586,-115.16355)">
+    <circle
+       cx="85.279587"
+       cy="118.91355"
+       id="id_Cutoff-5-7-4-8"
+       style="display:inline;opacity:0.697337;fill:#000000;stroke:#2a213c;stroke-width:0"
+       r="3.7499995" />
+    <ellipse
+       cx="85.279594"
+       cy="116.31967"
+       style="display:inline;fill:#e61c28;fill-opacity:1;stroke:none;stroke-width:0.520834"
+       id="circle3963-9-03-4-9"
+       rx="0.52083325"
+       ry="0.52083331" />
+    <circle
+       style="display:inline;opacity:0.709756;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:0.296;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path8044-5-8-7-4"
+       cx="85.279587"
+       cy="118.91355"
+       r="3.4174743" />
+  </g>
+</svg>

@@ -28,10 +28,10 @@ struct Lavender : Module {
 	};
 
 	enum OutputIds {
-		OUTPUT_LPFMAIN,
-		OUTPUT_HPFMAIN,
-		OUTPUT_BPFMAIN,
-		OUTPUT_BSFMAIN,
+		OUTPUT_LPF,
+		OUTPUT_HPF,
+		OUTPUT_BPF,
+		OUTPUT_BSF,
 		NUM_OUTPUTS,
 	};
 

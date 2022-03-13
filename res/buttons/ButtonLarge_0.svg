@@ -5,8 +5,8 @@
    width="15"
    height="15"
    version="1.1"
-   id="svg1764"
-   sodipodi:docname="ButtonMinLarge_1.svg"
+   id="svg2359"
+   sodipodi:docname="ButtonLarge_0.svg"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -16,7 +16,7 @@
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <metadata
-     id="metadata1768">
+     id="metadata2363">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -37,45 +37,37 @@
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
      inkscape:window-height="991"
-     id="namedview1766"
+     id="namedview2361"
      showgrid="false"
-     inkscape:zoom="25.807471"
-     inkscape:cx="17.165572"
-     inkscape:cy="2.0730431"
+     inkscape:zoom="29.642857"
+     inkscape:cx="6.9831326"
+     inkscape:cy="8.720482"
      inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg1764"
+     inkscape:current-layer="g2357"
      inkscape:document-rotation="0"
+     borderlayer="false"
      inkscape:pagecheckerboard="0" />
-  <defs
-     id="defs1756">
-    <clipPath
-       id="_clipPath_4U0jHmP0nxSrFEuH7FfgX9ZPTxB8v2K4">
-      <rect
-         width="9"
-         height="9"
-         id="rect1753"
-         x="0"
-         y="0" />
-    </clipPath>
-  </defs>
-  <circle
-     vector-effect="non-scaling-stroke"
-     cx="7.5"
-     cy="7.5"
-     fill="rgb(32,32,32)"
-     id="circle2353"
-     style="isolation:isolate;fill:#ae1c28;fill-opacity:1;stroke-width:11.6667"
-     r="7.5" />
   <g
-     aria-label="- "
-     transform="matrix(1.9611583,0,0,1.4163965,0.53291199,0.03874799)"
-     id="text2263"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.5515px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;isolation:isolate;fill:#ffffff;stroke-width:1.17669">
-    <path
-       d="M 5.7364205,5.8160681 H 1.9121353 V 4.7067803 h 3.8242852 z"
-       style="fill:#ffffff;stroke-width:1.17669"
-       id="path2269" />
+     clip-path="url(#_clipPath_4U0jHmP0nxSrFEuH7FfgX9ZPTxB8v2K4)"
+     id="g2357"
+     style="fill:#00ff00">
+    <circle
+       vector-effect="non-scaling-stroke"
+       cx="7.5"
+       cy="7.5"
+       fill="rgb(32,32,32)"
+       id="circle2353"
+       style="fill:#000000;stroke-width:14.9999"
+       r="7.5" />
+    <circle
+       vector-effect="non-scaling-stroke"
+       cx="7.5"
+       cy="7.5"
+       fill="rgb(64,64,64)"
+       id="circle2355"
+       style="fill:#666666;stroke-width:9.16667"
+       r="5.8333335" />
   </g>
 </svg>
