@@ -6,9 +6,10 @@ using namespace rack;
 const int MODULE_WIDTH=26;
 const int WIDTH=375;
 const int HEIGHT=350;
+const int EDGES=4;
 
 struct xpanderPairs {
-	std::pair<double, double> edges[2];
+	std::pair<double, double> edges[EDGES];
 	double mass;
 };
 
@@ -20,7 +21,14 @@ struct GenieExpander : Module {
 	};
 
 	enum InputIds {
-
+		INPUT_1_X,
+		INPUT_1_Y,
+		INPUT_2_X,
+		INPUT_2_Y,
+		INPUT_3_X,
+		INPUT_3_Y,
+		INPUT_4_X,
+		INPUT_4_Y,
 		NUM_INPUTS,
 	};
 
@@ -37,14 +45,14 @@ struct GenieExpander : Module {
 	GenieExpander();
 	void process(const ProcessArgs &) override;
 	void setDisplay(void);
-    std::pair<double, double> first_edge;
-    std::pair<double, double> second_edge;
+    std::pair<double, double> edges[EDGES];
 	double mass;
+	bool parentConnected;
 };
 
 struct GenieDisplay : TransparentWidget {
 	GenieDisplay() {
-		xpos = WIDTH/2;
+		xpos = (WIDTH/2)+75;
 		ypos = HEIGHT/2;
 	}
 	void process();

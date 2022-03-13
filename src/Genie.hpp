@@ -5,10 +5,10 @@ using namespace rack;
 const int MODULE_WIDTH=19;
 const int WIDTH=250;
 const int HEIGHT=250;
-const int EDGES=2;
+const int EDGES=4;
 
 struct xpanderPairs {
-	std::pair<double, double> edges[2];
+	std::pair<double, double> edges[EDGES];
     double mass;
 };
 
@@ -155,8 +155,8 @@ struct Genie : Module {
 	void process(const ProcessArgs &) override;
     void reset(void);
     std::pair<int, int> dim;
-    std::pair<double, double> first_edge;
-    std::pair<double, double> second_edge;
+
+    std::pair<double, double> edges[EDGES];
     dp::state st;
     dp::system ss;
     double timeMult;

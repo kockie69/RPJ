@@ -61,32 +61,31 @@ void Genie::process(const ProcessArgs &args) {
 	}
 	lengthMult = pow(2,lengthMult);
 
-	//len = std::min(dim.first, dim.second) *lengthMult/8.f;
 	len = std::min(dim.first-(2*mass), dim.second-(2*mass)) *lengthMult/4.f;
 	ss = {{mass, mass}, {len, len}};
 	
-	first_edge = {
+	edges[0] = {
         ss.length.first * sin(st.theta.first),
         ss.length.first * cos(st.theta.first)
     };
 
-	second_edge = {
-        first_edge.first  + ss.length.second * sin(st.theta.second),
-        first_edge.second + ss.length.second * cos(st.theta.second)
+	edges[1] = {
+        edges[0].first  + ss.length.second * sin(st.theta.second),
+        edges[0].second + ss.length.second * cos(st.theta.second)
     };
 
     st = dp::advance(st, ss, args.sampleTime*timeMult);
 
-	outputs[OUTPUT_1_X].setVoltage(first_edge.first/50.f);
-	outputs[OUTPUT_1_Y].setVoltage(first_edge.second/50.f);
-	outputs[OUTPUT_2_X].setVoltage(second_edge.first/50.f);
-	outputs[OUTPUT_2_Y].setVoltage(second_edge.second/50.f);
+	outputs[OUTPUT_1_X].setVoltage(edges[0].first/50.f);
+	outputs[OUTPUT_1_Y].setVoltage(edges[0].second/50.f);
+	outputs[OUTPUT_2_X].setVoltage(edges[1].first/50.f);
+	outputs[OUTPUT_2_Y].setVoltage(edges[1].second/50.f);
 
 	bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
 	if (expanderPresent) {
 		xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
-		wrMsg->edges[0] = first_edge;
-		wrMsg->edges[1] = second_edge;
+		for (int n=0; n < EDGES;n++)
+			wrMsg->edges[n] = edges[n];
 		wrMsg->mass = mass;
 		rightExpander.messageFlipRequested = true;
 	}
