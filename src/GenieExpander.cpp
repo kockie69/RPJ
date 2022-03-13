@@ -12,19 +12,22 @@ void GenieExpander::process(const ProcessArgs &args) {
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected) {
     	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-		for (int n=0; n < EDGES;n++)
-			edges[n] = rdMsg->edges[n];
+		for (int n=0;n < PENDULUMS;n++)
+			for (int i=0; i < EDGES;i++)
+				edges[n][i] = rdMsg->edges[n][i];
 		mass = rdMsg->mass;
+		nrOfPendulums = rdMsg->nrOfPendulums;
 	}
 	else {
-		edges[0].first = inputs[INPUT_1_X].getVoltage()*10;
-		edges[0].second = inputs[INPUT_1_Y].getVoltage()*10;
-		edges[1].first = inputs[INPUT_2_X].getVoltage()*20;
-		edges[1].second = inputs[INPUT_2_Y].getVoltage()*20;
-		edges[2].first = inputs[INPUT_3_X].getVoltage()*30;
-		edges[2].second = inputs[INPUT_3_Y].getVoltage()*30;
-		edges[3].first = inputs[INPUT_4_X].getVoltage()*40;
-		edges[3].second = inputs[INPUT_4_Y].getVoltage()*40;
+		nrOfPendulums=1;
+		edges[0][0].first = inputs[INPUT_1_X].getVoltage()*10;
+		edges[0][0].second = inputs[INPUT_1_Y].getVoltage()*10;
+		edges[0][1].first = inputs[INPUT_2_X].getVoltage()*20;
+		edges[0][1].second = inputs[INPUT_2_Y].getVoltage()*20;
+		edges[0][2].first = inputs[INPUT_3_X].getVoltage()*30;
+		edges[0][2].second = inputs[INPUT_3_Y].getVoltage()*30;
+		edges[0][3].first = inputs[INPUT_4_X].getVoltage()*40;
+		edges[0][3].second = inputs[INPUT_4_Y].getVoltage()*40;
 		mass = 10;
 	}
 }
@@ -46,85 +49,84 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 		nvgCircle(args.vg, xpos, ypos, module->mass);	
 		nvgFill(args.vg);
 		nvgStroke(args.vg);
-		if (!(((module->inputs[GenieExpander::INPUT_1_X].isConnected()) && (module->inputs[GenieExpander::INPUT_1_Y].isConnected())) || module->parentConnected))
+		for (int n=0;n<module->nrOfPendulums;n++) {
+			if (!(((module->inputs[GenieExpander::INPUT_1_X].isConnected()) && (module->inputs[GenieExpander::INPUT_1_Y].isConnected())) || module->parentConnected))
 			return;
-		// draw Second Wite Mass
-		NVGcolor massColor1 = nvgRGB(0xFF, 0xFF, 0xFF);
-		nvgFillColor(args.vg, massColor1);
-		nvgStrokeColor(args.vg, massColor1);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, (module->edges[0].first+xpos), (module->edges[0].second+ypos), module->mass);	
-		nvgFill(args.vg);
-		nvgStroke(args.vg);
-		// Draw line between masses
-		NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
-		nvgFillColor(args.vg, lineColor);
-		nvgStrokeColor(args.vg, lineColor);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgMoveTo(args.vg,xpos,ypos);
-		nvgLineTo(args.vg,module->edges[0].first+xpos, module->edges[0].second+ypos);
-		nvgStroke(args.vg);
-		nvgClosePath(args.vg);
-		if (!(((module->inputs[GenieExpander::INPUT_2_X].isConnected()) && (module->inputs[GenieExpander::INPUT_2_Y].isConnected())) || module->parentConnected))
-			return;
-		// draw third Mass
-		NVGcolor massColor2 = nvgRGB(0x21, 0x46, 0x8B);
-		nvgFillColor(args.vg, massColor2);
-		nvgStrokeColor(args.vg, massColor2);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, (module->edges[1].first+xpos), (module->edges[1].second+ypos), module->mass);
-		nvgFill(args.vg);
-		nvgStroke(args.vg);
-		// Draw line between masses
-		nvgFillColor(args.vg, lineColor);
-		nvgStrokeColor(args.vg, lineColor);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgMoveTo(args.vg,module->edges[0].first+xpos, module->edges[0].second+ypos);
-		nvgLineTo(args.vg,module->edges[1].first+xpos, module->edges[1].second+ypos);
-		nvgStroke(args.vg);
-		if (!((module->inputs[GenieExpander::INPUT_3_X].isConnected()) && (module->inputs[GenieExpander::INPUT_3_Y].isConnected())) || module->parentConnected)
-			return;
-		// Draw fourth Mass
-		NVGcolor massColor3 = nvgRGB(0xFF, 0x7F, 0x00);
-		nvgFillColor(args.vg, massColor3);
-		nvgStrokeColor(args.vg, massColor3);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, (module->edges[2].first+xpos), (module->edges[2].second+ypos), module->mass);
-		nvgFill(args.vg);
-		nvgStroke(args.vg);
-		// Draw line between masses
-		nvgFillColor(args.vg, lineColor);
-		nvgStrokeColor(args.vg, lineColor);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgMoveTo(args.vg,module->edges[1].first+xpos, module->edges[1].second+ypos);
-		nvgLineTo(args.vg,module->edges[2].first+xpos, module->edges[2].second+ypos);
-		nvgStroke(args.vg);
-		if (!(((module->inputs[GenieExpander::INPUT_4_X].isConnected()) && (module->inputs[GenieExpander::INPUT_4_Y].isConnected())) && !module->parentConnected))
-			return;
-		// Draw fifth Mass
-		nvgFillColor(args.vg, massColor0);
-		nvgStrokeColor(args.vg, massColor0);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, (module->edges[3].first+xpos), (module->edges[3].second+ypos), module->mass);
-		nvgFill(args.vg);
-		nvgStroke(args.vg);
-		// Draw line between masses
-		nvgFillColor(args.vg, lineColor);
-		nvgStrokeColor(args.vg, lineColor);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgMoveTo(args.vg,module->edges[2].first+xpos, module->edges[2].second+ypos);
-		nvgLineTo(args.vg,module->edges[3].first+xpos, module->edges[3].second+ypos);
-		nvgStroke(args.vg);
-
-		nvgClosePath(args.vg);
+			// draw Second White Mass
+			NVGcolor massColor1 = nvgRGB(0xFF, 0xFF, 0xFF);
+			nvgFillColor(args.vg, massColor1);
+			nvgStrokeColor(args.vg, massColor1);
+			nvgStrokeWidth(args.vg, 2);
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, (module->edges[n][0].first+xpos), (module->edges[n][0].second+ypos), module->mass);	
+			nvgFill(args.vg);
+			nvgStroke(args.vg);
+			// Draw line between masses
+			NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
+			nvgFillColor(args.vg, lineColor);
+			nvgStrokeColor(args.vg, lineColor);
+			nvgStrokeWidth(args.vg, 2);
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg,xpos,ypos);
+			nvgLineTo(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
+			nvgStroke(args.vg);
+			nvgClosePath(args.vg);
+			if (!(((module->inputs[GenieExpander::INPUT_2_X].isConnected()) && (module->inputs[GenieExpander::INPUT_2_Y].isConnected())) || module->parentConnected))
+				return;
+			// draw third Blue Mass
+			NVGcolor massColor2 = nvgRGB(0x21, 0x46, 0x8B);
+			nvgFillColor(args.vg, massColor2);
+			nvgStrokeColor(args.vg, massColor2);
+			nvgStrokeWidth(args.vg, 2);
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, (module->edges[n][1].first+xpos), (module->edges[n][1].second+ypos), module->mass);
+			nvgFill(args.vg);
+			nvgStroke(args.vg);
+			// Draw line between masses
+			nvgFillColor(args.vg, lineColor);
+			nvgStrokeColor(args.vg, lineColor);
+			nvgStrokeWidth(args.vg, 2);
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
+			nvgLineTo(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
+			nvgStroke(args.vg);
+			if (module->inputs[GenieExpander::INPUT_3_X].isConnected() && module->inputs[GenieExpander::INPUT_3_Y].isConnected() && !module->parentConnected) {
+				// Draw fourth Mass
+				NVGcolor massColor3 = nvgRGB(0xFF, 0x7F, 0x00);
+				nvgFillColor(args.vg, massColor3);
+				nvgStrokeColor(args.vg, massColor3);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgCircle(args.vg, (module->edges[n][2].first+xpos), (module->edges[n][2].second+ypos), module->mass);
+				nvgFill(args.vg);
+				nvgStroke(args.vg);
+				// Draw line between masses
+				nvgFillColor(args.vg, lineColor);
+				nvgStrokeColor(args.vg, lineColor);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgMoveTo(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
+				nvgLineTo(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
+				nvgStroke(args.vg);
+				// Draw fifth Mass
+				nvgFillColor(args.vg, massColor0);
+				nvgStrokeColor(args.vg, massColor0);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgCircle(args.vg, (module->edges[n][3].first+xpos), (module->edges[n][3].second+ypos), module->mass);
+				nvgFill(args.vg);
+				nvgStroke(args.vg);
+				// Draw line between masses
+				nvgFillColor(args.vg, lineColor);
+				nvgStrokeColor(args.vg, lineColor);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgMoveTo(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
+				nvgLineTo(args.vg,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
+				nvgStroke(args.vg);
+				nvgClosePath(args.vg);
+			}
+		}
 	}
 	TransparentWidget::drawLayer(args,layer);
 }

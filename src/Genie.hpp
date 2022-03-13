@@ -6,10 +6,12 @@ const int MODULE_WIDTH=19;
 const int WIDTH=250;
 const int HEIGHT=250;
 const int EDGES=4;
+const int MAXPENDULUMS = 4;
 
 struct xpanderPairs {
-	std::pair<double, double> edges[EDGES];
+	std::pair<double, double> edges[MAXPENDULUMS][EDGES];
     double mass;
+    int nrOfPendulums;
 };
 
 namespace dp {
@@ -156,18 +158,20 @@ struct Genie : Module {
     void reset(void);
     std::pair<int, int> dim;
 
-    std::pair<double, double> edges[EDGES];
-    dp::state st;
-    dp::system ss;
+    std::pair<double, double> edges[MAXPENDULUMS][EDGES];
+    dp::state st[MAXPENDULUMS];
+    dp::system ss[MAXPENDULUMS];
     double timeMult;
     double lengthMult;
     double len;
     double mass;
     xpanderPairs xpMsg[2];
+    int nrOfPendulums;
     dsp::SchmittTrigger resetTrigger;
 };
 
 struct GenieModuleWidget : ModuleWidget {
 	GenieModuleWidget(Genie*);
+    void appendContextMenu(Menu *) override;
 };
 

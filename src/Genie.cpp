@@ -10,14 +10,17 @@
 Genie::Genie() {
     std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
-
-    st = {{rnd(generator), rnd(generator)}, {0, 0}};
-
+	nrOfPendulums=3;
 	dim.first = WIDTH;
 	dim.second = HEIGHT;
     len = std::min(dim.first, dim.second) / 8.f;
 
-    ss = {{1, 1}, {len, len}};
+
+	for (int n=0;n<MAXPENDULUMS;n++) {
+    	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
+    	ss[n] = {{1, 1}, {len, len}};
+	}
+
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_TIMEMULT, 1.f, 10.f,10.f, "Speed");
 	configParam(PARAM_TIMEMULTCV, -1.f, 1.f,0.f, "Speed CV Attenuator");
@@ -33,7 +36,8 @@ void Genie::reset(void) {
 	std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
 
-    st = {{rnd(generator), rnd(generator)}, {0, 0}};
+	for (int n=0;n<MAXPENDULUMS;n++)
+    	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
 }
 
 void Genie::process(const ProcessArgs &args) {
@@ -62,33 +66,44 @@ void Genie::process(const ProcessArgs &args) {
 	lengthMult = pow(2,lengthMult);
 
 	len = std::min(dim.first-(2*mass), dim.second-(2*mass)) *lengthMult/4.f;
-	ss = {{mass, mass}, {len, len}};
+	for (int n=0;n<nrOfPendulums+1;n++) {
+		ss[n] = {{mass, mass}, {len, len}};
 	
-	edges[0] = {
-        ss.length.first * sin(st.theta.first),
-        ss.length.first * cos(st.theta.first)
-    };
+		edges[n][0] = {
+       		ss[n].length.first * sin(st[n].theta.first),
+        	ss[n].length.first * cos(st[n].theta.first)
+    	};
 
-	edges[1] = {
-        edges[0].first  + ss.length.second * sin(st.theta.second),
-        edges[0].second + ss.length.second * cos(st.theta.second)
-    };
+		edges[n][1] = {
+        	edges[n][0].first  + ss[n].length.second * sin(st[n].theta.second),
+        	edges[n][0].second + ss[n].length.second * cos(st[n].theta.second)
+    	};
 
-    st = dp::advance(st, ss, args.sampleTime*timeMult);
+    	st[n] = dp::advance(st[n], ss[n], args.sampleTime*timeMult);
 
-	outputs[OUTPUT_1_X].setVoltage(edges[0].first/50.f);
-	outputs[OUTPUT_1_Y].setVoltage(edges[0].second/50.f);
-	outputs[OUTPUT_2_X].setVoltage(edges[1].first/50.f);
-	outputs[OUTPUT_2_Y].setVoltage(edges[1].second/50.f);
+		outputs[OUTPUT_1_X].setVoltage(edges[n][0].first/50.f);
+		outputs[OUTPUT_1_Y].setVoltage(edges[n][0].second/50.f);
+		outputs[OUTPUT_2_X].setVoltage(edges[n][0].first/50.f);
+		outputs[OUTPUT_2_Y].setVoltage(edges[n][0].second/50.f);
 
-	bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
-	if (expanderPresent) {
-		xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
-		for (int n=0; n < EDGES;n++)
-			wrMsg->edges[n] = edges[n];
-		wrMsg->mass = mass;
-		rightExpander.messageFlipRequested = true;
+		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
+		if (expanderPresent) {
+			xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
+			for (int i=0; i < EDGES;i++)
+				wrMsg->edges[n][i] = edges[n][i];
+			wrMsg->mass = mass;
+			wrMsg->nrOfPendulums = nrOfPendulums+1;
+			rightExpander.messageFlipRequested = true;
+		}
 	}
+}
+
+void GenieModuleWidget::appendContextMenu(Menu *menu) {
+	Genie * module = dynamic_cast<Genie*>(this->module);
+
+	menu->addChild(new MenuSeparator());
+
+	menu->addChild(createIndexPtrSubmenuItem("Number of Pentulums", {"1", "2", "3", "4"}, &module->nrOfPendulums));
 }
 
 GenieModuleWidget::GenieModuleWidget(Genie* module) {

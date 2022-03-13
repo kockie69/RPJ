@@ -7,10 +7,12 @@ const int MODULE_WIDTH=26;
 const int WIDTH=375;
 const int HEIGHT=350;
 const int EDGES=4;
+const int PENDULUMS = 4;
 
 struct xpanderPairs {
-	std::pair<double, double> edges[EDGES];
+	std::pair<double, double> edges[PENDULUMS][EDGES];
 	double mass;
+	int nrOfPendulums;
 };
 
 struct GenieExpander : Module {
@@ -45,9 +47,10 @@ struct GenieExpander : Module {
 	GenieExpander();
 	void process(const ProcessArgs &) override;
 	void setDisplay(void);
-    std::pair<double, double> edges[EDGES];
+    std::pair<double, double> edges[PENDULUMS][EDGES];
 	double mass;
 	bool parentConnected;
+	int nrOfPendulums;
 };
 
 struct GenieDisplay : TransparentWidget {
