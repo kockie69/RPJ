@@ -7,10 +7,11 @@ const int MODULE_WIDTH=26;
 const int WIDTH=375;
 const int HEIGHT=350;
 const int EDGES=4;
-const int PENDULUMS = 4;
+const int MAXPENDULUMS = 4;
+const int MAXHISTORY = 10;
 
 struct xpanderPairs {
-	std::pair<double, double> edges[PENDULUMS][EDGES];
+	std::pair<double, double> edges[MAXPENDULUMS][EDGES];
 	double mass;
 	int nrOfPendulums;
 };
@@ -47,10 +48,13 @@ struct GenieExpander : Module {
 	GenieExpander();
 	void process(const ProcessArgs &) override;
 	void setDisplay(void);
-    std::pair<double, double> edges[PENDULUMS][EDGES];
+	void doHistory(float);
+    std::pair<double, double> edges[MAXPENDULUMS][EDGES];
+	std::vector<std::pair<double, double>> oldEdges[MAXPENDULUMS][EDGES];
 	double mass;
 	bool parentConnected;
 	int nrOfPendulums;
+	double historyTimer;
 };
 
 struct GenieDisplay : TransparentWidget {

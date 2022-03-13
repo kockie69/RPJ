@@ -6,13 +6,37 @@
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	historyTimer=0;
 }
 
+void GenieExpander::doHistory(float dt) {
+	historyTimer-=dt;
+	if (historyTimer<=0) {
+		for (int n=0;n<MAXPENDULUMS;n++) {
+			//oldEdges[n].push_back({edges[n][1].first,edges[n][1].second});
+			oldEdges[n][0].push_back({edges[n][0].first,edges[n][0].second});
+			oldEdges[n][1].push_back({edges[n][1].first,edges[n][1].second});
+			oldEdges[n][2].push_back({edges[n][2].first,edges[n][2].second});
+			oldEdges[n][3].push_back({edges[n][3].first,edges[n][3].second});
+			if (oldEdges[n][0].size()>MAXHISTORY) {
+				oldEdges[n][0].erase(oldEdges[n][0].begin());
+				oldEdges[n][1].erase(oldEdges[n][1].begin());
+				oldEdges[n][2].erase(oldEdges[n][2].begin());
+				oldEdges[n][3].erase(oldEdges[n][3].begin());
+			}
+			historyTimer = 1000*dt;
+		}
+	}
+};
+
 void GenieExpander::process(const ProcessArgs &args) {
+	
+	doHistory(args.sampleTime);
+	
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected) {
     	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-		for (int n=0;n < PENDULUMS;n++)
+		for (int n=0;n < MAXPENDULUMS;n++)
 			for (int i=0; i < EDGES;i++)
 				edges[n][i] = rdMsg->edges[n][i];
 		mass = rdMsg->mass;
@@ -61,6 +85,17 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 			nvgCircle(args.vg, (module->edges[n][0].first+xpos), (module->edges[n][0].second+ypos), module->mass);	
 			nvgFill(args.vg);
 			nvgStroke(args.vg);
+			for (int i=0;i<10;i++) {
+				massColor1 = nvgRGBA(0xFF, 0xFF, 0xFF, 50);
+				nvgFillColor(args.vg, massColor1);
+				nvgStrokeColor(args.vg, massColor1);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgCircle(args.vg, (module->oldEdges[n][0][i].first+xpos), (module->oldEdges[n][0][i].second+ypos), module->mass);				
+				nvgFill(args.vg);
+				nvgStroke(args.vg);
+				nvgClosePath(args.vg);
+			}
 			// Draw line between masses
 			NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
 			nvgFillColor(args.vg, lineColor);
@@ -82,6 +117,17 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 			nvgCircle(args.vg, (module->edges[n][1].first+xpos), (module->edges[n][1].second+ypos), module->mass);
 			nvgFill(args.vg);
 			nvgStroke(args.vg);
+			for (int i=0;i<10;i++) {
+				massColor1 = nvgRGBA(0x21, 0x46, 0x8B, 50);
+				nvgFillColor(args.vg, massColor1);
+				nvgStrokeColor(args.vg, massColor1);
+				nvgStrokeWidth(args.vg, 2);
+				nvgBeginPath(args.vg);
+				nvgCircle(args.vg, (module->oldEdges[n][1][i].first+xpos), (module->oldEdges[n][1][i].second+ypos), module->mass);				
+				nvgFill(args.vg);
+				nvgStroke(args.vg);
+				nvgClosePath(args.vg);
+			}
 			// Draw line between masses
 			nvgFillColor(args.vg, lineColor);
 			nvgStrokeColor(args.vg, lineColor);
@@ -100,6 +146,17 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 				nvgCircle(args.vg, (module->edges[n][2].first+xpos), (module->edges[n][2].second+ypos), module->mass);
 				nvgFill(args.vg);
 				nvgStroke(args.vg);
+				for (int i=0;i<10;i++) {
+					massColor3 = nvgRGBA(0xFF, 0x7F, 0x00, 50);
+					nvgFillColor(args.vg, massColor3);
+					nvgStrokeColor(args.vg, massColor3);
+					nvgStrokeWidth(args.vg, 2);
+					nvgBeginPath(args.vg);
+					nvgCircle(args.vg, (module->oldEdges[n][2][i].first+xpos), (module->oldEdges[n][2][i].second+ypos), module->mass);				
+					nvgFill(args.vg);
+					nvgStroke(args.vg);
+					nvgClosePath(args.vg);
+				}
 				// Draw line between masses
 				nvgFillColor(args.vg, lineColor);
 				nvgStrokeColor(args.vg, lineColor);
@@ -116,6 +173,17 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 				nvgCircle(args.vg, (module->edges[n][3].first+xpos), (module->edges[n][3].second+ypos), module->mass);
 				nvgFill(args.vg);
 				nvgStroke(args.vg);
+				for (int i=0;i<10;i++) {
+					massColor0 = nvgRGBA(0xAE, 0x1C, 0x28, 50);
+					nvgFillColor(args.vg, massColor0);
+					nvgStrokeColor(args.vg, massColor0);
+					nvgStrokeWidth(args.vg, 2);
+					nvgBeginPath(args.vg);
+					nvgCircle(args.vg, (module->oldEdges[n][3][i].first+xpos), (module->oldEdges[n][3][i].second+ypos), module->mass);				
+					nvgFill(args.vg);
+					nvgStroke(args.vg);
+					nvgClosePath(args.vg);
+				}
 				// Draw line between masses
 				nvgFillColor(args.vg, lineColor);
 				nvgStrokeColor(args.vg, lineColor);
