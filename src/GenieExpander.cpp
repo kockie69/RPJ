@@ -1,12 +1,15 @@
 #include "RPJ.hpp"
 #include "ctrl/RPJPorts.hpp"
+#include "ctrl/RPJKnobs.hpp"
 #include <random>
 #include "GenieExpander.hpp"
 
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Wasp length");
 	historyTimer=0;
+	maxHistory=10;
 }
 
 void GenieExpander::doHistory(float dt) {
@@ -15,14 +18,18 @@ void GenieExpander::doHistory(float dt) {
 		for (int n=0;n<MAXPENDULUMS;n++) {
 			//oldEdges[n].push_back({edges[n][1].first,edges[n][1].second});
 			oldEdges[n][0].push_back({edges[n][0].first,edges[n][0].second});
+			std::rotate(oldEdges[n][0].rbegin(), oldEdges[n][0].rbegin() + 1, oldEdges[n][0].rend());
 			oldEdges[n][1].push_back({edges[n][1].first,edges[n][1].second});
+			std::rotate(oldEdges[n][1].rbegin(), oldEdges[n][1].rbegin() + 1, oldEdges[n][1].rend());
 			oldEdges[n][2].push_back({edges[n][2].first,edges[n][2].second});
+			std::rotate(oldEdges[n][2].rbegin(), oldEdges[n][2].rbegin() + 1, oldEdges[n][2].rend());
 			oldEdges[n][3].push_back({edges[n][3].first,edges[n][3].second});
-			if (oldEdges[n][0].size()>MAXHISTORY) {
-				oldEdges[n][0].erase(oldEdges[n][0].begin());
-				oldEdges[n][1].erase(oldEdges[n][1].begin());
-				oldEdges[n][2].erase(oldEdges[n][2].begin());
-				oldEdges[n][3].erase(oldEdges[n][3].begin());
+			std::rotate(oldEdges[n][3].rbegin(), oldEdges[n][3].rbegin() + 1, oldEdges[n][3].rend());
+			if ((int)oldEdges[n][0].size()>maxHistory) {
+				oldEdges[n][0].erase(oldEdges[n][0].end());
+				oldEdges[n][1].erase(oldEdges[n][1].end());
+				oldEdges[n][2].erase(oldEdges[n][2].end());
+				oldEdges[n][3].erase(oldEdges[n][3].end());
 			}
 			historyTimer = 1000*dt;
 		}
@@ -31,6 +38,8 @@ void GenieExpander::doHistory(float dt) {
 
 void GenieExpander::process(const ProcessArgs &args) {
 	
+	maxHistory = params[PARAM_HISTORY].getValue();
+
 	doHistory(args.sampleTime);
 	
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
@@ -56,6 +65,34 @@ void GenieExpander::process(const ProcessArgs &args) {
 	}
 }
 
+void GenieDisplay::drawMass(NVGcontext *vg,NVGcolor massColor,float xpos,float ypos) {
+		nvgFillColor(vg, massColor);
+		nvgStrokeColor(vg, massColor);
+		nvgStrokeWidth(vg, 2);
+		nvgBeginPath(vg);
+		nvgCircle(vg, xpos, ypos, module->mass);
+		nvgFill(vg);
+		nvgStroke(vg);
+		nvgClosePath(vg);
+}
+
+void GenieDisplay::drawSwarm(int pendulum,int edge,NVGcontext *vg,NVGcolor massColor,float xpos,float ypos) {
+	for (int i=1;i<module->maxHistory;i++) {
+		if (i < (int)module->oldEdges[pendulum][edge].size()) {
+			// The 50 in the next line can be a parameter
+			NVGcolor massColorFaded = nvgTransRGBA(massColor, (module->maxHistory-i)*50/module->maxHistory);
+			nvgFillColor(vg, massColorFaded);
+			nvgStrokeColor(vg, massColorFaded);
+			nvgStrokeWidth(vg, 2);
+			nvgBeginPath(vg);
+			nvgCircle(vg, (module->oldEdges[pendulum][edge][i].first+xpos), (module->oldEdges[pendulum][edge][i].second+ypos), module->mass);				
+			nvgFill(vg);
+			nvgStroke(vg);
+			nvgClosePath(vg);
+		}
+	}
+}
+
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 
 	if (module == NULL) return;
@@ -64,38 +101,19 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 		Rect clipBox = args.clipBox;
 		clipBox.pos.x = args.clipBox.pos.x + 75;
 		nvgScissor(args.vg, RECT_ARGS(clipBox));
+		
 		// Draw first Red Mass
 		NVGcolor massColor0 = nvgRGB(0xAE, 0x1C, 0x28);
-		nvgFillColor(args.vg, massColor0);
-		nvgStrokeColor(args.vg, massColor0);
-		nvgStrokeWidth(args.vg, 2);
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, xpos, ypos, module->mass);	
-		nvgFill(args.vg);
-		nvgStroke(args.vg);
+		drawMass(args.vg,massColor0,xpos, ypos);
+
 		for (int n=0;n<module->nrOfPendulums;n++) {
 			if (!(((module->inputs[GenieExpander::INPUT_1_X].isConnected()) && (module->inputs[GenieExpander::INPUT_1_Y].isConnected())) || module->parentConnected))
 			return;
 			// draw Second White Mass
 			NVGcolor massColor1 = nvgRGB(0xFF, 0xFF, 0xFF);
-			nvgFillColor(args.vg, massColor1);
-			nvgStrokeColor(args.vg, massColor1);
-			nvgStrokeWidth(args.vg, 2);
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, (module->edges[n][0].first+xpos), (module->edges[n][0].second+ypos), module->mass);	
-			nvgFill(args.vg);
-			nvgStroke(args.vg);
-			for (int i=0;i<10;i++) {
-				massColor1 = nvgRGBA(0xFF, 0xFF, 0xFF, 50);
-				nvgFillColor(args.vg, massColor1);
-				nvgStrokeColor(args.vg, massColor1);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, (module->oldEdges[n][0][i].first+xpos), (module->oldEdges[n][0][i].second+ypos), module->mass);				
-				nvgFill(args.vg);
-				nvgStroke(args.vg);
-				nvgClosePath(args.vg);
-			}
+			drawMass(args.vg,massColor1,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
+			drawSwarm(n,0,args.vg,massColor1,xpos, ypos);
+
 			// Draw line between masses
 			NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
 			nvgFillColor(args.vg, lineColor);
@@ -110,24 +128,9 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 				return;
 			// draw third Blue Mass
 			NVGcolor massColor2 = nvgRGB(0x21, 0x46, 0x8B);
-			nvgFillColor(args.vg, massColor2);
-			nvgStrokeColor(args.vg, massColor2);
-			nvgStrokeWidth(args.vg, 2);
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, (module->edges[n][1].first+xpos), (module->edges[n][1].second+ypos), module->mass);
-			nvgFill(args.vg);
-			nvgStroke(args.vg);
-			for (int i=0;i<10;i++) {
-				massColor1 = nvgRGBA(0x21, 0x46, 0x8B, 50);
-				nvgFillColor(args.vg, massColor1);
-				nvgStrokeColor(args.vg, massColor1);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, (module->oldEdges[n][1][i].first+xpos), (module->oldEdges[n][1][i].second+ypos), module->mass);				
-				nvgFill(args.vg);
-				nvgStroke(args.vg);
-				nvgClosePath(args.vg);
-			}
+			drawMass(args.vg,massColor2,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
+			drawSwarm(n,1,args.vg,massColor2,xpos,ypos);
+
 			// Draw line between masses
 			nvgFillColor(args.vg, lineColor);
 			nvgStrokeColor(args.vg, lineColor);
@@ -139,24 +142,9 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 			if (module->inputs[GenieExpander::INPUT_3_X].isConnected() && module->inputs[GenieExpander::INPUT_3_Y].isConnected() && !module->parentConnected) {
 				// Draw fourth Mass
 				NVGcolor massColor3 = nvgRGB(0xFF, 0x7F, 0x00);
-				nvgFillColor(args.vg, massColor3);
-				nvgStrokeColor(args.vg, massColor3);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, (module->edges[n][2].first+xpos), (module->edges[n][2].second+ypos), module->mass);
-				nvgFill(args.vg);
-				nvgStroke(args.vg);
-				for (int i=0;i<10;i++) {
-					massColor3 = nvgRGBA(0xFF, 0x7F, 0x00, 50);
-					nvgFillColor(args.vg, massColor3);
-					nvgStrokeColor(args.vg, massColor3);
-					nvgStrokeWidth(args.vg, 2);
-					nvgBeginPath(args.vg);
-					nvgCircle(args.vg, (module->oldEdges[n][2][i].first+xpos), (module->oldEdges[n][2][i].second+ypos), module->mass);				
-					nvgFill(args.vg);
-					nvgStroke(args.vg);
-					nvgClosePath(args.vg);
-				}
+				drawMass(args.vg,massColor3,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
+				drawSwarm(n,2,args.vg,massColor3,xpos, ypos);
+
 				// Draw line between masses
 				nvgFillColor(args.vg, lineColor);
 				nvgStrokeColor(args.vg, lineColor);
@@ -166,24 +154,9 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 				nvgLineTo(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
 				nvgStroke(args.vg);
 				// Draw fifth Mass
-				nvgFillColor(args.vg, massColor0);
-				nvgStrokeColor(args.vg, massColor0);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, (module->edges[n][3].first+xpos), (module->edges[n][3].second+ypos), module->mass);
-				nvgFill(args.vg);
-				nvgStroke(args.vg);
-				for (int i=0;i<10;i++) {
-					massColor0 = nvgRGBA(0xAE, 0x1C, 0x28, 50);
-					nvgFillColor(args.vg, massColor0);
-					nvgStrokeColor(args.vg, massColor0);
-					nvgStrokeWidth(args.vg, 2);
-					nvgBeginPath(args.vg);
-					nvgCircle(args.vg, (module->oldEdges[n][3][i].first+xpos), (module->oldEdges[n][3][i].second+ypos), module->mass);				
-					nvgFill(args.vg);
-					nvgStroke(args.vg);
-					nvgClosePath(args.vg);
-				}
+				drawMass(args.vg,massColor0,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
+				drawSwarm(n,3,args.vg,massColor0,xpos, ypos);
+
 				// Draw line between masses
 				nvgFillColor(args.vg, lineColor);
 				nvgStrokeColor(args.vg, lineColor);
@@ -235,6 +208,14 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY3), module, GenieExpander::INPUT_3_Y));
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX1, jackY4), module, GenieExpander::INPUT_4_X));
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY4), module, GenieExpander::INPUT_4_Y));
+
+		// Then do the knobs
+	const float knobX1 = 6;
+
+	const float knobY1 = 31.5;
+	const float knobY2 = 70;
+
+	addParam(createParam<RPJKnob>(Vec(knobX1, knobY1), module, GenieExpander::PARAM_HISTORY));
 }
 
 Model * modelGenieExpander = createModel<GenieExpander, GenieExpanderModuleWidget>("GenieExpander");

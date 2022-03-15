@@ -8,7 +8,6 @@ const int WIDTH=375;
 const int HEIGHT=350;
 const int EDGES=4;
 const int MAXPENDULUMS = 4;
-const int MAXHISTORY = 10;
 
 struct xpanderPairs {
 	std::pair<double, double> edges[MAXPENDULUMS][EDGES];
@@ -19,7 +18,7 @@ struct xpanderPairs {
 struct GenieExpander : Module {
 
 	enum ParamIds {
-
+		PARAM_HISTORY,
 		NUM_PARAMS,
 	};
 
@@ -55,6 +54,7 @@ struct GenieExpander : Module {
 	bool parentConnected;
 	int nrOfPendulums;
 	double historyTimer;
+	int maxHistory;
 };
 
 struct GenieDisplay : TransparentWidget {
@@ -64,6 +64,8 @@ struct GenieDisplay : TransparentWidget {
 	}
 	void process();
 	void drawLayer(const DrawArgs &args,int) override;
+	void drawMass(NVGcontext*,NVGcolor,float,float);
+	void drawSwarm(int,int,NVGcontext *,NVGcolor,float,float);
 	float xpos, ypos;
     GenieExpander * module;
 };
