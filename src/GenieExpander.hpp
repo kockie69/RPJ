@@ -57,6 +57,15 @@ struct GenieExpander : Module {
 	int maxHistory;
 };
 
+struct line {
+	private:
+		float xposBegin, yposBegin, xposEnd, yposEnd;
+		NVGcontext *vg;
+	public:
+		line(NVGcontext *,double,double,double,double);
+		void draw(void);
+};
+
 struct GenieDisplay : TransparentWidget {
 	GenieDisplay() {
 		xpos = (WIDTH/2)+75;
@@ -64,8 +73,10 @@ struct GenieDisplay : TransparentWidget {
 	}
 	void process();
 	void drawLayer(const DrawArgs &args,int) override;
+	//void drawMass(NVGcontext*,NVGcolor,float,float);
 	void drawMass(NVGcontext*,NVGcolor,float,float);
 	void drawSwarm(int,int,NVGcontext *,NVGcolor,float,float);
+	void drawLine(NVGcontext *,float,float,float,float);
 	float xpos, ypos;
     GenieExpander * module;
 };

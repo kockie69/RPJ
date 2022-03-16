@@ -76,6 +76,7 @@ void GenieDisplay::drawMass(NVGcontext *vg,NVGcolor massColor,float xpos,float y
 		nvgClosePath(vg);
 }
 
+
 void GenieDisplay::drawSwarm(int pendulum,int edge,NVGcontext *vg,NVGcolor massColor,float xpos,float ypos) {
 	for (int i=1;i<module->maxHistory;i++) {
 		if (i < (int)module->oldEdges[pendulum][edge].size()) {
@@ -91,6 +92,26 @@ void GenieDisplay::drawSwarm(int pendulum,int edge,NVGcontext *vg,NVGcolor massC
 			nvgClosePath(vg);
 		}
 	}
+}
+
+line::line(NVGcontext *vg,double xposBegin,double yposBegin,double xposEnd,double yposEnd) {
+	this->vg =vg;
+	this->xposBegin=xposBegin;
+	this->xposEnd=xposEnd;
+	this->yposBegin=yposBegin;
+	this->yposEnd=yposEnd;
+}
+
+void line::draw() {
+	NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
+	nvgFillColor(vg, lineColor);
+	nvgStrokeColor(vg, lineColor);
+	nvgStrokeWidth(vg, 2);
+	nvgBeginPath(vg);
+	nvgMoveTo(vg,xposBegin,yposBegin);
+	nvgLineTo(vg,xposEnd,yposEnd);
+	nvgStroke(vg);
+	nvgClosePath(vg);
 }
 
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
@@ -115,15 +136,9 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 			drawSwarm(n,0,args.vg,massColor1,xpos, ypos);
 
 			// Draw line between masses
-			NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
-			nvgFillColor(args.vg, lineColor);
-			nvgStrokeColor(args.vg, lineColor);
-			nvgStrokeWidth(args.vg, 2);
-			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg,xpos,ypos);
-			nvgLineTo(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
-			nvgStroke(args.vg);
-			nvgClosePath(args.vg);
+			line *line1 = new line(args.vg, xpos, ypos,module->edges[n][0].first+xpos,module->edges[n][0].second+ypos);
+			line1->draw();
+			
 			if (!(((module->inputs[GenieExpander::INPUT_2_X].isConnected()) && (module->inputs[GenieExpander::INPUT_2_Y].isConnected())) || module->parentConnected))
 				return;
 			// draw third Blue Mass
@@ -132,13 +147,8 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 			drawSwarm(n,1,args.vg,massColor2,xpos,ypos);
 
 			// Draw line between masses
-			nvgFillColor(args.vg, lineColor);
-			nvgStrokeColor(args.vg, lineColor);
-			nvgStrokeWidth(args.vg, 2);
-			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
-			nvgLineTo(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
-			nvgStroke(args.vg);
+			line *line2 = new line(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
+			line2->draw();
 			if (module->inputs[GenieExpander::INPUT_3_X].isConnected() && module->inputs[GenieExpander::INPUT_3_Y].isConnected() && !module->parentConnected) {
 				// Draw fourth Mass
 				NVGcolor massColor3 = nvgRGB(0xFF, 0x7F, 0x00);
@@ -146,26 +156,15 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 				drawSwarm(n,2,args.vg,massColor3,xpos, ypos);
 
 				// Draw line between masses
-				nvgFillColor(args.vg, lineColor);
-				nvgStrokeColor(args.vg, lineColor);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
-				nvgLineTo(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
-				nvgStroke(args.vg);
+				line *line3 = new line(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
+				line3->draw();
 				// Draw fifth Mass
 				drawMass(args.vg,massColor0,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
 				drawSwarm(n,3,args.vg,massColor0,xpos, ypos);
 
 				// Draw line between masses
-				nvgFillColor(args.vg, lineColor);
-				nvgStrokeColor(args.vg, lineColor);
-				nvgStrokeWidth(args.vg, 2);
-				nvgBeginPath(args.vg);
-				nvgMoveTo(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
-				nvgLineTo(args.vg,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
-				nvgStroke(args.vg);
-				nvgClosePath(args.vg);
+				line *line4 = new line(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
+				line4->draw();
 			}
 		}
 	}
