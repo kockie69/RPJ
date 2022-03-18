@@ -8,110 +8,189 @@
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Wasp length");
-	historyTimer=0;
+	historyTimer.setDivision(1000);
 	maxHistory=10;
 }
 
-void GenieExpander::doHistory(float dt) {
-	historyTimer-=dt;
-	if (historyTimer<=0) {
-		for (int n=0;n<MAXPENDULUMS;n++) {
-			//oldEdges[n].push_back({edges[n][1].first,edges[n][1].second});
-			oldEdges[n][0].push_back({edges[n][0].first,edges[n][0].second});
-			std::rotate(oldEdges[n][0].rbegin(), oldEdges[n][0].rbegin() + 1, oldEdges[n][0].rend());
-			oldEdges[n][1].push_back({edges[n][1].first,edges[n][1].second});
-			std::rotate(oldEdges[n][1].rbegin(), oldEdges[n][1].rbegin() + 1, oldEdges[n][1].rend());
-			oldEdges[n][2].push_back({edges[n][2].first,edges[n][2].second});
-			std::rotate(oldEdges[n][2].rbegin(), oldEdges[n][2].rbegin() + 1, oldEdges[n][2].rend());
-			oldEdges[n][3].push_back({edges[n][3].first,edges[n][3].second});
-			std::rotate(oldEdges[n][3].rbegin(), oldEdges[n][3].rbegin() + 1, oldEdges[n][3].rend());
-			if ((int)oldEdges[n][0].size()>maxHistory) {
-				oldEdges[n][0].erase(oldEdges[n][0].end());
-				oldEdges[n][1].erase(oldEdges[n][1].end());
-				oldEdges[n][2].erase(oldEdges[n][2].end());
-				oldEdges[n][3].erase(oldEdges[n][3].end());
-			}
-			historyTimer = 1000*dt;
-		}
-	}
-};
-
 void GenieExpander::process(const ProcessArgs &args) {
-	
-	maxHistory = params[PARAM_HISTORY].getValue();
 
-	doHistory(args.sampleTime);
+	maxHistory = params[PARAM_HISTORY].getValue();
+	// In future read the pendulum position parameters, for now all xpos,ypos
+	for (int i=0;i<MAXPENDULUMS;i++) { 
+		pendulums[i].setPosition({(WIDTH/2)+75,HEIGHT/2});
+		pendulums[i].nodes[0].setColor(nvgRGB(0xAE, 0x1C, 0x28));	
+		pendulums[i].nodes[1].setColor(nvgRGB(0xFF, 0xFF, 0xFF));
+		pendulums[i].nodes[2].setColor(nvgRGB(0x21, 0x46, 0x8B));
+		pendulums[i].nodes[3].setColor(nvgRGB(0xFF, 0x7F, 0x00));
+		pendulums[i].nodes[4].setColor(nvgRGB(0xAE, 0x1C, 0x28));
+		pendulums[i].nodes[0].setMaxhistory(maxHistory);
+		pendulums[i].nodes[1].setMaxhistory(maxHistory);
+		pendulums[i].nodes[2].setMaxhistory(maxHistory);
+		pendulums[i].nodes[3].setMaxhistory(maxHistory);
+		pendulums[i].nodes[4].setMaxhistory(maxHistory);
+	}
+
+	maxHistory = params[PARAM_HISTORY].getValue();
 	
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected) {
     	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-		for (int n=0;n < MAXPENDULUMS;n++)
-			for (int i=0; i < EDGES;i++)
-				edges[n][i] = rdMsg->edges[n][i];
-		mass = rdMsg->mass;
+		for (int n=0;n < MAXPENDULUMS;n++) {
+			pendulums[n].nodes[0].newMass.setPosition({pendulums[n].getPosition()});
+			pendulums[n].nodes[0].newMass.setSize(10);
+			pendulums[n].setNrOfNodes(3);
+
+			for (int i=1; i < 3;i++) {
+				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1]+pendulums[n].getPosition()});
+				pendulums[n].nodes[i].newMass.setSize(10);
+			}
+		}
 		nrOfPendulums = rdMsg->nrOfPendulums;
 	}
 	else {
 		nrOfPendulums=1;
-		edges[0][0].first = inputs[INPUT_1_X].getVoltage()*10;
-		edges[0][0].second = inputs[INPUT_1_Y].getVoltage()*10;
-		edges[0][1].first = inputs[INPUT_2_X].getVoltage()*20;
-		edges[0][1].second = inputs[INPUT_2_Y].getVoltage()*20;
-		edges[0][2].first = inputs[INPUT_3_X].getVoltage()*30;
-		edges[0][2].second = inputs[INPUT_3_Y].getVoltage()*30;
-		edges[0][3].first = inputs[INPUT_4_X].getVoltage()*40;
-		edges[0][3].second = inputs[INPUT_4_Y].getVoltage()*40;
-		mass = 10;
-	}
-}
-
-void GenieDisplay::drawMass(NVGcontext *vg,NVGcolor massColor,float xpos,float ypos) {
-		nvgFillColor(vg, massColor);
-		nvgStrokeColor(vg, massColor);
-		nvgStrokeWidth(vg, 2);
-		nvgBeginPath(vg);
-		nvgCircle(vg, xpos, ypos, module->mass);
-		nvgFill(vg);
-		nvgStroke(vg);
-		nvgClosePath(vg);
-}
-
-
-void GenieDisplay::drawSwarm(int pendulum,int edge,NVGcontext *vg,NVGcolor massColor,float xpos,float ypos) {
-	for (int i=1;i<module->maxHistory;i++) {
-		if (i < (int)module->oldEdges[pendulum][edge].size()) {
-			// The 50 in the next line can be a parameter
-			NVGcolor massColorFaded = nvgTransRGBA(massColor, (module->maxHistory-i)*50/module->maxHistory);
-			nvgFillColor(vg, massColorFaded);
-			nvgStrokeColor(vg, massColorFaded);
-			nvgStrokeWidth(vg, 2);
-			nvgBeginPath(vg);
-			nvgCircle(vg, (module->oldEdges[pendulum][edge][i].first+xpos), (module->oldEdges[pendulum][edge][i].second+ypos), module->mass);				
-			nvgFill(vg);
-			nvgStroke(vg);
-			nvgClosePath(vg);
+		pendulums[0].nodes[0].newMass.setPosition({pendulums[0].getPosition()});
+		pendulums[0].nodes[0].newMass.setSize(10);
+		pendulums[0].setNrOfNodes(5);
+		for (int i=1;i<5;i++) {
+			std::pair<double,double> newPair;
+			if (inputs[INPUT_1_X+2*(i-1)].isConnected() && inputs[INPUT_1_Y+2*(i-1)].isConnected()) {
+				newPair.first = inputs[INPUT_1_X+2*(i-1)].getVoltage()*10*i;
+				newPair.second = inputs[INPUT_1_Y+2*(i-1)].getVoltage()*10*i;
+				pendulums[0].nodes[i].newMass.setPosition({newPair+pendulums[0].getPosition()});
+				pendulums[0].nodes[i].newMass.setSize(10);
+			}
+			else {
+				pendulums[0].setNrOfNodes(i);
+				return;
+			}
 		}
 	}
 }
 
-line::line(NVGcontext *vg,double xposBegin,double yposBegin,double xposEnd,double yposEnd) {
-	this->vg =vg;
-	this->xposBegin=xposBegin;
-	this->xposEnd=xposEnd;
-	this->yposBegin=yposBegin;
-	this->yposEnd=yposEnd;
+void node::setMaxhistory(int maxHistory) {
+	this->maxHistory = maxHistory;
 }
 
-void line::draw() {
+void node::setColor(NVGcolor nodeColor) {
+	this->nodeColor = nodeColor;
+}
+
+void node::draw(NVGcontext *vg) {
+	newMass.setColor(nodeColor);
+	newMass.draw(vg);
+	nodeSwarm.draw(vg,nodeColor);
+	nodeSwarm.update(newMass,maxHistory);
+}
+
+swarm::swarm() {
+	history=0;
+}
+
+void swarm::addNewestMass(mass newMass) {
+	masses.insert(masses.begin(),newMass);
+	history++;
+}
+
+void swarm::deleteOldestMass() {
+	masses.pop_back();
+	history--;
+}
+
+void swarm::update(mass newMass, int maxHistory) {
+	if (maxHistory < history) {
+		this->addNewestMass(newMass);
+		this->deleteOldestMass();
+		this->deleteOldestMass();
+	}
+	else {
+		if (maxHistory > history)
+			this->addNewestMass(newMass);
+		else {
+			this->addNewestMass(newMass);
+			this->deleteOldestMass();
+		}
+	}
+}
+
+void swarm::draw(NVGcontext *vg,NVGcolor massColor) {
+	for (int i=1;i<history;i++) {
+		// The 50 in the next line can be a parameter		
+		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-i)*50/history);
+		masses[i].setColor(massColorFaded);
+		masses[i].draw(vg);
+	}
+}
+
+void line::setBegin(std::pair<double,double> positionBegin) {
+	this->positionBegin = positionBegin;
+}
+
+void line::setEnd(std::pair<double,double> positionEnd) {
+	this->positionEnd = positionEnd;
+}
+
+void mass::setSize(int size) {
+	this->size = size;
+}
+
+void mass::setPosition(std::pair<double,double> position) {
+	this->position = position;
+}
+
+std::pair<double,double> mass::getPosition(void) {
+	return position;
+}
+
+void mass::setColor(NVGcolor massColor) {
+	this->massColor = massColor;
+}
+
+void mass::draw(NVGcontext *vg) {
+	nvgFillColor(vg, massColor);
+	nvgStrokeColor(vg, massColor);
+	nvgStrokeWidth(vg, 2);
+	nvgBeginPath(vg);
+	nvgCircle(vg, position.first, position.second, size);
+	nvgFill(vg);
+	nvgStroke(vg);
+	nvgClosePath(vg);
+}
+
+void line::draw(NVGcontext *vg) {
 	NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
 	nvgFillColor(vg, lineColor);
 	nvgStrokeColor(vg, lineColor);
 	nvgStrokeWidth(vg, 2);
 	nvgBeginPath(vg);
-	nvgMoveTo(vg,xposBegin,yposBegin);
-	nvgLineTo(vg,xposEnd,yposEnd);
+	nvgMoveTo(vg,positionBegin.first,positionBegin.second);
+	nvgLineTo(vg,positionEnd.first,positionEnd.second);
 	nvgStroke(vg);
 	nvgClosePath(vg);
+}
+
+void pendulum::setNrOfNodes(int nrOfNodes) {
+	this->nrOfNodes = nrOfNodes;
+}
+
+void pendulum::setPosition(std::pair<double,double> position) {
+	this->position = position;
+}
+
+std::pair<double,double> pendulum::getPosition(void) {
+	return position;
+}
+
+void pendulum::draw(NVGcontext *vg) {
+
+	for (int i=0;i<nrOfNodes;i++) { 
+		nodes[i].draw(vg);
+		if (i>0) {
+			lines[i-1].setBegin(nodes[i-1].newMass.getPosition());
+			lines[i-1].setEnd(nodes[i].newMass.getPosition());
+			lines[i-1].draw(vg);
+		}
+	}
 }
 
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
@@ -122,50 +201,9 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 		Rect clipBox = args.clipBox;
 		clipBox.pos.x = args.clipBox.pos.x + 75;
 		nvgScissor(args.vg, RECT_ARGS(clipBox));
-		
-		// Draw first Red Mass
-		NVGcolor massColor0 = nvgRGB(0xAE, 0x1C, 0x28);
-		drawMass(args.vg,massColor0,xpos, ypos);
 
 		for (int n=0;n<module->nrOfPendulums;n++) {
-			if (!(((module->inputs[GenieExpander::INPUT_1_X].isConnected()) && (module->inputs[GenieExpander::INPUT_1_Y].isConnected())) || module->parentConnected))
-			return;
-			// draw Second White Mass
-			NVGcolor massColor1 = nvgRGB(0xFF, 0xFF, 0xFF);
-			drawMass(args.vg,massColor1,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos);
-			drawSwarm(n,0,args.vg,massColor1,xpos, ypos);
-
-			// Draw line between masses
-			line *line1 = new line(args.vg, xpos, ypos,module->edges[n][0].first+xpos,module->edges[n][0].second+ypos);
-			line1->draw();
-			
-			if (!(((module->inputs[GenieExpander::INPUT_2_X].isConnected()) && (module->inputs[GenieExpander::INPUT_2_Y].isConnected())) || module->parentConnected))
-				return;
-			// draw third Blue Mass
-			NVGcolor massColor2 = nvgRGB(0x21, 0x46, 0x8B);
-			drawMass(args.vg,massColor2,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
-			drawSwarm(n,1,args.vg,massColor2,xpos,ypos);
-
-			// Draw line between masses
-			line *line2 = new line(args.vg,module->edges[n][0].first+xpos, module->edges[n][0].second+ypos,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos);
-			line2->draw();
-			if (module->inputs[GenieExpander::INPUT_3_X].isConnected() && module->inputs[GenieExpander::INPUT_3_Y].isConnected() && !module->parentConnected) {
-				// Draw fourth Mass
-				NVGcolor massColor3 = nvgRGB(0xFF, 0x7F, 0x00);
-				drawMass(args.vg,massColor3,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
-				drawSwarm(n,2,args.vg,massColor3,xpos, ypos);
-
-				// Draw line between masses
-				line *line3 = new line(args.vg,module->edges[n][1].first+xpos, module->edges[n][1].second+ypos,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos);
-				line3->draw();
-				// Draw fifth Mass
-				drawMass(args.vg,massColor0,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
-				drawSwarm(n,3,args.vg,massColor0,xpos, ypos);
-
-				// Draw line between masses
-				line *line4 = new line(args.vg,module->edges[n][2].first+xpos, module->edges[n][2].second+ypos,module->edges[n][3].first+xpos, module->edges[n][3].second+ypos);
-				line4->draw();
-			}
+			module->pendulums[n].draw(args.vg);
 		}
 	}
 	TransparentWidget::drawLayer(args,layer);
@@ -183,20 +221,20 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 
 	// Fill the display for the module browser
-	GenieDisplay *display = new GenieDisplay();
+	display = new GenieDisplay();
 	display->box.pos = Vec(15, 30);
 	display->box.size = Vec(WIDTH, HEIGHT);
 	display->module = module;
 	addChild(display);	
 
 		// Next do the Jacks
-	const float jackX1 = 8.5;
-	const float jackX2 = 45;		
+	const float jackX1 = 14.5;
+	const float jackX2 = 51;		
 
-	const float jackY1 = 49;
-	const float jackY2 = 94;
-	const float jackY3 = 143;
-	const float jackY4 = 189;
+	const float jackY1 = 232;
+	const float jackY2 = 263;
+	const float jackY3 = 293;
+	const float jackY4 = 321;
 
 
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX1, jackY1), module, GenieExpander::INPUT_1_X));
@@ -209,9 +247,9 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY4), module, GenieExpander::INPUT_4_Y));
 
 		// Then do the knobs
-	const float knobX1 = 6;
+	const float knobX1 = 26;
 
-	const float knobY1 = 31.5;
+	const float knobY1 = 48;
 	const float knobY2 = 70;
 
 	addParam(createParam<RPJKnob>(Vec(knobX1, knobY1), module, GenieExpander::PARAM_HISTORY));

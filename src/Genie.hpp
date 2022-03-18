@@ -5,7 +5,7 @@ using namespace rack;
 const int MODULE_WIDTH=19;
 const int WIDTH=250;
 const int HEIGHT=250;
-const int EDGES=4;
+const int EDGES=2;
 const int MAXPENDULUMS = 4;
 
 struct xpanderPairs {

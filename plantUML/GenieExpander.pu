@@ -1,0 +1,65 @@
+@startuml
+
+class GenieExpanderModuleWidget {
+    -display GenieDisplay
+}
+
+class GenieExpander {
+    -pendulum[4] pendulums
+    -size float
+	-arentConnected bool
+	-nrOfPendulums int
+	-maxHistory int
+    -process()
+}
+
+class GenieDisplay {
+    -module GenieExpander
+    +drawLayer(const DrawArgs &args,int layer)
+}
+class pendulum {
+    -position
+    +pendulum(void)
+    +void draw(NVGcontext *vg)
+    -node[4] nodes
+}
+
+class node {
+    +setColor(NVGcolor color)
+    +setMaxhistory(int maxHistory)
+    +draw(NVGcontext *vg)
+    +newMass : mass
+    +nodeSwarm : swarm
+    -color : NVGcolor
+    -maxHistory : int
+}
+
+class mass {
+    -position std::pair<double,double>
+    -size int
+    +void draw(NVGcontext *vg)
+    +void setSize(int size)
+    +void setPosition(std::pair<double,double> position)
+    +void setColor(NVGcolor massColor)
+}
+
+class swarm {
+    -mass[0..*] masses
+    -history int
+    +void draw(NVGcontext *vg,NVGcolr massColor)
+    +void updateSwarm(mass newMass, int maxHistory)
+    -void deleteOldestMass()
+    -void addNewestMass()
+}
+
+modelGenieExpander --> GenieExpander
+modelGenieExpander --> GenieExpanderModuleWidget
+GenieExpanderModuleWidget --> GenieDisplay
+GenieDisplay --> GenieExpander
+GenieExpander -- "4" pendulum : has >
+pendulum -- "4" node : has >
+node -- mass : has >
+node -- swarm
+swarm -- "0..*" mass : has >
+
+@enduml
