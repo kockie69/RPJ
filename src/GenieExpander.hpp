@@ -9,6 +9,8 @@ const int HEIGHT=350;
 const int NODES=5;
 const int MAXPENDULUMS = 4;
 
+float swarmThickness;
+
 std::pair<double, double> operator +(const std::pair<double, double>& x, const std::pair<double, double>& y) {
     return std::make_pair(x.first + y.first, x.second + y.second);
 }
@@ -40,7 +42,6 @@ struct swarm {
 
 struct xpanderPairs {
 	std::pair<double, double> edges[4][2];
-	double mass;
 	int nrOfPendulums;
 };
 
@@ -48,7 +49,10 @@ struct node {
 	private:
 		NVGcolor nodeColor;
 		int maxHistory;
+		dsp::ClockDivider historyTimer;
+		float thickness;
 	public:
+		node();
 		mass newMass;
 		swarm nodeSwarm;
 		void setColor(NVGcolor color);
@@ -84,6 +88,15 @@ struct GenieExpander : Module {
 
 	enum ParamIds {
 		PARAM_HISTORY,
+		PARAM_HISTORYTIMER,
+		PARAM_PEND_1_X,
+		PARAM_PEND_1_Y,
+		PARAM_PEND_2_X,
+		PARAM_PEND_2_Y,
+		PARAM_PEND_3_X,
+		PARAM_PEND_3_Y,
+		PARAM_PEND_4_X,
+		PARAM_PEND_4_Y,
 		NUM_PARAMS,
 	};
 
@@ -108,19 +121,15 @@ struct GenieExpander : Module {
 		NUM_LIGHTS
 	};
 
-
-	GenieExpander();
-	void process(const ProcessArgs &) override;
-	//void setDisplay(void);
-	//void doHistory(float);
-    //std::pair<double, double> edges[MAXPENDULUMS][EDGES];
-	//std::vector<std::pair<double, double>> oldEdges[MAXPENDULUMS][EDGES];
-	pendulum pendulums[MAXPENDULUMS];
-	double size;
-	bool parentConnected;
-	int nrOfPendulums;
-	dsp::ClockDivider historyTimer;
-	int maxHistory;
+	public:
+		GenieExpander();
+		void process(const ProcessArgs &) override;
+		pendulum pendulums[MAXPENDULUMS];
+		double size;
+		bool parentConnected;
+		int nrOfPendulums;
+		int maxHistory;
+	private:
 };
 
 struct GenieDisplay : TransparentWidget {
@@ -130,10 +139,6 @@ struct GenieDisplay : TransparentWidget {
 	}
 	void process();
 	void drawLayer(const DrawArgs &args,int) override;
-	//void drawMass(NVGcontext*,NVGcolor,float,float);
-	//void drawMass(NVGcontext*,NVGcolor,float,float);
-	//void drawSwarm(int,int,NVGcontext *,NVGcolor,float,float);
-	//void drawLine(NVGcontext *,float,float,float,float);
 	float xpos, ypos;
     GenieExpander * module;
 };

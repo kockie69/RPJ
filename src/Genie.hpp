@@ -10,7 +10,6 @@ const int MAXPENDULUMS = 4;
 
 struct xpanderPairs {
 	std::pair<double, double> edges[MAXPENDULUMS][EDGES];
-    double mass;
     int nrOfPendulums;
 };
 

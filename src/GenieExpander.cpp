@@ -7,8 +7,16 @@
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Wasp length");
-	historyTimer.setDivision(1000);
+	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Swarm length");
+	configParam(PARAM_HISTORYTIMER,1.f, 10.f, 1.f, "Swarm thickness");
+	configParam(PARAM_PEND_1_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 1");
+	configParam(PARAM_PEND_1_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 1");
+	configParam(PARAM_PEND_2_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 2");
+	configParam(PARAM_PEND_2_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 2");
+	configParam(PARAM_PEND_3_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 3");
+	configParam(PARAM_PEND_3_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 3");
+	configParam(PARAM_PEND_4_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 4");
+	configParam(PARAM_PEND_4_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 4");
 	maxHistory=10;
 }
 
@@ -30,18 +38,19 @@ void GenieExpander::process(const ProcessArgs &args) {
 		pendulums[i].nodes[4].setMaxhistory(maxHistory);
 	}
 
-	maxHistory = params[PARAM_HISTORY].getValue();
+	swarmThickness = params[PARAM_HISTORYTIMER].getValue();
 	
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected) {
     	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
 		for (int n=0;n < MAXPENDULUMS;n++) {
-			pendulums[n].nodes[0].newMass.setPosition({pendulums[n].getPosition()});
+			pendulums[n].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
 			pendulums[n].nodes[0].newMass.setSize(10);
 			pendulums[n].setNrOfNodes(3);
 
+
 			for (int i=1; i < 3;i++) {
-				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1]+pendulums[n].getPosition()});
+				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
 				pendulums[n].nodes[i].newMass.setSize(10);
 			}
 		}
@@ -49,14 +58,14 @@ void GenieExpander::process(const ProcessArgs &args) {
 	}
 	else {
 		nrOfPendulums=1;
-		pendulums[0].nodes[0].newMass.setPosition({pendulums[0].getPosition()});
+		pendulums[0].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X].getValue()+pendulums[0].getPosition().first,params[PARAM_PEND_1_Y].getValue()+pendulums[0].getPosition().second});
 		pendulums[0].nodes[0].newMass.setSize(10);
 		pendulums[0].setNrOfNodes(5);
 		for (int i=1;i<5;i++) {
 			std::pair<double,double> newPair;
 			if (inputs[INPUT_1_X+2*(i-1)].isConnected() && inputs[INPUT_1_Y+2*(i-1)].isConnected()) {
-				newPair.first = inputs[INPUT_1_X+2*(i-1)].getVoltage()*10*i;
-				newPair.second = inputs[INPUT_1_Y+2*(i-1)].getVoltage()*10*i;
+				newPair.first = params[PARAM_PEND_1_X].getValue()+inputs[INPUT_1_X+2*(i-1)].getVoltage()*10*i;
+				newPair.second = params[PARAM_PEND_1_Y].getValue()+inputs[INPUT_1_Y+2*(i-1)].getVoltage()*10*i;
 				pendulums[0].nodes[i].newMass.setPosition({newPair+pendulums[0].getPosition()});
 				pendulums[0].nodes[i].newMass.setSize(10);
 			}
@@ -76,11 +85,18 @@ void node::setColor(NVGcolor nodeColor) {
 	this->nodeColor = nodeColor;
 }
 
+node::node() {
+	thickness=1;
+}
+
 void node::draw(NVGcontext *vg) {
 	newMass.setColor(nodeColor);
 	newMass.draw(vg);
 	nodeSwarm.draw(vg,nodeColor);
-	nodeSwarm.update(newMass,maxHistory);
+	if (thickness!=swarmThickness)
+		historyTimer.setDivision(swarmThickness);
+	if (historyTimer.process()) 
+		nodeSwarm.update(newMass,maxHistory);
 }
 
 swarm::swarm() {
@@ -231,10 +247,10 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	const float jackX1 = 14.5;
 	const float jackX2 = 51;		
 
-	const float jackY1 = 232;
-	const float jackY2 = 263;
-	const float jackY3 = 293;
-	const float jackY4 = 321;
+	const float jackY1 = 242;
+	const float jackY2 = 272;
+	const float jackY3 = 302;
+	const float jackY4 = 331;
 
 
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX1, jackY1), module, GenieExpander::INPUT_1_X));
@@ -247,12 +263,27 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX2, jackY4), module, GenieExpander::INPUT_4_Y));
 
 		// Then do the knobs
-	const float knobX1 = 26;
+	const float knobX1 = 16;
+	const float knobX2 = 32;
+	const float knobX3 = 52;
 
-	const float knobY1 = 48;
-	const float knobY2 = 70;
+	const float knobY1 = 33;
+	const float knobY2 = 80;
+	const float knobY3 = 122;
+	const float knobY4 = 150;
+	const float knobY5 = 178;
+	const float knobY6 = 206;
 
-	addParam(createParam<RPJKnob>(Vec(knobX1, knobY1), module, GenieExpander::PARAM_HISTORY));
+	addParam(createParam<RPJKnob>(Vec(knobX2, knobY1), module, GenieExpander::PARAM_HISTORY));
+	addParam(createParam<RPJKnob>(Vec(knobX2, knobY2), module, GenieExpander::PARAM_HISTORYTIMER));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX1, knobY3), module, GenieExpander::PARAM_PEND_1_X));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX3, knobY3), module, GenieExpander::PARAM_PEND_1_Y));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX1, knobY4), module, GenieExpander::PARAM_PEND_2_X));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX3, knobY4), module, GenieExpander::PARAM_PEND_2_Y));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX1, knobY5), module, GenieExpander::PARAM_PEND_3_X));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX3, knobY5), module, GenieExpander::PARAM_PEND_3_Y));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX1, knobY6), module, GenieExpander::PARAM_PEND_4_X));
+	addParam(createParam<RPJKnobSmall>(Vec(knobX3, knobY6), module, GenieExpander::PARAM_PEND_4_Y));
 }
 
 Model * modelGenieExpander = createModel<GenieExpander, GenieExpanderModuleWidget>("GenieExpander");

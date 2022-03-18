@@ -65,7 +65,7 @@ void Genie::process(const ProcessArgs &args) {
 	}
 	lengthMult = pow(2,lengthMult);
 
-	len = std::min(dim.first-(2*mass), dim.second-(2*mass)) *lengthMult/4.f;
+	len = std::min(dim.first, dim.second) *lengthMult/4.f;
 	for (int n=0;n<nrOfPendulums+1;n++) {
 		ss[n] = {{mass, mass}, {len, len}};
 	
@@ -91,7 +91,6 @@ void Genie::process(const ProcessArgs &args) {
 			xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
 			for (int i=0; i < EDGES;i++)
 				wrMsg->edges[n][i] = edges[n][i];
-			wrMsg->mass = mass;
 			wrMsg->nrOfPendulums = nrOfPendulums+1;
 			rightExpander.messageFlipRequested = true;
 		}
