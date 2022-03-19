@@ -68,6 +68,7 @@ void Genie::process(const ProcessArgs &args) {
 	}
 
 	len = std::min(dim.first, dim.second) * lengthMult;
+	
 	for (int n=0;n<nrOfPendulums+1;n++) {
 		ss[n] = {{mass, mass}, {len, len}};
 	
@@ -83,10 +84,9 @@ void Genie::process(const ProcessArgs &args) {
 
     	st[n] = dp::advance(st[n], ss[n], args.sampleTime*timeMult);
 
-		outputs[OUTPUT_1_X].setVoltage((edges[n][0].first)+5*uni);
-		outputs[OUTPUT_1_Y].setVoltage((edges[n][0].second)+5*uni);
-		outputs[OUTPUT_2_X].setVoltage((edges[n][0].first)+5*uni);
-		outputs[OUTPUT_2_Y].setVoltage((edges[n][0].second)+5*uni);
+		outputs[OUTPUT_1_X+2*n].setVoltage((edges[n][0].first)+5*uni);
+		outputs[OUTPUT_1_Y+2*n].setVoltage((edges[n][0].second)+5*uni);
+		outputs[OUTPUT_1_EDGE+2*n].setVoltage((st[n].theta.first/18.0f));
 
 		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
 		if (expanderPresent) {
@@ -147,22 +147,30 @@ GenieModuleWidget::GenieModuleWidget(Genie* module) {
 	const float jackX1 = 7.5;
 	const float jackX2 = 39;		
 	const float jackX3 = 56;
-	const float jackX4 = 70;
+	const float jackX4 = 70.5;
 	const float jackX5 = 102;
 
 	const float jackY1 = 96;
 	const float jackY2 = 260;
 	const float jackY3 = 253;
 	const float jackY4 = 288;
-	const float jackY5 = 333;
+	const float jackY5 = 323;
 
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX1, jackY1), module, Genie::INPUT_TIMEMULTCV));
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX5, jackY1), module, Genie::INPUT_LENGTHMULTCV));
 	addInput(createInput<RPJPJ301MPort>(Vec(jackX3, jackY1), module, Genie::INPUT_MASSCV));
 	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX1, jackY3), module, Genie::OUTPUT_1_X));
 	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX1, jackY4), module, Genie::OUTPUT_1_Y));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX1, jackY5), module, Genie::OUTPUT_1_EDGE));
 	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX2, jackY3), module, Genie::OUTPUT_2_X));
 	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX2, jackY4), module, Genie::OUTPUT_2_Y));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX2, jackY5), module, Genie::OUTPUT_2_EDGE));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX4, jackY3), module, Genie::OUTPUT_3_X));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX4, jackY4), module, Genie::OUTPUT_3_Y));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX4, jackY5), module, Genie::OUTPUT_3_EDGE));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX5, jackY3), module, Genie::OUTPUT_4_X));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX5, jackY4), module, Genie::OUTPUT_4_Y));
+	addOutput(createOutput<RPJPJ301MPort>(Vec(jackX5, jackY5), module, Genie::OUTPUT_4_EDGE));
 }
 
 Model * modelGenie = createModel<Genie, GenieModuleWidget>("Genie");

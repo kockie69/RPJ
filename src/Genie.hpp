@@ -145,6 +145,14 @@ struct Genie : Module {
         OUTPUT_1_Y,
         OUTPUT_2_X,
         OUTPUT_2_Y,
+        OUTPUT_3_X,
+        OUTPUT_3_Y,
+        OUTPUT_4_X,
+        OUTPUT_4_Y,
+        OUTPUT_1_EDGE,
+        OUTPUT_2_EDGE,
+        OUTPUT_3_EDGE,
+        OUTPUT_4_EDGE,
 		NUM_OUTPUTS,
 	};
 
