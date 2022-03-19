@@ -4,6 +4,7 @@
 #include <random>
 #include "GenieExpander.hpp"
 
+#define DEBUG_ONLY(x)
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -18,12 +19,6 @@ GenieExpander::GenieExpander() {
 	configParam(PARAM_PEND_4_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 4");
 	configParam(PARAM_PEND_4_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 4");
 	maxHistory=10;
-}
-
-void GenieExpander::process(const ProcessArgs &args) {
-
-	maxHistory = params[PARAM_HISTORY].getValue();
-	// In future read the pendulum position parameters, for now all xpos,ypos
 	for (int i=0;i<MAXPENDULUMS;i++) { 
 		pendulums[i].setPosition({(WIDTH/2)+75,HEIGHT/2});
 		pendulums[i].nodes[0].setColor(nvgRGB(0xAE, 0x1C, 0x28));	
@@ -31,6 +26,19 @@ void GenieExpander::process(const ProcessArgs &args) {
 		pendulums[i].nodes[2].setColor(nvgRGB(0x21, 0x46, 0x8B));
 		pendulums[i].nodes[3].setColor(nvgRGB(0xFF, 0x7F, 0x00));
 		pendulums[i].nodes[4].setColor(nvgRGB(0xAE, 0x1C, 0x28));
+		pendulums[i].nodes[0].setNodeType(node::STATIC);
+		pendulums[i].nodes[1].setNodeType(node::ROTATING);
+		pendulums[i].nodes[2].setNodeType(node::ROTATING);
+		pendulums[i].nodes[3].setNodeType(node::ROTATING);
+		pendulums[i].nodes[4].setNodeType(node::ROTATING);
+	}
+}
+
+void GenieExpander::process(const ProcessArgs &args) {
+
+	maxHistory = params[PARAM_HISTORY].getValue();
+	// In future read the pendulum position parameters, for now all xpos,ypos
+	for (int i=0;i<MAXPENDULUMS;i++) { 
 		pendulums[i].nodes[0].setMaxhistory(maxHistory);
 		pendulums[i].nodes[1].setMaxhistory(maxHistory);
 		pendulums[i].nodes[2].setMaxhistory(maxHistory);
@@ -85,6 +93,10 @@ void node::setColor(NVGcolor nodeColor) {
 	this->nodeColor = nodeColor;
 }
 
+void node::setNodeType(NodeType nodeType) {
+	this->nodeType = nodeType;
+}
+
 node::node() {
 	thickness=1;
 }
@@ -93,10 +105,12 @@ void node::draw(NVGcontext *vg) {
 	newMass.setColor(nodeColor);
 	newMass.draw(vg);
 	nodeSwarm.draw(vg,nodeColor);
-	if (thickness!=swarmThickness)
-		historyTimer.setDivision(swarmThickness);
-	if (historyTimer.process()) 
-		nodeSwarm.update(newMass,maxHistory);
+	if (nodeType==ROTATING) {
+		if (thickness!=swarmThickness) 
+			historyTimer.setDivision(swarmThickness);
+		if (historyTimer.process()) 
+			nodeSwarm.update(newMass,maxHistory);
+	}
 }
 
 swarm::swarm() {
@@ -130,9 +144,10 @@ void swarm::update(mass newMass, int maxHistory) {
 }
 
 void swarm::draw(NVGcontext *vg,NVGcolor massColor) {
+
 	for (int i=1;i<history;i++) {
 		// The 50 in the next line can be a parameter		
-		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-i)*50/history);
+		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-i)*200/history);
 		masses[i].setColor(massColorFaded);
 		masses[i].draw(vg);
 	}
@@ -164,17 +179,17 @@ void mass::setColor(NVGcolor massColor) {
 
 void mass::draw(NVGcontext *vg) {
 	nvgFillColor(vg, massColor);
-	nvgStrokeColor(vg, massColor);
-	nvgStrokeWidth(vg, 2);
+	NVGcolor transColor = nvgLerpRGBA(nvgRGB(0xFF, 0xFF, 0xFF), massColor, 0.25);
 	nvgBeginPath(vg);
 	nvgCircle(vg, position.first, position.second, size);
+	nvgFillPaint(vg,nvgRadialGradient(vg,position.first, position.second, 1, size, transColor ,massColor));
 	nvgFill(vg);
-	nvgStroke(vg);
 	nvgClosePath(vg);
-}
+}	
+
 
 void line::draw(NVGcontext *vg) {
-	NVGcolor lineColor = nvgRGB(0xFF, 0x7F, 0x00);
+	NVGcolor lineColor = nvgRGBA(0xFF, 0x7F, 0x00, 0xA0);
 	nvgFillColor(vg, lineColor);
 	nvgStrokeColor(vg, lineColor);
 	nvgStrokeWidth(vg, 2);

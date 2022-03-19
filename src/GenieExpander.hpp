@@ -46,16 +46,23 @@ struct xpanderPairs {
 };
 
 struct node {
+	enum NodeType {
+		STATIC,
+		ROTATING,
+	};
+
 	private:
 		NVGcolor nodeColor;
 		int maxHistory;
 		dsp::ClockDivider historyTimer;
 		float thickness;
+		NodeType nodeType;
 	public:
 		node();
 		mass newMass;
 		swarm nodeSwarm;
 		void setColor(NVGcolor color);
+		void setNodeType(NodeType);
 		void setMaxhistory(int maxHistory);
 		void draw(NVGcontext *vg);
 };
