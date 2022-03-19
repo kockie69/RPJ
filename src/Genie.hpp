@@ -129,6 +129,7 @@ struct Genie : Module {
         PARAM_MASS,
         PARAM_MASSCV,
         PARAM_RESET,
+        PARAM_UNI,
 		NUM_PARAMS,
 	};
 
@@ -167,6 +168,7 @@ struct Genie : Module {
     xpanderPairs xpMsg[2];
     int nrOfPendulums;
     dsp::SchmittTrigger resetTrigger;
+    bool uni;
 };
 
 struct GenieModuleWidget : ModuleWidget {

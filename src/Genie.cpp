@@ -11,10 +11,10 @@ Genie::Genie() {
     std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
 	nrOfPendulums=3;
-	dim.first = WIDTH;
-	dim.second = HEIGHT;
-    len = std::min(dim.first, dim.second) / 8.f;
-
+	dim.first = 5;
+	dim.second = 5;
+    len = std::min(dim.first, dim.second);
+	uni = false;
 
 	for (int n=0;n<MAXPENDULUMS;n++) {
     	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
@@ -24,10 +24,11 @@ Genie::Genie() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_TIMEMULT, 1.f, 10.f,10.f, "Speed");
 	configParam(PARAM_TIMEMULTCV, -1.f, 1.f,0.f, "Speed CV Attenuator");
-	configParam(PARAM_LENGTHMULT, 0.f, 0.5f,0.5f, "Length","",2,1,-1);
+	configParam(PARAM_LENGTHMULT, 0.1f, 1.f,1.f, "Length");
 	configParam(PARAM_LENGTHMULTCV, -1.f, 1.f,0.f, "Length CV Attenuator");
 	configParam(PARAM_MASS, 0.1f, 10.f,5.f, "Mass");
 	configParam(PARAM_MASSCV, -1.f, 1.f,0.f, "Mass CV Attenuator");
+	configParam(PARAM_UNI,0.f,1.f,0.f,"Unipolar selection");
 	rightExpander.producerMessage = (xpanderPairs*) &xpMsg[0];
 	rightExpander.consumerMessage = (xpanderPairs*) &xpMsg[1];
 }
@@ -46,6 +47,8 @@ void Genie::process(const ProcessArgs &args) {
 		reset();
     }
 
+	uni = params[PARAM_UNI].getValue();
+
 	mass = params[PARAM_MASS].getValue();
 	if (inputs[INPUT_MASSCV].isConnected()) {
 		double cvm = inputs[INPUT_MASSCV].getVoltage()/10.f;
@@ -61,11 +64,10 @@ void Genie::process(const ProcessArgs &args) {
 	lengthMult = params[PARAM_LENGTHMULT].getValue();
 	if (inputs[INPUT_LENGTHMULTCV].isConnected()) {
 		double cvl = inputs[INPUT_LENGTHMULTCV].getVoltage()/10.f;
-		lengthMult=clamp((params[PARAM_LENGTHMULTCV].getValue() * cvl) + params[PARAM_LENGTHMULT].getValue(),0.f, 0.5f);
+		lengthMult=clamp((params[PARAM_LENGTHMULTCV].getValue() * cvl) + params[PARAM_LENGTHMULT].getValue(),0.1f, 1.f);
 	}
-	lengthMult = pow(2,lengthMult);
 
-	len = std::min(dim.first, dim.second) *lengthMult/4.f;
+	len = std::min(dim.first, dim.second) * lengthMult;
 	for (int n=0;n<nrOfPendulums+1;n++) {
 		ss[n] = {{mass, mass}, {len, len}};
 	
@@ -81,10 +83,10 @@ void Genie::process(const ProcessArgs &args) {
 
     	st[n] = dp::advance(st[n], ss[n], args.sampleTime*timeMult);
 
-		outputs[OUTPUT_1_X].setVoltage(edges[n][0].first/50.f);
-		outputs[OUTPUT_1_Y].setVoltage(edges[n][0].second/50.f);
-		outputs[OUTPUT_2_X].setVoltage(edges[n][0].first/50.f);
-		outputs[OUTPUT_2_Y].setVoltage(edges[n][0].second/50.f);
+		outputs[OUTPUT_1_X].setVoltage((edges[n][0].first)+5*uni);
+		outputs[OUTPUT_1_Y].setVoltage((edges[n][0].second)+5*uni);
+		outputs[OUTPUT_2_X].setVoltage((edges[n][0].first)+5*uni);
+		outputs[OUTPUT_2_Y].setVoltage((edges[n][0].second)+5*uni);
 
 		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
 		if (expanderPresent) {
@@ -116,10 +118,12 @@ GenieModuleWidget::GenieModuleWidget(Genie* module) {
 	addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 
 	// First do the buttons
-	const float buttonX1 = 107;
+	const float buttonX1 = 62;
+	const float buttonX2 = 107;
 
 	const float buttonY1 = 129;
-    addParam(createParam<ButtonBig>(Vec(buttonX1,buttonY1),module, Genie::PARAM_RESET));
+    addParam(createParam<ButtonBigSwitch>(Vec(buttonX1,buttonY1),module, Genie::PARAM_UNI));
+	addParam(createParam<ButtonBig>(Vec(buttonX2,buttonY1),module, Genie::PARAM_RESET));
 
 	// Then do the knobs
 	const float knobX1 = 6;

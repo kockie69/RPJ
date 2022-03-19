@@ -58,7 +58,7 @@ void GenieExpander::process(const ProcessArgs &args) {
 
 
 			for (int i=1; i < 3;i++) {
-				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
+				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first*10+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second*10+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
 				pendulums[n].nodes[i].newMass.setSize(10);
 			}
 		}

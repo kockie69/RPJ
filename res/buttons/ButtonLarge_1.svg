@@ -60,12 +60,23 @@
          y="0" />
     </clipPath>
   </defs>
-  <circle
-     vector-effect="non-scaling-stroke"
-     cx="7.5"
-     cy="7.5"
-     fill="rgb(32,32,32)"
-     id="circle2353"
-     style="isolation:isolate;fill:#ae1c28;fill-opacity:1;stroke-width:11.6667"
-     r="7.5" />
+  <g
+     id="g16891">
+    <circle
+       vector-effect="non-scaling-stroke"
+       cx="7.5"
+       cy="7.5"
+       fill="rgb(32,32,32)"
+       id="circle2353-8"
+       style="isolation:isolate;fill:#000000;stroke-width:14.9999"
+       r="7.5" />
+    <circle
+       vector-effect="non-scaling-stroke"
+       cx="7.5"
+       cy="7.5"
+       fill="rgb(32,32,32)"
+       id="circle2353"
+       style="isolation:isolate;fill:#ae1c28;fill-opacity:1;stroke-width:9.07436"
+       r="5.8334999" />
+  </g>
 </svg>
