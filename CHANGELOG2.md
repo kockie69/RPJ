@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Hardcut button is not working yet
 
+## [1.0.8] - 2022-06-12
+### Added
+
+### Changed
+- Links to manual and changelog updated
+- 
 ## [1.0.7] - 2022-06-11
 ### Added
 - Documentation updated
