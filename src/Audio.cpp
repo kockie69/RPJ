@@ -145,16 +145,9 @@ void Audio::processAudioSample() {
 
 		// First check if samplePos is still within begin and end bounderies, otherwise return to start
     	if (play && withinBoundery()) {
-			// If mono
-			if (channels == 1) {
-				left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
-				right = panning(panningType, panningValue).right * dB * (playBuffer[0][floor(samplePos)]);
-			}
-			// If stereo
-			else if (channels ==2) {
-				left = dB * panning(panningType, panningValue).left * (playBuffer[0][floor(samplePos)]);
-				right = dB * panning(panningType, panningValue).right * (playBuffer[1][floor(samplePos)]);
-       		}
+			left = panning(panningType, panningValue).left * dB * (playBuffer[0][floor(samplePos)]);
+			right = panning(panningType, panningValue).right * dB;
+			right = (channels == 1) ? right * playBuffer[0][floor(samplePos)] : right * playBuffer[1][floor(samplePos)] ;
 		}
 
 		if (!withinBoundery()) {
