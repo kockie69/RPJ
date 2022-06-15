@@ -19,7 +19,9 @@ GenieExpander::GenieExpander() {
 	configParam(PARAM_PEND_4_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 4");
 	configParam(PARAM_PEND_4_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 4");
 	maxHistory=10;
-	for (int i=0;i<MAXPENDULUMS;i++) { 
+	drawLines=true;
+
+	for (int i=0;i<MAXOBJECTS;i++) { 
 		pendulums[i].setPosition({(WIDTH/2)+75,HEIGHT/2});
 		pendulums[i].nodes[0].setColor(nvgRGB(0xAE, 0x1C, 0x28));	
 		pendulums[i].nodes[1].setColor(nvgRGB(0xFF, 0xFF, 0xFF));
@@ -34,11 +36,49 @@ GenieExpander::GenieExpander() {
 	}
 }
 
+json_t *GenieExpander::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, "JSON_DRAWLINES", json_boolean(static_cast<bool>(drawLines)));
+    return rootJ;
+}
+
+void GenieExpander::dataFromJson(json_t *rootJ) {
+	json_t *nDrawLinesJ = json_object_get(rootJ, "JSON_DRAWLINES");
+	if (nDrawLinesJ) 
+		drawLines = static_cast<bool>(json_boolean_value(nDrawLinesJ));
+}
+
+void GenieExpander::doPendulum() {
+	
+	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
+	for (int n=0;n < MAXOBJECTS;n++) {
+		pendulums[n].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
+		pendulums[n].nodes[0].newMass.setSize(10);
+		pendulums[n].setNrOfNodes(3);
+
+		for (int i=1; i < 3;i++) {
+			pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first*10+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second*10+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
+			pendulums[n].nodes[i].newMass.setSize(10);
+		}
+	}
+
+	nrOfPendulums = rdMsg->nrOfItems;
+}
+
+void GenieExpander::doBumpingBalls() {
+xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
+	for (int n=0;n < MAXOBJECTS;n++) {
+		bumpingBalls[n].setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
+		bumpingBalls[n].setSize(10);
+	}
+	nrOfBalls = rdMsg->nrOfItems;
+}
+
 void GenieExpander::process(const ProcessArgs &args) {
 
 	maxHistory = params[PARAM_HISTORY].getValue();
 	// In future read the pendulum position parameters, for now all xpos,ypos
-	for (int i=0;i<MAXPENDULUMS;i++) { 
+	for (int i=0;i<MAXOBJECTS;i++) { 
 		pendulums[i].nodes[0].setMaxhistory(maxHistory);
 		pendulums[i].nodes[1].setMaxhistory(maxHistory);
 		pendulums[i].nodes[2].setMaxhistory(maxHistory);
@@ -50,19 +90,23 @@ void GenieExpander::process(const ProcessArgs &args) {
 	
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected) {
-    	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-		for (int n=0;n < MAXPENDULUMS;n++) {
-			pendulums[n].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
-			pendulums[n].nodes[0].newMass.setSize(10);
-			pendulums[n].setNrOfNodes(3);
 
-
-			for (int i=1; i < 3;i++) {
-				pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first*10+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second*10+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
-				pendulums[n].nodes[i].newMass.setSize(10);
-			}
+		switch (static_cast<int>(genieAlgorythm))
+		{
+			// PENDULUM
+			case 0:
+				{
+					doPendulum();
+				}
+				break;
+			case 1:
+				{
+					doBumpingBalls();
+				}
+				break;
+			default:
+				break;
 		}
-		nrOfPendulums = rdMsg->nrOfPendulums;
 	}
 	else {
 		nrOfPendulums=1;
@@ -212,14 +256,16 @@ std::pair<double,double> pendulum::getPosition(void) {
 	return position;
 }
 
-void pendulum::draw(NVGcontext *vg) {
+void pendulum::draw(NVGcontext *vg,bool drawLines) {
 
 	for (int i=0;i<nrOfNodes;i++) { 
 		nodes[i].draw(vg);
-		if (i>0) {
-			lines[i-1].setBegin(nodes[i-1].newMass.getPosition());
-			lines[i-1].setEnd(nodes[i].newMass.getPosition());
-			lines[i-1].draw(vg);
+		if (drawLines) {
+			if (i>0) {
+				lines[i-1].setBegin(nodes[i-1].newMass.getPosition());
+				lines[i-1].setEnd(nodes[i].newMass.getPosition());
+				lines[i-1].draw(vg);
+			}
 		}
 	}
 }
@@ -233,13 +279,21 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 		clipBox.pos.x = args.clipBox.pos.x + 75;
 		nvgScissor(args.vg, RECT_ARGS(clipBox));
 
+		
 		for (int n=0;n<module->nrOfPendulums;n++) {
-			module->pendulums[n].draw(args.vg);
+			module->pendulums[n].draw(args.vg,module->drawLines);
 		}
 	}
 	TransparentWidget::drawLayer(args,layer);
 }
 
+void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
+	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
+
+	menu->addChild(new MenuSeparator());
+
+	menu->addChild(createBoolPtrMenuItem("Draw Lines between Nodes","", &module->drawLines));
+}
 
 GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 

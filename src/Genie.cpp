@@ -8,6 +8,7 @@
 
 
 Genie::Genie() {
+	genieAlgorythm = PENDULUM;
     std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
 	nrOfPendulums=3;
@@ -16,7 +17,11 @@ Genie::Genie() {
     len = std::min(dim.first, dim.second);
 	uni = false;
 
-	for (int n=0;n<MAXPENDULUMS;n++) {
+	for (int n=0;n<MAXOBJECTS;n++) {
+		bumpingBalls[n].setPosition({rnd(generator), rnd(generator)});
+	}
+
+	for (int n=0;n<MAXOBJECTS;n++) {
     	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
     	ss[n] = {{1, 1}, {len, len}};
 	}
@@ -37,8 +42,69 @@ void Genie::reset(void) {
 	std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
 
-	for (int n=0;n<MAXPENDULUMS;n++)
+	for (int n=0;n<MAXOBJECTS;n++)
     	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
+}
+
+json_t *Genie::dataToJson() {
+	json_t *rootJ=json_object();
+	json_object_set_new(rootJ, "JSON_NROFPENDULUMS", json_integer(static_cast<int>(nrOfPendulums)));
+    json_object_set_new(rootJ, "JSON_ALGORYTHM", json_integer(static_cast<int>(genieAlgorythm)));
+	return rootJ;
+}
+
+void Genie::dataFromJson(json_t *rootJ) {
+	json_t *nNrOfPJ = json_object_get(rootJ, "JSON_NROFPENDULUMS");
+	json_t *nAlgoJ = json_object_get(rootJ, "JSON_ALGORYTHM");
+	if (nNrOfPJ) 
+		nrOfPendulums = static_cast<int>(json_integer_value(nNrOfPJ));
+	if (nAlgoJ) 
+		genieAlgorythm = static_cast<GenieAlgorythms>(json_integer_value(nAlgoJ));
+}
+
+void ball::setPosition(std::pair<double,double> position) {
+	this->position = position;
+}
+
+std::pair<double,double> ball::getPosition(void) {
+	return position;
+}
+
+void Genie::doBumpingBalls(const ProcessArgs & args) {
+	for (int n=0;n<nrOfPendulums+1;n++) {
+		std::pair<double,double> x = bumpingBalls[n].getPosition();
+	}
+}
+
+void Genie::doPendulum(const ProcessArgs & args) {
+
+	for (int n=0;n<nrOfPendulums+1;n++) {
+		ss[n] = {{mass, mass}, {len, len}};
+		edges[n][0] = {
+			ss[n].length.first * sin(st[n].theta.first),
+			ss[n].length.first * cos(st[n].theta.first)
+		};
+
+		edges[n][1] = {
+			edges[n][0].first  + ss[n].length.second * sin(st[n].theta.second),
+			edges[n][0].second + ss[n].length.second * cos(st[n].theta.second)
+		};
+
+		st[n] = dp::advance(st[n], ss[n], args.sampleTime*timeMult);
+
+		outputs[OUTPUT_1_X+2*n].setVoltage((edges[n][0].first)+5*uni);
+		outputs[OUTPUT_1_Y+2*n].setVoltage((edges[n][0].second)+5*uni);
+		outputs[OUTPUT_1_EDGE+2*n].setVoltage((st[n].theta.first/18.0f));
+				
+		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
+		if (expanderPresent) {
+			xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
+			for (int i=0; i < EDGES;i++)
+			wrMsg->edges[n][i] = edges[n][i];
+			wrMsg->nrOfItems = nrOfPendulums+1;
+			rightExpander.messageFlipRequested = true;
+		}
+	}
 }
 
 void Genie::process(const ProcessArgs &args) {
@@ -68,34 +134,22 @@ void Genie::process(const ProcessArgs &args) {
 	}
 
 	len = std::min(dim.first, dim.second) * lengthMult;
-	
-	for (int n=0;n<nrOfPendulums+1;n++) {
-		ss[n] = {{mass, mass}, {len, len}};
-	
-		edges[n][0] = {
-       		ss[n].length.first * sin(st[n].theta.first),
-        	ss[n].length.first * cos(st[n].theta.first)
-    	};
 
-		edges[n][1] = {
-        	edges[n][0].first  + ss[n].length.second * sin(st[n].theta.second),
-        	edges[n][0].second + ss[n].length.second * cos(st[n].theta.second)
-    	};
-
-    	st[n] = dp::advance(st[n], ss[n], args.sampleTime*timeMult);
-
-		outputs[OUTPUT_1_X+2*n].setVoltage((edges[n][0].first)+5*uni);
-		outputs[OUTPUT_1_Y+2*n].setVoltage((edges[n][0].second)+5*uni);
-		outputs[OUTPUT_1_EDGE+2*n].setVoltage((st[n].theta.first/18.0f));
-
-		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
-		if (expanderPresent) {
-			xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;
-			for (int i=0; i < EDGES;i++)
-				wrMsg->edges[n][i] = edges[n][i];
-			wrMsg->nrOfPendulums = nrOfPendulums+1;
-			rightExpander.messageFlipRequested = true;
-		}
+	switch (static_cast<int>(genieAlgorythm))
+	{
+		// PENDULUM
+		case 0:
+			{
+				doPendulum(args);
+			}
+			break;
+		case 1:
+			{
+				doBumpingBalls(args);
+			}
+			break;
+		default:
+			break;
 	}
 }
 
@@ -103,8 +157,12 @@ void GenieModuleWidget::appendContextMenu(Menu *menu) {
 	Genie * module = dynamic_cast<Genie*>(this->module);
 
 	menu->addChild(new MenuSeparator());
+	menu->addChild(createIndexPtrSubmenuItem("Algorythm", {"Pendulum", "Bumping Balls"}, &module->genieAlgorythm));
 
-	menu->addChild(createIndexPtrSubmenuItem("Number of Pentulums", {"1", "2", "3", "4"}, &module->nrOfPendulums));
+	menu->addChild(new MenuSeparator());
+
+	menu->addChild(createIndexPtrSubmenuItem("Number of Pendulums", {"1", "2", "3", "4"}, &module->nrOfPendulums));
+
 }
 
 GenieModuleWidget::GenieModuleWidget(Genie* module) {

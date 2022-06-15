@@ -5,7 +5,7 @@ class GenieExpanderModuleWidget {
 }
 
 class GenieExpander {
-    -pendulum[4] pendulums
+    -item[4] items
     -size float
 	-arentConnected bool
 	-nrOfPendulums int
@@ -17,11 +17,18 @@ class GenieDisplay {
     -module GenieExpander
     +drawLayer(const DrawArgs &args,int layer)
 }
-class pendulum {
-    -position
-    +pendulum(void)
+
+enum GenieAlgorythms {
+    PENDULUM
+    BUMPINGBALLS
+}
+
+class item {
+    -position : std::pair<double,double> 
+    -genieAlgorythm : GenieAlgorythms
+    -child : mass
+    +item(void)
     +void draw(NVGcontext *vg)
-    -node[4] nodes
 }
 
 class node {
@@ -32,11 +39,15 @@ class node {
     +nodeSwarm : swarm
     -color : NVGcolor
     -maxHistory : int
+    -parent : node
+    -child : node
 }
 
 class mass {
-    -position std::pair<double,double>
-    -size int
+    -position : std::pair<double,double>
+    -size : float
+    -mass : float
+    -color : NVGColor
     +void draw(NVGcontext *vg)
     +void setSize(int size)
     +void setPosition(std::pair<double,double> position)
@@ -56,10 +67,12 @@ modelGenieExpander --> GenieExpander
 modelGenieExpander --> GenieExpanderModuleWidget
 GenieExpanderModuleWidget --> GenieDisplay
 GenieDisplay --> GenieExpander
-GenieExpander -- "4" pendulum : has >
-pendulum -- "4" node : has >
-node -- mass : has >
+GenieExpander -- "4" item : has >
+item -- "1" node : has >
+item -- GenieAlgorythms
 node -- swarm
+node -- mass
 swarm -- "0..*" mass : has >
+node "0" -- "*" node
 
 @enduml

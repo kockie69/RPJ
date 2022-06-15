@@ -7,7 +7,12 @@ const int MODULE_WIDTH=26;
 const int WIDTH=375;
 const int HEIGHT=350;
 const int NODES=5;
-const int MAXPENDULUMS = 4;
+const int MAXOBJECTS = 4;
+
+enum GenieAlgorythms {
+    PENDULUM,
+    BUMPINGBALLS,
+};
 
 float swarmThickness;
 
@@ -41,8 +46,9 @@ struct swarm {
 };
 
 struct xpanderPairs {
-	std::pair<double, double> edges[4][2];
-	int nrOfPendulums;
+	std::pair<double, double> edges[MAXOBJECTS][2];
+    int nrOfItems;
+    GenieAlgorythms genieAlgorythm;
 };
 
 struct node {
@@ -80,7 +86,7 @@ struct line {
 
 struct pendulum {
 	public:
-		void draw(NVGcontext *vg);
+		void draw(NVGcontext *vg,bool drawLines);
 		void setPosition(std::pair<double,double> position);
 		std::pair<double,double> getPosition();
 		void setNrOfNodes(int nrOfNodes);
@@ -131,12 +137,20 @@ struct GenieExpander : Module {
 	public:
 		GenieExpander();
 		void process(const ProcessArgs &) override;
-		pendulum pendulums[MAXPENDULUMS];
+		pendulum pendulums[MAXOBJECTS];
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void doPendulum();
+		void doBumpingBalls();
+		GenieAlgorythms genieAlgorythm;
+		mass bumpingBalls[MAXOBJECTS];
 		double size;
 		bool parentConnected;
-		int nrOfPendulums;
+		int nrOfPendulums,nrOfBalls;
 		int maxHistory;
+		bool drawLines;
 	private:
+
 };
 
 struct GenieDisplay : TransparentWidget {
@@ -152,6 +166,7 @@ struct GenieDisplay : TransparentWidget {
 
 struct GenieExpanderModuleWidget : ModuleWidget {
 	GenieExpanderModuleWidget(GenieExpander*);
+	void appendContextMenu(Menu *) override;
 	GenieDisplay *display;
 };
 

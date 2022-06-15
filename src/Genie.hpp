@@ -6,11 +6,17 @@ const int MODULE_WIDTH=19;
 const int WIDTH=250;
 const int HEIGHT=250;
 const int EDGES=2;
-const int MAXPENDULUMS = 4;
+const int MAXOBJECTS = 4;
+
+enum GenieAlgorythms {
+    PENDULUM,
+    BUMPINGBALLS,
+};
 
 struct xpanderPairs {
-	std::pair<double, double> edges[MAXPENDULUMS][EDGES];
-    int nrOfPendulums;
+	std::pair<double, double> edges[MAXOBJECTS][EDGES];
+    int nrOfItems;
+    GenieAlgorythms genieAlgorythm;
 };
 
 namespace dp {
@@ -119,6 +125,19 @@ namespace dp {
     }
 }
 
+struct ball {
+    private:
+		std::pair<double,double> position;
+    	int size;
+		NVGcolor massColor;
+	public:
+    	void draw(NVGcontext *vg);
+    	void setSize(int size);
+    	void setPosition(std::pair<double,double> position);
+		std::pair<double,double> getPosition(void);
+    	void setColor(NVGcolor massColor);
+};
+
 struct Genie : Module {
 
 	enum ParamIds {
@@ -164,15 +183,21 @@ struct Genie : Module {
 	Genie();
 	void process(const ProcessArgs &) override;
     void reset(void);
+    json_t *dataToJson() override;
+	void dataFromJson(json_t *) override;
+    void doPendulum(const ProcessArgs &);
+    void doBumpingBalls(const ProcessArgs &);
+    GenieAlgorythms genieAlgorythm;
     std::pair<int, int> dim;
 
-    std::pair<double, double> edges[MAXPENDULUMS][EDGES];
-    dp::state st[MAXPENDULUMS];
-    dp::system ss[MAXPENDULUMS];
+    std::pair<double, double> edges[MAXOBJECTS][EDGES];
+    dp::state st[MAXOBJECTS];
+    dp::system ss[MAXOBJECTS];
     double timeMult;
     double lengthMult;
     double len;
     double mass;
+    ball bumpingBalls[MAXOBJECTS];
     xpanderPairs xpMsg[2];
     int nrOfPendulums;
     dsp::SchmittTrigger resetTrigger;
