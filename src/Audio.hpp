@@ -54,7 +54,7 @@ struct Audio {
     void setPlayMode(PlayMode);
     bool goingUp(void);
     float scaleFac;
-	float samplePos;
+	unsigned int samplePos;
     PanningType panningType;
     float left,right;
     float dB;

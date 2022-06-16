@@ -18,7 +18,7 @@ The **Start** and **End** knobs let you control the begin and ens position of th
 
 **Volume** lets you control the volume, where the leds below give you an idea about the current level.
 
-The **Zoom-In** and **Zoom-Out** buttons give you the option to drill down and get to access to a specific area in your sample. Ideal for granular synthesis. 
+The **Zoom-In** and **Zoom-Out** buttons give you the option to drill down and get to access to a specific area in your sample. Ideal for granular synthesis. Make sure you change the begin and end markers, otherwise there is no reason and no possibility for the module to drill. 
 
 The menu of the module gives you two additional control settings. One is the **Panningtype** (**Simple** or **Constant Power**) that can be selected and the other one is **PlayMode**. Here you can choose between:
 **Single**, the sample will be played from the Begin postion till the End postion only once.

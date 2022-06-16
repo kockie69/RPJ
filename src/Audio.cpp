@@ -140,9 +140,9 @@ void Audio::processAudioSample() {
 			setPlay(false);
 		}
 
-		if (play) 
-			samplePos = (up) ? samplePos+(delta*(sampleRate/rackSampleRate)+speed) : samplePos+(-1*delta*(sampleRate/rackSampleRate)+speed);
-
+		if (play) {
+			samplePos = (up) ? samplePos+((delta*(sampleRate/rackSampleRate))+speed) : samplePos+(-1*delta*(sampleRate/rackSampleRate))+speed;
+		}
 		// First check if samplePos is still within begin and end bounderies, otherwise return to start
     	if (play && withinBoundery()) {
 			// If mono
