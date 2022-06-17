@@ -2,7 +2,10 @@
 RACK_DIR ?= ../..
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS +=
+FLAGS += -I./dsp/generators -I./dsp/utils -I./dsp/filters
+FLAGS += -I./dsp/third-party/src
+FLAGS += -I./dsp/third-party/falco
+FLAGS += -I./dsp
 CFLAGS +=
 CXXFLAGS +=
 
@@ -12,6 +15,8 @@ LDFLAGS +=
 
 # Add .cpp files to the build
 SOURCES += $(wildcard src/*.cpp)
+SOURCES += $(wildcard dsp/**/*.cpp)
+SOURCES += $(wildcard dsp/third-party/falco/*.cpp)
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

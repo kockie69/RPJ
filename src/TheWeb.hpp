@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=8;
 
 struct TheWeb : Module {
 
@@ -40,10 +40,15 @@ struct TheWeb : Module {
 	};
 
 		TheWeb();
-		AudioFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
+		void processChannel(int, Input&, Output&, Output&, Output&, Output&);
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		AudioFilter<rack::simd::float_4> LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
 		void process(const ProcessArgs &) override;
+		void onSampleRateChange() override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
+		biquadAlgorithm bqaUI;
 };
 
 

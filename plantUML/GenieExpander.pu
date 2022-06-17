@@ -1,0 +1,78 @@
+@startuml
+
+class GenieExpanderModuleWidget {
+    -display GenieDisplay
+}
+
+class GenieExpander {
+    -item[4] items
+    -size float
+	-arentConnected bool
+	-nrOfPendulums int
+	-maxHistory int
+    -process()
+}
+
+class GenieDisplay {
+    -module GenieExpander
+    +drawLayer(const DrawArgs &args,int layer)
+}
+
+enum GenieAlgorythms {
+    PENDULUM
+    BUMPINGBALLS
+}
+
+class item {
+    -position : std::pair<double,double> 
+    -genieAlgorythm : GenieAlgorythms
+    -child : mass
+    +item(void)
+    +void draw(NVGcontext *vg)
+}
+
+class node {
+    +setColor(NVGcolor color)
+    +setMaxhistory(int maxHistory)
+    +draw(NVGcontext *vg)
+    +newMass : mass
+    +nodeSwarm : swarm
+    -color : NVGcolor
+    -maxHistory : int
+    -parent : node
+    -child : node
+}
+
+class mass {
+    -position : std::pair<double,double>
+    -size : float
+    -mass : float
+    -color : NVGColor
+    +void draw(NVGcontext *vg)
+    +void setSize(int size)
+    +void setPosition(std::pair<double,double> position)
+    +void setColor(NVGcolor massColor)
+}
+
+class swarm {
+    -mass[0..*] masses
+    -history int
+    +void draw(NVGcontext *vg,NVGcolr massColor)
+    +void updateSwarm(mass newMass, int maxHistory)
+    -void deleteOldestMass()
+    -void addNewestMass()
+}
+
+modelGenieExpander --> GenieExpander
+modelGenieExpander --> GenieExpanderModuleWidget
+GenieExpanderModuleWidget --> GenieDisplay
+GenieDisplay --> GenieExpander
+GenieExpander -- "4" item : has >
+item -- "1" node : has >
+item -- GenieAlgorythms
+node -- swarm
+node -- mass
+swarm -- "0..*" mass : has >
+node "0" -- "*" node
+
+@enduml

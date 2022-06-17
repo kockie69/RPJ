@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=7;
+const int MODULE_WIDTH=8;
 
 const char *JSON_GAIN_KEY="Gain";
 const char *JSON_NLP_KEY="Nlp";
@@ -13,10 +13,13 @@ const char *JSON_MATCH_KEY="Match";
 struct LadyNina : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
+		PARAM_CVFC,
 		PARAM_Q,
+		PARAM_CVQ,
+		PARAM_DRY,
+		PARAM_WET,
+		PARAM_CVB,
 		PARAM_BOOSTCUT_DB,
 		NUM_PARAMS,
 	};
@@ -44,36 +47,10 @@ struct LadyNina : Module {
 		LadyNina();
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
-		ZVAFilter LPFaudioFilter,HPFaudioFilter,BPFaudioFilter,BSFaudioFilter;
+		void onSampleRateChange() override;
+		ZVAFilter<rack::simd::float_4> LPFaudioFilter[4],HPFaudioFilter[4],BPFaudioFilter[4],BSFaudioFilter[4];
 		void process(const ProcessArgs &) override;
+		void processChannel(int, Input&, Output&, Output&, Output&, Output&);
 		ZVAFilterParameters LPFafp,HPFafp,BPFafp,BSFafp;
 		bool gain, nlp, osc, match;
-};
-
-/* Context Menu Item for changing the Gain Compensation setting */
-struct nGainCompensationMenuItem : MenuItem {
-	LadyNina *module;
-	bool Gain;
-	void onAction(const event::Action &) override;
-};
-
-/* Context Menu Item for changing the NLP setting */
-struct nNLPMenuItem : MenuItem {
-	LadyNina *module;
-	bool NLP;
-	void onAction(const event::Action &) override;
-};
-
-/* Context Menu Item for changing the Self Oscilation setting */
-struct nOscMenuItem : MenuItem {
-	LadyNina *module;
-	bool Osc;
-	void onAction(const event::Action &) override;
-};
-
-/* Context Menu Item for changing the Match Analog gain at Nyquist setting */
-struct nMatchMenuItem : MenuItem {
-	LadyNina *module;
-	bool Match;
-	void onAction(const event::Action &) override;
 };

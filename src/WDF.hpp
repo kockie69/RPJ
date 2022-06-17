@@ -10,29 +10,29 @@ public:
 	virtual void initializeAdaptorChain();
 
 	/** set input value into component port  */
-	virtual void setInput(double);
+	virtual void setInput(rack::simd::float_4);
 
 	/** get output value from component port  */
-	virtual double getOutput();
+	virtual rack::simd::float_4 getOutput();
 
 	// --- for adaptors
 	/** ADAPTOR: set input port 1  */
-	virtual void setInput1(double) = 0;
+	virtual void setInput1(rack::simd::float_4) = 0;
 
 	/** ADAPTOR: set input port 2  */
-	virtual void setInput2(double) = 0;
+	virtual void setInput2(rack::simd::float_4) = 0;
 
 	/** ADAPTOR: set input port 3 */
-	virtual void setInput3(double) = 0;
+	virtual void setInput3(rack::simd::float_4) = 0;
 
 	/** ADAPTOR: get output port 1 value */
-	virtual double getOutput1() = 0;
+	virtual rack::simd::float_4 getOutput1() = 0;
 
 	/** ADAPTOR: get output port 2 value */
-	virtual double getOutput2() = 0;
+	virtual rack::simd::float_4 getOutput2() = 0;
 
 	/** ADAPTOR: get output port 3 value */
-	virtual double getOutput3() = 0;
+	virtual rack::simd::float_4 getOutput3() = 0;
 
 	/** reset the object with new sample rate */
 	virtual void reset(double);
@@ -91,28 +91,28 @@ public:
 	virtual void reset(double) override;
 
 	/** set input value into component; NOTE: resistor is dead-end energy sink so this function does nothing */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: a WDF resistor produces no reflected output */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double) override;;
+	virtual void setInput1(rack::simd::float_4) override;;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double) override;
+	virtual void setInput2(rack::simd::float_4) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double) override;
+	virtual void setInput3(rack::simd::float_4) override;
 
 protected:
 	double zRegister = 0.0;			///< storage register (not used with resistor)
@@ -150,31 +150,31 @@ public:
 	virtual void reset(double) override;
 
 	/** set input value into component; NOTE: capacitor sets value into register*/
-	virtual void setInput(double in) override;
+	virtual void setInput(rack::simd::float_4 in) override;
 
 	/** get output value; NOTE: capacitor produces reflected output */
-	virtual double getOutput() override;	// z^-1
+	virtual rack::simd::float_4 getOutput() override;	// z^-1
 
 	/** get output1 value; only one capacitor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one capacitor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one capacitor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double _in1) override;
+	virtual void setInput1(rack::simd::float_4 _in1) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double _in2) override;
+	virtual void setInput2(rack::simd::float_4 _in2) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double _in3) override;
+	virtual void setInput3(rack::simd::float_4 _in3) override;
 
 protected:
-	double zRegister = 0.0;			///< storage register (not used with resistor)
+	rack::simd::float_4 zRegister = 0.0;			///< storage register (not used with resistor)
 	double componentValue = 0.0;	///< component value in electronic form (ohm, farad, henry)
 	double componentResistance = 0.0;///< simulated resistance
 	double sampleRate = 0.0;		///< sample rate
@@ -209,31 +209,31 @@ public:
 	virtual void reset(double) override;;
 
 	/** set input value into component; NOTE: inductor sets value into storage register */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: a WDF inductor produces reflected output that is inverted */
-	virtual double getOutput() override; // -z^-1
+	virtual rack::simd::float_4 getOutput() override; // -z^-1
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double) override;
+	virtual void setInput1(rack::simd::float_4) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double) override;
+	virtual void setInput2(rack::simd::float_4) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double) override;
+	virtual void setInput3(rack::simd::float_4) override;
 
 protected:
-	double zRegister = 0.0;			///< storage register (not used with resistor)
+	rack::simd::float_4 zRegister = 0.0;			///< storage register (not used with resistor)
 	double componentValue = 0.0;	///< component value in electronic form (ohm, farad, henry)
 	double componentResistance = 0.0;///< simulated resistance
 	double sampleRate = 0.0;		///< sample rate
@@ -278,32 +278,32 @@ public:
 	virtual void reset(double) override;
 
 	/** set input value into component; NOTE: K is calculated here */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: utput is located in zReg_L */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double) override;
+	virtual void setInput1(rack::simd::float_4) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double) override;
+	virtual void setInput2(rack::simd::float_4) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double) override;
+	virtual void setInput3(rack::simd::float_4) override;
 
 protected:
-	double zRegister_L = 0.0; ///< storage register for L
-	double zRegister_C = 0.0; ///< storage register for C
+	rack::simd::float_4 zRegister_L = 0.0; ///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0; ///< storage register for C
 
 	double componentValue_L = 0.0; ///< component value L
 	double componentValue_C = 0.0; ///< component value C
@@ -352,32 +352,32 @@ public:
 	virtual void reset(double _sampleRate) override;
 	
     /** set input value into component; NOTE: K is calculated here */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: output is located in -zReg_L */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double) override;
+	virtual void setInput1(rack::simd::float_4) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double) override;
+	virtual void setInput2(rack::simd::float_4) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double) override;
+	virtual void setInput3(rack::simd::float_4) override;
 
 protected:
-	double zRegister_L = 0.0; ///< storage register for L
-	double zRegister_C = 0.0; ///< storage register for C
+	rack::simd::float_4 zRegister_L = 0.0; ///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0; ///< storage register for C
 
 	double componentValue_L = 0.0; ///< component value L
 	double componentValue_C = 0.0; ///< component value C
@@ -427,32 +427,32 @@ public:
 	virtual void reset(double) override;
 
 	/** set input value into component */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: see FX book for details */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double) override;
+	virtual void setInput1(rack::simd::float_4) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double) override;
+	virtual void setInput2(rack::simd::float_4) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double) override;
+	virtual void setInput3(rack::simd::float_4) override;
 
 protected:
-	double zRegister_L = 0.0; ///< storage register for L
-	double zRegister_C = 0.0;///< storage register for C (not used)
+	rack::simd::float_4 zRegister_L = 0.0; ///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0;///< storage register for C (not used)
 	double K = 0.0;
 
 	double componentValue_L = 0.0;///< component value L
@@ -504,32 +504,32 @@ public:
 	virtual void reset(double _sampleRate) override;
 
 	/** set input value into component */
-	virtual void setInput(double) override;
+	virtual void setInput(rack::simd::float_4) override;
 
 	/** get output value; NOTE: see FX book for details */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 protected:
-	double zRegister_L = 0.0;	///< storage register for L
-	double zRegister_C = 0.0;	///< storage register for L
+	rack::simd::float_4 zRegister_L = 0.0;	///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0;	///< storage register for L
 	double K = 0.0;				///< K value
 
 	double componentValue_L = 0.0;	///< component value L
@@ -582,32 +582,32 @@ public:
 	virtual void reset(double _sampleRate) override;
 
 	/** set input value into component */
-	virtual void setInput(double ) override;
+	virtual void setInput(rack::simd::float_4 ) override;
 
 	/** get output value; NOTE: see FX book for details */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 protected:
-	double zRegister_L = 0.0; ///< storage register for L
-	double zRegister_C = 0.0; ///< storage register for C
+	rack::simd::float_4 zRegister_L = 0.0; ///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0; ///< storage register for C
 	double K = 0.0;
 
 	double componentValue_R = 0.0;///< component value R
@@ -659,32 +659,32 @@ public:
 	virtual void reset(double ) override;
 
 	/** set input value into component; */
-	virtual void setInput(double ) override;
+	virtual void setInput(rack::simd::float_4 ) override;
 
 	/** get output value; NOTE: output is located in zRegister_C */
-	virtual double getOutput() override;
+	virtual rack::simd::float_4 getOutput() override;
 
 	/** get output1 value; only one resistor output (not used) */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get output2 value; only one resistor output (not used) */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get output3 value; only one resistor output (not used) */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 	/** set input1 value; not used for components */
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** set input2 value; not used for components */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input3 value; not used for components */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 protected:
-	double zRegister_L = 0.0; ///< storage register for L
-	double zRegister_C = 0.0; ///< storage register for C
+	rack::simd::float_4 zRegister_L = 0.0; ///< storage register for L
+	rack::simd::float_4 zRegister_C = 0.0; ///< storage register for C
 	double K = 0.0;
 
 	double componentValue_C = 0.0;	///< component value C
@@ -784,16 +784,16 @@ protected:
 
 	// --- these are input variables that are stored;
 	//     not used in this implementation but may be required for extended versions
-	double in1 = 0.0;	///< stored port 1 input;  not used in this implementation but may be required for extended versions
-	double in2 = 0.0;	///< stored port 2 input;  not used in this implementation but may be required for extended versions
-	double in3 = 0.0;	///< stored port 3 input;  not used in this implementation but may be required for extended versions
+	rack::simd::float_4 in1 = 0.0;	///< stored port 1 input;  not used in this implementation but may be required for extended versions
+	rack::simd::float_4 in2 = 0.0;	///< stored port 2 input;  not used in this implementation but may be required for extended versions
+	rack::simd::float_4 in3 = 0.0;	///< stored port 3 input;  not used in this implementation but may be required for extended versions
 
 	// --- these are output variables that are stored;
 	//     currently out2 is the only one used as it is y(n) for this library
 	//     out1 and out2 are stored; not used in this implementation but may be required for extended versions
-	double out1 = 0.0;	///< stored port 1 output; not used in this implementation but may be required for extended versions
-	double out2 = 0.0;	///< stored port 2 output; it is y(n) for this library
-	double out3 = 0.0;	///< stored port 3 output; not used in this implementation but may be required for extended versions
+	rack::simd::float_4 out1 = 0.0;	///< stored port 1 output; not used in this implementation but may be required for extended versions
+	rack::simd::float_4 out2 = 0.0;	///< stored port 2 output; it is y(n) for this library
+	rack::simd::float_4 out3 = 0.0;	///< stored port 3 output; not used in this implementation but may be required for extended versions
 
 	// --- terminal impedance
 	double terminalResistance = 600.0; ///< value of terminal (load) resistance
@@ -816,26 +816,26 @@ public:
 	virtual void initialize(double ) override;
 
 	/** push audio input sample into incident wave input*/
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** push audio input sample into reflected wave input */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input 3 always connects to component */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 	/** get OUT1 = reflected output pin on Port 1 */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get OUT2 = incident (normal) output pin on Port 2 */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get OUT3 always connects to component */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 private:
-	double N1 = 0.0;	///< node 1 value, internal use only
-	double N2 = 0.0;	///< node 2 value, internal use only
+	rack::simd::float_4 N1 = 0.0;	///< node 1 value, internal use only
+	rack::simd::float_4 N2 = 0.0;	///< node 2 value, internal use only
 	double B = 0.0;		///< B coefficient value
 };
 
@@ -854,27 +854,27 @@ public:
 	/** push audio input sample into reflected wave input
 	for terminated adaptor, this is dead end, just store it */
 	// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** push audio input sample into reflected wave input
 	    for terminated adaptor, this is dead end, just store it */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input 3 always connects to component */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 	/** get OUT1 = reflected output pin on Port 1 */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get OUT2 = incident (normal) output pin on Port 2 */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get OUT3 always connects to component */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 private:
-	double N1 = 0.0;	///< node 1 value, internal use only
-	double N2 = 0.0;	///< node 2 value, internal use only
+	rack::simd::float_4 N1 = 0.0;	///< node 1 value, internal use only
+	rack::simd::float_4 N2 = 0.0;	///< node 2 value, internal use only
 	double B1 = 0.0;	///< B1 coefficient value
 	double B3 = 0.0;	///< B3 coefficient value
 };
@@ -892,26 +892,26 @@ public:
 	virtual void initialize(double ) override;
 
 	/** push audio input sample into incident wave input*/
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** push audio input sample into reflected wave input*/
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input 3 always connects to component */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 	/** get OUT1 = reflected output pin on Port 1 */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get OUT2 = incident (normal) output pin on Port 2 */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get OUT3 always connects to component */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 private:
-	double N1 = 0.0;	///< node 1 value, internal use only
-	double N2 = 0.0;	///< node 2 value, internal use only
+	rack::simd::float_4 N1 = 0.0;	///< node 1 value, internal use only
+	rack::simd::float_4 N2 = 0.0;	///< node 2 value, internal use only
 	double A = 0.0;		///< A coefficient value
 };
 
@@ -928,26 +928,26 @@ public:
 	virtual void initialize(double ) override;
 
 	/** push audio input sample into incident wave input*/
-	virtual void setInput1(double ) override;
+	virtual void setInput1(rack::simd::float_4 ) override;
 
 	/** push audio input sample into reflected wave input; this is a dead end for terminated adaptorsthis is a dead end for terminated adaptors  */
-	virtual void setInput2(double ) override;
+	virtual void setInput2(rack::simd::float_4 ) override;
 
 	/** set input 3 always connects to component */
-	virtual void setInput3(double ) override;
+	virtual void setInput3(rack::simd::float_4 ) override;
 
 	/** get OUT1 = reflected output pin on Port 1 */
-	virtual double getOutput1() override;
+	virtual rack::simd::float_4 getOutput1() override;
 
 	/** get OUT2 = incident (normal) output pin on Port 2 */
-	virtual double getOutput2() override;
+	virtual rack::simd::float_4 getOutput2() override;
 
 	/** get OUT3 always connects to component */
-	virtual double getOutput3() override;
+	virtual rack::simd::float_4 getOutput3() override;
 
 private:
-	double N1 = 0.0;	///< node 1 value, internal use only
-	double N2 = 0.0;	///< node 2 value, internal use only
+	rack::simd::float_4 N1 = 0.0;	///< node 1 value, internal use only
+	rack::simd::float_4 N2 = 0.0;	///< node 2 value, internal use only
 	double A1 = 0.0;	///< A1 coefficient value
 	double A3 = 0.0;	///< A3 coefficient value
 };
@@ -969,7 +969,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(double );
 
 	/** create the WDF structure for this object - may be called more than once */
 	void createWDF();
@@ -998,7 +998,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** create the filter structure; may be called more than once */
 	void createWDF();
@@ -1043,7 +1043,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(double );
 
 	/** create the WDF structure; may be called more than once*/
 	void createWDF();
@@ -1073,7 +1073,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(double );
 
 	/** create the WDF structure */
 	void createWDF();
@@ -1120,7 +1120,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** create the WDF structure; may be called more than once */
 	void createWDF();
@@ -1165,7 +1165,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** create WDF structure; may be called more than once */
 	void createWDF();
@@ -1210,7 +1210,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** create the WDF structure*/
 	void createWDF();
@@ -1254,7 +1254,7 @@ public:
 	\param xn input
 	\return the processed sample
 	*/
-	virtual double processAudioSample(double );
+	virtual rack::simd::float_4 processAudioSample(rack::simd::float_4 );
 
 	/** create WDF structure */
 	void createWDF();

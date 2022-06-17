@@ -2,7 +2,7 @@
 
 const double kSmallestPositiveFloatValue = 1.175494351e-38;         /* min positive value */
 const double kSmallestNegativeFloatValue = -1.175494351e-38;         /* min negative value */
-
+const char* const JSON_BIQUAD_ALGORYTHM="Biquad Algorithm";
 
 enum biquadAlgorithm { kDirect, kCanonical, kTransposeDirect, kTransposeCanonical }; //  4 types of biquad calculations, constants (k)
 
@@ -27,63 +27,142 @@ struct BiquadParameters
 	biquadAlgorithm biquadCalcType = biquadAlgorithm::kDirect; ///< biquad structure to use
 };
 
+template <typename T>
 struct Biquad {
 	public:
-	Biquad() {}		/* C-TOR */
-	~Biquad() {}	/* D-TOR */
-
-    bool checkFloatUnderflow(double&);
-
-	// --- IAudioSignalProcessor FUNCTIONS --- //
-	//
-	/** reset: clear out the state array (flush delays); can safely ignore sampleRate argument - we don't need/use it */
-	bool reset(double);
-
-	/** return false: this object only processes samples */
-	bool canProcessAudioFrame();
-
-	/** process input x(n) through biquad to produce return value y(n) */
-	/**
-	\param xn input
-	\return the processed sample
-	*/
-	virtual double processAudioSample(double xn);
-
-	/** get parameters: note use of custom structure for passing param data */
-	/**
-	\return BiquadParameters custom data structure
-	*/
-	BiquadParameters getParameters();
-
-	/** set parameters: note use of custom structure for passing param data */
-	/**
-	\param BiquadParameters custom data structure
-	*/
-	void setParameters(const BiquadParameters&); 
-
-	// --- MUTATORS & ACCESSORS --- //
-	/** set the coefficient array NOTE: passing by pointer to array; allows us to use "array notation" with pointers i.e. [ ] */
-	void setCoefficients(double*);
+bool checkFloatUnderflow(T& value)
+{
+	bool retValue = false;
+	T tmpValue = ifelse(value > 0.f, ifelse(value < kSmallestPositiveFloatValue,0.f,value), ifelse(value > kSmallestNegativeFloatValue,0.f,value));
+	value = tmpValue;
+	return retValue = !(bool)rack::simd::movemask(value);
+}
 
 
-	/** get the coefficient array for read/write access to the array (not used in current objects) */
-	double* getCoefficients();
+bool reset(double _sampleRate) {
+	memset(&stateArray[0], 0, sizeof(double)*numStates);
+	return true;  // handled = true
+}
 
-	/** get the state array for read/write access to the array (used only in direct form oscillator) */
-	double* getStateArray();
+bool canProcessAudioFrame() { 
+	return false; 
+}
 
-	/** get the structure G (gain) value for Harma filters; see 2nd Ed FX book */
-	double getG_value();
+BiquadParameters getParameters() { 
+    return parameters ; 
+}
 
-	/** get the structure S (storage) value for Harma filters; see 2nd Ed FX book */
-	double getS_value();// { return storageComponent; }
+void setParameters(const BiquadParameters& _parameters) { 
+    parameters = _parameters; 
+}
+
+rack::simd::float_4* getCoefficients() {
+	// --- read/write access to the array (not used)
+	return &coeffArray[0];
+}
+
+T* getStateArray() {
+	// --- read/write access to the array (used only in direct form oscillator)
+	return &stateArray[0];
+}
+
+void setCoefficients(rack::simd::float_4* coeffs){
+// --- fast block memory copy:
+	memcpy(&coeffArray[0], &coeffs[0], sizeof(rack::simd::float_4)*numCoeffs);
+}
+
+T getG_value() { 
+    return coeffArray[a0]; 
+}
+
+T processAudioSample(T xn) {
+	if (parameters.biquadCalcType  == biquadAlgorithm::kDirect) {
+		// --- 1)  form output y(n) = a0*x(n) + a1*x(n-1) + a2*x(n-2) - b1*y(n-1) - b2*y(n-2)
+		T yn = coeffArray[a0] * xn + 
+					coeffArray[a1] * stateArray[x_z1] +
+					coeffArray[a2] * stateArray[x_z2] -
+					coeffArray[b1] * stateArray[y_z1] -
+					coeffArray[b2] * stateArray[y_z2];
+
+		// --- 2) underflow check
+		checkFloatUnderflow(yn);
+
+		// --- 3) update states
+		stateArray[x_z2] = stateArray[x_z1];
+		stateArray[x_z1] = xn;
+
+		stateArray[y_z2] = stateArray[y_z1];
+		stateArray[y_z1] = yn;
+
+		return yn;
+	}
+	else if (parameters.biquadCalcType == biquadAlgorithm::kCanonical)
+	{
+		// --- 1)  form output y(n) = a0*w(n) + m_f_a1*stateArray[x_z1] + m_f_a2*stateArray[x_z2][x_z2];
+		//
+		// --- w(n) = x(n) - b1*stateArray[x_z1] - b2*stateArray[x_z2]
+		T wn = xn - coeffArray[b1] * stateArray[x_z1] - coeffArray[b2] * stateArray[x_z2];
+
+		// --- y(n):
+		T yn = coeffArray[a0] * wn + coeffArray[a1] * stateArray[x_z1] + coeffArray[a2] * stateArray[x_z2];
+
+		// --- 2) underflow check
+		checkFloatUnderflow(yn);
+
+		// --- 3) update states
+		stateArray[x_z2] = stateArray[x_z1];
+		stateArray[x_z1] = wn;
+
+		// --- return value
+		return yn;
+	}
+	else if (parameters.biquadCalcType == biquadAlgorithm::kTransposeDirect)
+	{
+		// --- 1)  form output y(n) = a0*w(n) + stateArray[x_z1]
+		//
+		// --- w(n) = x(n) + stateArray[y_z1]
+		T wn = xn + stateArray[y_z1];
+
+		// --- y(n) = a0*w(n) + stateArray[x_z1]
+		T yn = coeffArray[a0] * wn + stateArray[x_z1];
+
+		// --- 2) underflow check
+		checkFloatUnderflow(yn);
+
+		// --- 3) update states
+		stateArray[y_z1] = stateArray[y_z2] - coeffArray[b1] * wn;
+		stateArray[y_z2] = -coeffArray[b2] * wn;
+
+		stateArray[x_z1] = stateArray[x_z2] + coeffArray[a1] * wn;
+		stateArray[x_z2] = coeffArray[a2] * wn;
+
+		// --- return value
+		return yn;
+	}
+	else if (parameters.biquadCalcType == biquadAlgorithm::kTransposeCanonical)
+	{
+		// --- 1)  form output y(n) = a0*x(n) + stateArray[x_z1]
+		T yn = coeffArray[a0] * xn + stateArray[x_z1];
+
+		// --- 2) underflow check
+		checkFloatUnderflow(yn);
+
+		// --- shuffle/update
+		stateArray[x_z1] = coeffArray[a1]*xn - coeffArray[b1]*yn + stateArray[x_z2];
+		stateArray[x_z2] = coeffArray[a2]*xn - coeffArray[b2]*yn;
+
+		// --- return value
+		return yn;
+	}
+	return xn; // didn't process anything :(
+}
 
 protected:
 	/** array of coefficients */
-	double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	rack::simd::float_4 coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 	/** array of state (z^-1) registers */
-	double stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
+	T stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
 
 	/** type of calculation (algorithm  structure) */
 	BiquadParameters parameters;

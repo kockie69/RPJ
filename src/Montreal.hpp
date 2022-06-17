@@ -3,18 +3,22 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=6;
+const int MODULE_WIDTH=8;
 
 struct Montreal : Module {
 
 	enum ParamIds {
 		PARAM_FC,
+		PARAM_CVFC,
 		PARAM_Q,
+		PARAM_CVQ,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
+		INPUT_CVFC,
+		INPUT_CVQ,
 		NUM_INPUTS,
 	};
 
@@ -32,12 +36,15 @@ struct Montreal : Module {
 
 		Montreal();
 		void process(const ProcessArgs &) override;
-		WDFIdealRLCLPF wdfIdealRLCLPF;
-		WDFIdealRLCHPF wdfIdealRLCHPF;
-		WDFIdealRLCBPF wdfIdealRLCBPF;
-		WDFIdealRLCBSF wdfIdealRLCBSF;
+		void onSampleRateChange() override;
+		void processChannel(int, Input&, Output&, Output&, Output&, Output&);
+		WDFIdealRLCLPF wdfIdealRLCLPF[4];
+		WDFIdealRLCHPF wdfIdealRLCHPF[4];
+		WDFIdealRLCBPF wdfIdealRLCBPF[4];
+		WDFIdealRLCBSF wdfIdealRLCBSF[4];
 		double sampleRate;
 		WDFParameters wdfp;
+		float fc;
 };
 
 

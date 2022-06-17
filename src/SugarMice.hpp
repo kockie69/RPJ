@@ -9,11 +9,13 @@ struct SugarMice : Module {
 
 	enum ParamIds {
 		PARAM_FC,
+		PARAM_CVFC,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
+		INPUT_CVFC,
 		NUM_INPUTS,
 	};
 
@@ -28,7 +30,9 @@ struct SugarMice : Module {
 
 		SugarMice();
 		void process(const ProcessArgs &) override;
-		WDFTunableButterLPF3 wdfButterLPF3;
+		void onSampleRateChange() override;
+		void processChannel(int, Input&, Output&);
+		WDFTunableButterLPF3 wdfButterLPF3[4];
 		double sampleRate, fc;
 		bool warp;
 };

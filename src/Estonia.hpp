@@ -4,6 +4,7 @@
 using namespace rack;
 
 const int MODULE_WIDTH=6;
+const char *JSON_FILTER_ALGORITHM_KEY="Algorithm";
 		
 struct Estonia : Module {
 
@@ -34,33 +35,39 @@ struct Estonia : Module {
 	};
 
 		Estonia();
-		AudioFilter audioFilter;
+		void processChannel(int, Input&, Output&);
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override;
+		AudioFilter<rack::simd::float_4> audioFilter[4];
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters afp;
+		biquadAlgorithm bqaUI;
+		std::string strAlgorithm;
 };
 
-struct FilterNameDisplay : TransparentWidget {
+struct EstoniaFilterNameDisplay : TransparentWidget {
 	std::shared_ptr<Font> font;
 	NVGcolor txtCol;
 	Estonia* module;
 	const int fh = 12; // font height
 
 
-	FilterNameDisplay(Vec pos) {
+	EstoniaFilterNameDisplay(Vec pos) {
 		box.pos = pos;
 		box.size.y = fh;
 		box.size.x = fh;
 		setColor(0xff, 0xff, 0xff, 0xff);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 	}
 
-	FilterNameDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	EstoniaFilterNameDisplay(Vec pos, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 		box.pos = pos;
 		box.size.y = fh;
 		box.size.x = fh;
 		setColor(r, g, b, a);
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
+		//font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 	}
 
 	void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
@@ -70,17 +77,19 @@ struct FilterNameDisplay : TransparentWidget {
 		txtCol.a = a;
 	}
 
-	void draw(const DrawArgs &args) override {
-		char tbuf[11];
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			char tbuf[11];
 
-		if (module == NULL) return;
-
-		std::snprintf(tbuf, sizeof(tbuf), "%s", &module->audioFilter.getParameters().strAlgorithm[0]);
+			if (module == NULL)
+				std::snprintf(tbuf, sizeof(tbuf), "%s", "carry on");
+			else
+			 	std::snprintf(tbuf, sizeof(tbuf), "%s", &module->strAlgorithm[0]);
 		
-		TransparentWidget::draw(args);
-		drawBackground(args);
-		drawValue(args, tbuf);
-
+			TransparentWidget::draw(args);
+			drawBackground(args);
+			drawValue(args, tbuf);
+		}
 	}
 
 	void drawBackground(const DrawArgs &args) {
@@ -107,9 +116,11 @@ struct FilterNameDisplay : TransparentWidget {
 
 	void drawValue(const DrawArgs &args, const char * txt) {
 		Vec c = Vec(box.size.x/2, box.size.y);
+		std::shared_ptr<Font> font = APP->window->loadFont(asset::plugin(pluginInstance, "res/DejaVuSansMono.ttf"));
 
 		nvgFontSize(args.vg, fh);
-		nvgFontFaceId(args.vg, font->handle);
+		if (font)
+			nvgFontFaceId(args.vg, font->handle);
 		nvgTextLetterSpacing(args.vg, -2);
 		nvgTextAlign(args.vg, NVG_ALIGN_CENTER);
 		nvgFillColor(args.vg, nvgRGBA(txtCol.r, txtCol.g, txtCol.b, txtCol.a));

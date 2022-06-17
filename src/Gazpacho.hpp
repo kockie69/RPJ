@@ -8,22 +8,19 @@ const int MODULE_WIDTH=6;
 struct Gazpacho : Module {
 
 	enum ParamIds {
-		PARAM_UP,
-		PARAM_DOWN,
 		PARAM_FC,
 		PARAM_CVFC,
-		PARAM_Q,
-		PARAM_CVQ,
-		PARAM_BOOSTCUT_DB,
 		PARAM_DRY,
 		PARAM_WET,
+		PARAM_DRIVE,
+		PARAM_CVDRIVE,
 		NUM_PARAMS,
 	};
 
 	enum InputIds {
 		INPUT_MAIN,
 		INPUT_CVFC,
-		INPUT_CVQ,
+		INPUT_CVDRIVE,
 		NUM_INPUTS,
 	};
 
@@ -38,11 +35,16 @@ struct Gazpacho : Module {
 	};
 
 		Gazpacho();
-		AudioFilter LPFaudioFilter;
-		AudioFilter HPFaudioFilter;
+		void processChannel(int, Input&, Output&, Output&);
+		json_t *dataToJson() override;
+		void dataFromJson(json_t *) override;
+		void onSampleRateChange() override; 
+		AudioFilter<rack::simd::float_4> LPFaudioFilter[4];
+		AudioFilter<rack::simd::float_4> HPFaudioFilter[4];
 		void process(const ProcessArgs &) override;
 		dsp::SchmittTrigger upTrigger,downTrigger;
 		AudioFilterParameters LPFafp,HPFafp;
+		biquadAlgorithm bqaUI;
 };
 
 
