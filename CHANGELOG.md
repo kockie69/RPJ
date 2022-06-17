@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob in Grendel
 
+## [2.1.2] - 2022-06-16
+- Fixed speed bug in TuxOn
+- Updated documentation for TuxOn
+
 ## [1.0.4] - 2021-07-26
 ### Added
 - SugarMice, a 3rd order Butterworth low-pass ladder filter
