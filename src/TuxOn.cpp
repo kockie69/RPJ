@@ -152,7 +152,7 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 	}
 }
 
-void TuxOn::setDisplay() {
+void TuxOn::setDisplay(bool isZoom) {
 	display->width = WIDTH;
 	display->fileDesc=fileDesc;
 	if (zoomParameters.size()) {
@@ -257,20 +257,21 @@ void TuxOn::process(const ProcessArgs &args) {
 		audio.ejectSong();
 		fileName = "";
 		fileDesc="No WAV, FLAC or MP3 file loaded.";
-		setDisplay();
+		setDisplay(false);
 		selectAndLoadFile();
 		if (fileName == "") {
 			fileName = oldFileName;
 			fileDesc = oldFileDesc;
 			audio.fileLoaded=true;
 			audio.setPlay(true);
-			setDisplay();
+			setDisplay(false);
 		}
 		buttonToDisplay=BLACK;
 	}
 
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
-
+		zoomParameters[zoom].zoomDelta=display->zoomDelta;
+		display->zoomDelta=beginRatio/1024;
 		if (endRatio < beginRatio) 
 			std::swap(beginRatio,endRatio);
 
@@ -284,12 +285,12 @@ void TuxOn::process(const ProcessArgs &args) {
 	}
 
 	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
-
 		zoom--;
 		if (zoom==-1)
 			zoom=0;
 		else {
 			zoomParameters.pop_back();
+			display->zoomDelta=zoomParameters[zoom].zoomDelta;
 			if (audio.fileLoaded) 
 				display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
 		}
@@ -297,7 +298,7 @@ void TuxOn::process(const ProcessArgs &args) {
 
 	audio.setParameters(adp);
 	audio.processAudioSample();
-	setDisplay();
+	setDisplay(false);
 	
 	outputs[OUTPUT_LEFT].setVoltage(10.f * audio.left);
 	outputs[OUTPUT_RIGHT].setVoltage(10.f * audio.right);

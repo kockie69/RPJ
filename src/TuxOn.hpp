@@ -36,6 +36,7 @@ struct zoomParameter {
 	float begin;
 	float end;
 	int totalPCMFrameCount;
+	float zoomDelta;
 };
 
 
@@ -91,7 +92,7 @@ struct TuxOn : Module {
 	float getBegin(void);
 	float getEnd(void);
 	float stepSize(void);
-	void setDisplay(void);
+	void setDisplay(bool);
 	std::string fileName;
 	dsp::BooleanTrigger startTrigger,pauseTrigger,stopTrigger,ejectTrigger,zoominTrigger,zoomoutTrigger;
 	dsp::SchmittTrigger cvPlayStopTrigger;
