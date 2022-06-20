@@ -7,7 +7,8 @@ Display::Display(int theWidth) {
 		displayBuff.resize(1);
 		start = 8;
 		width=theWidth;
-		zoomDelta=0;
+		displayBegin=start;
+		displayEnd=width;
 }
 
 void Display::setDisplayFont(Plugin *pluginInstance,std::string font) {
@@ -15,7 +16,7 @@ void Display::setDisplayFont(Plugin *pluginInstance,std::string font) {
 }
 
 void Display::setDisplayPos(float samplePos,float zoomBegin,float FrameCount) {
-	displayPos = floor ((((samplePos - zoomBegin) / FrameCount)-zoomDelta)* width);
+	displayPos = floor (((samplePos - zoomBegin) / FrameCount)* width);
 }
 void Display::setDisplayWidth(int width) {
 	this->width = width;
@@ -23,11 +24,11 @@ void Display::setDisplayWidth(int width) {
 
 
 void Display::setBegin(float beginRatio) {
-	displayBegin = floor((beginRatio-zoomDelta) * width);
+	displayBegin = floor(beginRatio * width);
 }
 
 void Display::setEnd(float endRatio) {
-	displayEnd = (endRatio-zoomDelta) * width;
+	displayEnd = endRatio * width;
 }
 
 void Display::setDisplayBuff(float begin, float end, vector<vector<float>> playBuffer) {
