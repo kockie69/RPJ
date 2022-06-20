@@ -33,8 +33,10 @@ TuxOn::TuxOn() {
 	configParam(PARAM_DB, 0.0f, maxTGFader, 1.0f, "Volume level", " dB", -10, 60.0f);
 
 	configParam(PARAM_PANNING, -1.f, 1.f, 0.f, "Panning");
-	configParam(PARAM_STARTPOS, 0.f, 1024.f, 0.f, "Start position");
-	configParam(PARAM_ENDPOS, 0.f, 1024.f, 1024.f, "End position");
+	//configParam(PARAM_STARTPOS, 0.f, 1024.f, 0.f, "Start position");
+	configParam(PARAM_STARTPOS, -INFINITY, INFINITY, 0.0f, "Start position");	
+	//configParam(PARAM_ENDPOS, 0.f, 1024.f, 1024.f, "End position");
+	configParam(PARAM_ENDPOS, -INFINITY, INFINITY, 1.0f, "End position");	
 	configParam(PARAM_SPEED, -0.1f, 0.1f, 0.f, "Speed");
 	adp.panningType=CONSTPOWER;
 	adp.dB=1;
@@ -48,6 +50,10 @@ TuxOn::TuxOn() {
 	playBufferCopy[1].resize(0);
 	zoom=0;
 	adp.playMode=REPEAT;
+	prevBeginRatio=0;
+	prevEndRatio=1;
+	beginRatio=0;
+	endRatio=1;
 }
 
 json_t *TuxOn::dataToJson() {
@@ -157,20 +163,24 @@ void TuxOn::setDisplay(bool isZoom) {
 	display->fileDesc=fileDesc;
 	if (zoomParameters.size()) {
 		display->setDisplayPos(audio.samplePos,zoomParameters[zoom].begin,zoomParameters[zoom].totalPCMFrameCount);
-		display->setBegin(beginRatio/1024);
-		display->setEnd(endRatio/1024);
+		display->setBegin(beginRatio);
+		display->setEnd(endRatio);
 	}
 }
 
 float TuxOn::getBegin() {
-	if (zoomParameters.size()) 
-		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio/1024;
+	if (zoomParameters.size()) { 
+		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
+		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
+	}
 	else return 0;
 }
 
 float TuxOn::getEnd() {
-	if (zoomParameters.size())	
-		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio/1024;
+	if (zoomParameters.size()) {
+		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
+		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
+	}
 	else return 0;
 }
 
@@ -216,8 +226,19 @@ void TuxOn::process(const ProcessArgs &args) {
 	audio.setPause(false);
 	audio.setStop(false);
 	adp.speed = params[PARAM_SPEED].getValue();
-	beginRatio = params[PARAM_STARTPOS].getValue();
-	endRatio = params[PARAM_ENDPOS].getValue();
+	
+	float deltaRatio = params[PARAM_STARTPOS].getValue() - prevBeginRatio;
+	beginRatio += deltaRatio;
+	beginRatio = std::max(beginRatio,0.f);
+	beginRatio = std::min(beginRatio,1.0f);
+	prevBeginRatio = params[PARAM_STARTPOS].getValue();
+	
+	deltaRatio = params[PARAM_ENDPOS].getValue() - prevEndRatio;
+	endRatio+= deltaRatio;
+	endRatio = std::max(endRatio,0.f);
+	endRatio = std::min(endRatio,1.0f);
+	prevEndRatio = params[PARAM_ENDPOS].getValue();
+	
 	adp.begin = getBegin();
 	adp.end = getEnd();
 
@@ -270,18 +291,26 @@ void TuxOn::process(const ProcessArgs &args) {
 	}
 
 	if (zoominTrigger.process((bool)params[PARAM_ZOOMIN].getValue())) {
-		zoomParameters[zoom].zoomDelta=display->zoomDelta;
-		display->zoomDelta=beginRatio/1024;
-		if (endRatio < beginRatio) 
-			std::swap(beginRatio,endRatio);
+		if ((beginRatio==0 && endRatio==1 ) || (endRatio < beginRatio))
+			return;
+		else {
+			display->zoomBeginDelta=beginRatio;
+			display->zoomEndDelta=endRatio;
+			zoomParameters[zoom].zoomBeginDelta=display->zoomBeginDelta;
+			zoomParameters[zoom].zoomEndDelta=display->zoomEndDelta;
+			if (endRatio < beginRatio) 
+				std::swap(beginRatio,endRatio);
 
-		zoom++;
-		zoomParameters.push_back(zoomParameter());
-		zoomParameters[zoom].begin=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*beginRatio/1024;
-		zoomParameters[zoom].end=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*endRatio/1024;
-		zoomParameters[zoom].totalPCMFrameCount=abs(zoomParameters[zoom].end-zoomParameters[zoom].begin);
-		if (audio.fileLoaded)
-			display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
+			zoom++;
+			zoomParameters.push_back(zoomParameter());
+			zoomParameters[zoom].begin=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*beginRatio;
+			zoomParameters[zoom].end=zoomParameters[zoom-1].begin+zoomParameters[zoom-1].totalPCMFrameCount*endRatio;
+			zoomParameters[zoom].totalPCMFrameCount=abs(zoomParameters[zoom].end-zoomParameters[zoom].begin);
+			beginRatio=0;
+			endRatio=1;
+			if (audio.fileLoaded)
+				display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
+		}
 	}
 
 	if (zoomoutTrigger.process((bool)params[PARAM_ZOOMOUT].getValue())) {
@@ -290,7 +319,8 @@ void TuxOn::process(const ProcessArgs &args) {
 			zoom=0;
 		else {
 			zoomParameters.pop_back();
-			display->zoomDelta=zoomParameters[zoom].zoomDelta;
+			display->zoomBeginDelta=zoomParameters[zoom].zoomBeginDelta;
+			display->zoomEndDelta=zoomParameters[zoom].zoomEndDelta;
 			if (audio.fileLoaded) 
 				display->setDisplayBuff(zoomParameters[zoom].begin,zoomParameters[zoom].end,audio.playBuffer);
 		}

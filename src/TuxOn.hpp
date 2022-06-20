@@ -36,7 +36,8 @@ struct zoomParameter {
 	float begin;
 	float end;
 	int totalPCMFrameCount;
-	float zoomDelta;
+	float zoomBeginDelta;
+	float zoomEndDelta;
 };
 
 
@@ -113,6 +114,8 @@ struct TuxOn : Module {
 	ButtonSvgs buttonToDisplay;
 	float beginRatio, endRatio;
 	Display *display = new Display(WIDTH);
+	float prevBeginRatio;
+	float prevEndRatio;
 };
 
 struct MmSlider : SvgSlider {
