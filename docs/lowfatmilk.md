@@ -18,10 +18,11 @@ There is a next button and a next input. If next is triggered it depends on the 
 ## Prev
 Same as next, but instead of the next preset it will show the previous. 
 
-## Resizing the window
-If you put your mouse at the right end of the module you can drag the window and you can make the window bigger or smaller, depending on your requirements.
-
 ## Full Screen
 If you have the windowed version of the module active, clicking it and pressing the 'enter' key will make the window Full screen. By pressing the 'Esc' key you will get back to normal size
 
+The next functionality is disabled at the moment, but will be back in a future release:
+
+## Resizing the window
+If you put your mouse at the right end of the module you can drag the window and you can make the window bigger or smaller, depending on your requirements.
 
