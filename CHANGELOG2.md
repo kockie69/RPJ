@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Hardcut button is not working yet
+- Resizing creates black spce to the right
+- Reducing size sometimes results in flicker to the right
+
+## [1.0.9] - 2022-07-11
+### Added
+- Resizing module
 
 ## [1.0.9] - 2022-07-10
 ### Added
@@ -14,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Removed resizing module, breaks full size display
-- 
+ 
 ## [1.0.8] - 2022-06-12
 ### Added
 
