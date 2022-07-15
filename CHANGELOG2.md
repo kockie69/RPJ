@@ -5,9 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-- Hardcut
+## [2.0.13]
+- Hardcut button removed
+
+## [2.0.12]
+### Added
 - Non-Casesensitive search in Virtual presets
+
+### Changed
+- The shining has been removed for the embedded module
 
 ## [2.0.11] - 2022-07-15
 ### Added
