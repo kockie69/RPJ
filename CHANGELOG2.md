@@ -5,12 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.14] - 2022-07-16
+### Added
+- Glow in the dark
+ 
 ## [2.0.13] - 2022-07-15
 - Hardcut button removed
 
 ## [2.0.12] - 2022-07-15
 ### Added
-- Non-Casesensitive search in Virtual presets
+- Non-Case sensitive search in Virtual presets
 
 ### Changed
 - The shining has been removed for the embedded module
