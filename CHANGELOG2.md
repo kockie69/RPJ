@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Non-Case sensitive search in Virtual presets
 
 ### Changed
-- The shining has been removed for the embedded module
+- Glow in the dark has been removed for the embedded module
 
 ## [2.0.11] - 2022-07-15
 ### Added
