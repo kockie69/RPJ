@@ -40,6 +40,8 @@ This setting is used for the search option. If this is enabled the search will t
 ### Visual Presets
 Below it one can see the Visual presets that are available. The list can be huge, and to make it easier to navigate to the right preset a searchbox is available where you can type to find the desired preset.
 
+![lowfatmilk menu image](./lowfatmilk4.png)
+
 ## Knobs, Buttons and Jacks
 
 ### Timer
