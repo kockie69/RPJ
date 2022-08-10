@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob in Grendel
 
+## [2.2.1] - 2022-08-10
+- Fixed begin and end positioning
+- Improved zoom functionality
+
 ## [2.1.2] - 2022-06-16
 - Fixed speed bug in TuxOn
 - Updated documentation for TuxOn
