@@ -66,6 +66,8 @@ json_t *TuxOn::dataToJson() {
 	json_object_set_new(rootJ, JSON_SAMPLE_POS, json_real(audio.samplePos));
 	json_object_set_new(rootJ, JSON_BEGIN_POS, json_real(audio.begin));
 	json_object_set_new(rootJ, JSON_END_POS, json_real(audio.end));
+	json_object_set_new(rootJ, JSON_BEGIN_RATIO, json_real(beginRatio));
+	json_object_set_new(rootJ, JSON_END_RATIO, json_real(endRatio));
 	json_t *zoomP = json_array();
 	if (zoomParameters.size()>0) {
 		for (int i=0;i<(int)zoomParameters.size();i++) {
@@ -92,7 +94,9 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 	json_t *nendPosJ = json_object_get(rootJ, JSON_END_POS);
 	json_t *nparamsJ = json_object_get(rootJ, JSON_ZOOM_PARAMS);
 	json_t *nplaymodeJ = json_object_get(rootJ, JSON_PLAY_MODE);
-
+	json_t *nbeginRatioJ = json_object_get(rootJ, JSON_BEGIN_RATIO);
+	json_t *nendRatioJ = json_object_get(rootJ, JSON_END_RATIO);
+	
 	if (nfileNameJ) {
 		fileName=(char *)json_string_value(nfileNameJ);
 		if (fileName!="")
@@ -148,6 +152,13 @@ void TuxOn::dataFromJson(json_t *rootJ) {
 			}
 		}
 	}
+	if (nbeginRatioJ) {
+		beginRatio = json_real_value(nbeginRatioJ);
+	}
+	if (nendRatioJ) {
+		endRatio = json_real_value(nendRatioJ);
+	}
+
 	if (zoom >0) {
 		audio.begin = zoomParameters[zoom].begin;
 		audio.end = zoomParameters[zoom].end;
@@ -170,7 +181,6 @@ void TuxOn::setDisplay(bool isZoom) {
 
 float TuxOn::getBegin() {
 	if (zoomParameters.size()) { 
-		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
 		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
 	}
 	else return 0;
@@ -178,7 +188,6 @@ float TuxOn::getBegin() {
 
 float TuxOn::getEnd() {
 	if (zoomParameters.size()) {
-		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
 		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
 	}
 	else return 0;
