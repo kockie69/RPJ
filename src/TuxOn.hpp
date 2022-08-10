@@ -15,6 +15,8 @@ const char *JSON_PAUSE="Pause";
 const char *JSON_SAMPLE_POS="Samplepos";
 const char *JSON_BEGIN_POS="Beginpos";
 const char *JSON_END_POS="Endpos";
+const char *JSON_BEGIN_RATIO="Beginratio";
+const char *JSON_END_RATIO="Endratio";
 const char *JSON_ZOOM_PARAMS="Zoomparams";
 const char *JSON_ZOOM_TOTALPCM="TotalPCM";
 const char *JSON_ZOOM_BEGIN="Begin";
@@ -36,7 +38,8 @@ struct zoomParameter {
 	float begin;
 	float end;
 	int totalPCMFrameCount;
-	float zoomDelta;
+	float zoomBeginDelta;
+	float zoomEndDelta;
 };
 
 
@@ -113,6 +116,8 @@ struct TuxOn : Module {
 	ButtonSvgs buttonToDisplay;
 	float beginRatio, endRatio;
 	Display *display = new Display(WIDTH);
+	float prevBeginRatio;
+	float prevEndRatio;
 };
 
 struct MmSlider : SvgSlider {
