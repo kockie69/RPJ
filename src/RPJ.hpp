@@ -21,5 +21,3 @@ extern Model *modelCircularRide;
 extern Model *modelDrillingHoles;
 extern Model *modelTuxOn;
 extern Model *modelPigeonPlink;
-extern Model *modelGenie;
-extern Model *modelGenieExpander;
