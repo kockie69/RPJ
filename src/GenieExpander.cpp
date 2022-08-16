@@ -1,39 +1,21 @@
 #include "RPJ.hpp"
 #include "ctrl/RPJPorts.hpp"
 #include "ctrl/RPJKnobs.hpp"
-#include <random>
 #include "GenieExpander.hpp"
-
-#define DEBUG_ONLY(x)
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Swarm length");
 	configParam(PARAM_HISTORYTIMER,1.f, 10.f, 1.f, "Swarm thickness");
-	configParam(PARAM_PEND_1_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 1");
-	configParam(PARAM_PEND_1_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 1");
-	configParam(PARAM_PEND_2_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 2");
-	configParam(PARAM_PEND_2_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 2");
-	configParam(PARAM_PEND_3_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 3");
-	configParam(PARAM_PEND_3_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 3");
-	configParam(PARAM_PEND_4_X,-((WIDTH/2)+75), (WIDTH/2)+75, 0, "X-pos Pendulum 4");
-	configParam(PARAM_PEND_4_Y,-(HEIGHT/2), (HEIGHT/2), 0, "Y-pos Pendulum 4");
-	maxHistory=10;
-	drawLines=true;
-
-	for (int i=0;i<MAXOBJECTS;i++) { 
-		pendulums[i].setPosition({(WIDTH/2)+75,HEIGHT/2});
-		pendulums[i].nodes[0].setColor(nvgRGB(0xAE, 0x1C, 0x28));	
-		pendulums[i].nodes[1].setColor(nvgRGB(0xFF, 0xFF, 0xFF));
-		pendulums[i].nodes[2].setColor(nvgRGB(0x21, 0x46, 0x8B));
-		pendulums[i].nodes[3].setColor(nvgRGB(0xFF, 0x7F, 0x00));
-		pendulums[i].nodes[4].setColor(nvgRGB(0xAE, 0x1C, 0x28));
-		pendulums[i].nodes[0].setNodeType(node::STATIC);
-		pendulums[i].nodes[1].setNodeType(node::ROTATING);
-		pendulums[i].nodes[2].setNodeType(node::ROTATING);
-		pendulums[i].nodes[3].setNodeType(node::ROTATING);
-		pendulums[i].nodes[4].setNodeType(node::ROTATING);
-	}
+	configParam(PARAM_PEND_1_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 1");
+	configParam(PARAM_PEND_1_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 1");
+	configParam(PARAM_PEND_2_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 2");
+	configParam(PARAM_PEND_2_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 2");
+	configParam(PARAM_PEND_3_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 3");
+	configParam(PARAM_PEND_3_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 3");
+	configParam(PARAM_PEND_4_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 4");
+	configParam(PARAM_PEND_4_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 4");
+	rdMsg = new XpanderPairs();
 }
 
 json_t *GenieExpander::dataToJson() {
@@ -48,247 +30,150 @@ void GenieExpander::dataFromJson(json_t *rootJ) {
 		drawLines = static_cast<bool>(json_boolean_value(nDrawLinesJ));
 }
 
-void GenieExpander::doPendulum() {
-	
-	xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-	for (int n=0;n < MAXOBJECTS;n++) {
-		pendulums[n].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
-		pendulums[n].nodes[0].newMass.setSize(10);
-		pendulums[n].setNrOfNodes(3);
-
-		for (int i=1; i < 3;i++) {
-			pendulums[n].nodes[i].newMass.setPosition({rdMsg->edges[n][i-1].first*10+params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,rdMsg->edges[n][i-1].second*10+params[PARAM_PEND_1_Y+2*n].getValue()+pendulums[n].getPosition().second});
-			pendulums[n].nodes[i].newMass.setSize(10);
-		}
-	}
-
-	nrOfPendulums = rdMsg->nrOfItems;
-}
-
-void GenieExpander::doBumpingBalls() {
-xpanderPairs* rdMsg = (xpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-	for (int n=0;n < MAXOBJECTS;n++) {
-		bumpingBalls[n].setPosition({params[PARAM_PEND_1_X+2*n].getValue()+pendulums[n].getPosition().first,params[PARAM_PEND_1_Y+n*2].getValue()+pendulums[n].getPosition().second});
-		bumpingBalls[n].setSize(10);
-	}
-	nrOfBalls = rdMsg->nrOfItems;
-}
-
-void GenieExpander::process(const ProcessArgs &args) {
-
-	maxHistory = params[PARAM_HISTORY].getValue();
-	// In future read the pendulum position parameters, for now all xpos,ypos
-	for (int i=0;i<MAXOBJECTS;i++) { 
-		pendulums[i].nodes[0].setMaxhistory(maxHistory);
-		pendulums[i].nodes[1].setMaxhistory(maxHistory);
-		pendulums[i].nodes[2].setMaxhistory(maxHistory);
-		pendulums[i].nodes[3].setMaxhistory(maxHistory);
-		pendulums[i].nodes[4].setMaxhistory(maxHistory);
-	}
-
-	swarmThickness = params[PARAM_HISTORYTIMER].getValue();
-	
-	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
-	if (parentConnected) {
-
-		switch (static_cast<int>(genieAlgorythm))
-		{
-			// PENDULUM
-			case 0:
-				{
-					doPendulum();
-				}
-				break;
-			case 1:
-				{
-					doBumpingBalls();
-				}
-				break;
-			default:
-				break;
-		}
-	}
-	else {
-		nrOfPendulums=1;
-		pendulums[0].nodes[0].newMass.setPosition({params[PARAM_PEND_1_X].getValue()+pendulums[0].getPosition().first,params[PARAM_PEND_1_Y].getValue()+pendulums[0].getPosition().second});
-		pendulums[0].nodes[0].newMass.setSize(10);
-		pendulums[0].setNrOfNodes(5);
-		for (int i=1;i<5;i++) {
-			std::pair<double,double> newPair;
-			if (inputs[INPUT_1_X+2*(i-1)].isConnected() && inputs[INPUT_1_Y+2*(i-1)].isConnected()) {
-				newPair.first = params[PARAM_PEND_1_X].getValue()+inputs[INPUT_1_X+2*(i-1)].getVoltage()*10*i;
-				newPair.second = params[PARAM_PEND_1_Y].getValue()+inputs[INPUT_1_Y+2*(i-1)].getVoltage()*10*i;
-				pendulums[0].nodes[i].newMass.setPosition({newPair+pendulums[0].getPosition()});
-				pendulums[0].nodes[i].newMass.setSize(10);
-			}
-			else {
-				pendulums[0].setNrOfNodes(i);
-				return;
-			}
-		}
-	}
-}
-
-void node::setMaxhistory(int maxHistory) {
-	this->maxHistory = maxHistory;
-}
-
-void node::setColor(NVGcolor nodeColor) {
-	this->nodeColor = nodeColor;
-}
-
-void node::setNodeType(NodeType nodeType) {
-	this->nodeType = nodeType;
-}
-
-node::node() {
-	thickness=1;
-}
-
-void node::draw(NVGcontext *vg) {
-	newMass.setColor(nodeColor);
-	newMass.draw(vg);
-	nodeSwarm.draw(vg,nodeColor);
-	if (nodeType==ROTATING) {
-		if (thickness!=swarmThickness) 
-			historyTimer.setDivision(swarmThickness);
-		if (historyTimer.process()) 
-			nodeSwarm.update(newMass,maxHistory);
-	}
-}
-
-swarm::swarm() {
-	history=0;
-}
-
-void swarm::addNewestMass(mass newMass) {
-	masses.insert(masses.begin(),newMass);
-	history++;
-}
-
-void swarm::deleteOldestMass() {
-	masses.pop_back();
-	history--;
-}
-
-void swarm::update(mass newMass, int maxHistory) {
-	if (maxHistory < history) {
-		this->addNewestMass(newMass);
-		this->deleteOldestMass();
-		this->deleteOldestMass();
-	}
-	else {
-		if (maxHistory > history)
-			this->addNewestMass(newMass);
-		else {
-			this->addNewestMass(newMass);
-			this->deleteOldestMass();
-		}
-	}
-}
-
-void swarm::draw(NVGcontext *vg,NVGcolor massColor) {
-
-	for (int i=1;i<history;i++) {
-		// The 50 in the next line can be a parameter		
-		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-i)*200/history);
-		masses[i].setColor(massColorFaded);
-		masses[i].draw(vg);
-	}
-}
-
-void line::setBegin(std::pair<double,double> positionBegin) {
-	this->positionBegin = positionBegin;
-}
-
-void line::setEnd(std::pair<double,double> positionEnd) {
-	this->positionEnd = positionEnd;
-}
-
-void mass::setSize(int size) {
-	this->size = size;
-}
-
-void mass::setPosition(std::pair<double,double> position) {
-	this->position = position;
-}
-
-std::pair<double,double> mass::getPosition(void) {
-	return position;
-}
-
-void mass::setColor(NVGcolor massColor) {
-	this->massColor = massColor;
-}
-
-void mass::draw(NVGcontext *vg) {
-	nvgFillColor(vg, massColor);
-	NVGcolor transColor = nvgLerpRGBA(nvgRGB(0xFF, 0xFF, 0xFF), massColor, 0.25);
-	nvgBeginPath(vg);
-	nvgCircle(vg, position.first, position.second, size);
-	nvgFillPaint(vg,nvgRadialGradient(vg,position.first, position.second, 1, size, transColor ,massColor));
-	nvgFill(vg);
-	nvgClosePath(vg);
-}	
-
-
-void line::draw(NVGcontext *vg) {
-	NVGcolor lineColor = nvgRGBA(0xFF, 0x7F, 0x00, 0xA0);
-	nvgFillColor(vg, lineColor);
-	nvgStrokeColor(vg, lineColor);
-	nvgStrokeWidth(vg, 2);
-	nvgBeginPath(vg);
-	nvgMoveTo(vg,positionBegin.first,positionBegin.second);
-	nvgLineTo(vg,positionEnd.first,positionEnd.second);
-	nvgStroke(vg);
-	nvgClosePath(vg);
-}
-
-void pendulum::setNrOfNodes(int nrOfNodes) {
-	this->nrOfNodes = nrOfNodes;
-}
-
-void pendulum::setPosition(std::pair<double,double> position) {
-	this->position = position;
-}
-
-std::pair<double,double> pendulum::getPosition(void) {
-	return position;
-}
-
-void pendulum::draw(NVGcontext *vg,bool drawLines) {
-
-	for (int i=0;i<nrOfNodes;i++) { 
-		nodes[i].draw(vg);
-		if (drawLines) {
-			if (i>0) {
-				lines[i-1].setBegin(nodes[i-1].newMass.getPosition());
-				lines[i-1].setEnd(nodes[i].newMass.getPosition());
-				lines[i-1].draw(vg);
-			}
-		}
-	}
+void GenieDisplay::onDragStart(const DragStartEvent& e) {
+	TransparentWidget::onDragStart(e);
 }
 
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 
-	if (module == NULL) return;
-	if (layer == 1) {
-		// The clipbox is whole module, so we fix so it is only display screen
-		Rect clipBox = args.clipBox;
-		clipBox.pos.x = args.clipBox.pos.x + 75;
-		nvgScissor(args.vg, RECT_ARGS(clipBox));
-
-		
-		for (int n=0;n<module->nrOfPendulums;n++) {
-			module->pendulums[n].draw(args.vg,module->drawLines);
-		}
-	}
+	if (module)
+        if (layer == 1) {
+            if (module->rdMsg) {
+                for (int n=0;n < 4;n++) {
+                    Mass *newMass = new Mass();
+					Joint *joint1 = new Joint();
+					Joint *joint2 = new Joint();
+                    newMass->setPosition({module->X[n],module->Y[n]});
+					newMass->setColor(nvgRGB(0xAE, 0x1C, 0x28));
+                    newMass->history = module->params[module->PARAM_HISTORY].getValue();
+					newMass->setWeight(module->rdMsg->weight);
+                    addChild(newMass);
+					joint1->setBegin({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
+                    for (int i=0; i < 2;i++) {
+                        Mass *newMass = new Mass();
+                        newMass->setPosition({module->X[n]+module->rdMsg->edges[n][i].first*10,module->Y[n]+module->rdMsg->edges[n][i].second*10});
+                        // If the node is below the root
+						if (i==0) {
+                            newMass->setColor(nvgRGB(0xFF, 0xFF, 0xFF));
+							joint1->setEnd({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
+							joint2->setBegin({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
+							joint1->setWeight(module->rdMsg->weight);
+							addChild(joint1);
+						}
+						// two levels below the root
+                        if (i==1) {
+                            newMass->setColor(nvgRGB(0x21, 0x46, 0x8B));
+							joint2->setEnd({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
+							joint2->setWeight(module->rdMsg->weight);
+							addChild(joint2);
+						}
+						newMass->history = module->params[module->PARAM_HISTORY].getValue();
+                        newMass->setWeight(module->rdMsg->weight);
+                        addChild(newMass);
+                    }
+                }
+            }
+        }
+	// Remove everything outside display
+    nvgScissor(args.vg, RECT_ARGS(args.clipBox));
 	TransparentWidget::drawLayer(args,layer);
+}
+
+Joint::Joint() {
+	elapsed=0;
+}
+
+void Joint::setWeight(float t) {
+	thick = t;
+}
+
+void Joint::setEnd(Vec e) {
+	positionEnd = e;
+}
+
+void Joint::setBegin(Vec b) {
+	positionBegin = b;
+}
+
+void Joint::drawLayer(const DrawArgs &args,int layer) {
+	if (layer == 1) {
+		if (elapsed!=1) {
+			NVGcolor lineColor = nvgRGBA(0xFF, 0x7F, 0x00, 0xA0);
+			nvgFillColor(args.vg, lineColor);
+			nvgStrokeColor(args.vg, lineColor);
+			nvgStrokeWidth(args.vg, thick);
+			nvgBeginPath(args.vg);
+			nvgMoveTo(args.vg,positionBegin.x,positionBegin.y);
+			nvgLineTo(args.vg,positionEnd.x,positionEnd.y);
+			nvgStroke(args.vg);
+			nvgClosePath(args.vg);
+			elapsed++;
+		}
+		else
+			requestDelete();
+	}
+	Widget::drawLayer(args,layer);
+}
+
+void Mass::setWeight(float w) {
+    weight = w;
+}
+
+void Mass::drawLayer(const DrawArgs &args,int layer) {
+    if (layer==1) {
+        NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-elapsed)*200/history);
+        nvgBeginPath(args.vg);
+        nvgCircle(args.vg, getPosition().x, getPosition().y, weight);
+        nvgFillPaint(args.vg,nvgRadialGradient(args.vg,getPosition().x, getPosition().y, 1, weight, massColorFaded ,massColor));
+        nvgFill(args.vg);
+        nvgClosePath(args.vg);
+        elapsed++;
+        if (elapsed == history)
+            requestDelete();
+    }
+	Widget::drawLayer(args,layer);
+}
+
+void Mass::setColor(NVGcolor massColor) {
+	this->massColor = massColor;
+}
+
+
+void GenieExpander::process(const ProcessArgs &args) {
+	
+	for (int i=0;i<4;i++) {
+		float delta1X = params[PARAM_PEND_1_X+(2*i)].getValue() - prevX[i];
+		X[i] += delta1X*(WIDTH/2);
+		X[i] = std::max(X[i],0.f);
+		X[i] = std::min(X[i],float(WIDTH/2));
+		prevX[i] = params[PARAM_PEND_1_X+(2*i)].getValue();
+
+		float delta1Y = params[PARAM_PEND_1_Y+(2*i)].getValue() - prevY[i];
+		Y[i] += delta1Y*(HEIGHT/2);
+		Y[i] = std::max(Y[i],0.f);
+		Y[i] = std::min(Y[i],float(HEIGHT/2));
+		prevY[i] = params[PARAM_PEND_1_Y+(2*i)].getValue();
+	}
+
+	maxHistory = params[PARAM_HISTORY].getValue();
+
+	swarmThickness = params[PARAM_HISTORYTIMER].getValue();
+	historyTimer.setDivision(swarmThickness);
+
+	bool parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
+	if (parentConnected)
+		getPendulums();
+}
+
+void GenieExpander::getPendulums() {
+    rdMsg = (XpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
 }
 
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
+
+//	menu->addChild(new MenuSeparator());
+//	menu->addChild(createIndexPtrSubmenuItem("Number of Pendulums", {"1", "2", "3", "4"}, &module->nrOfPendulums));
 
 	menu->addChild(new MenuSeparator());
 
@@ -301,17 +186,17 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/GenieExpander.svg")));
 
 	addChild(createWidget<ScrewSilver>(Vec(0, 0)));
-	addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15,0)));
-	addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
+	//addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15,0)));
+	//addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 	addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 
-	// Fill the display for the module browser
-	display = new GenieDisplay();
-	display->box.pos = Vec(15, 30);
-	display->box.size = Vec(WIDTH, HEIGHT);
-	display->module = module;
-	addChild(display);	
-
+	if (module) {
+        display = new GenieDisplay();
+        display->box.pos = Vec(84, 6);
+        display->box.size = Vec(WIDTH, HEIGHT);
+        display->module = module;
+        addChild(display);	
+    }
 		// Next do the Jacks
 	const float jackX1 = 14.5;
 	const float jackX2 = 51;		

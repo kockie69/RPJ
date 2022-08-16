@@ -3,98 +3,38 @@
 
 using namespace rack;
 
-const int MODULE_WIDTH=26;
-const int WIDTH=375;
-const int HEIGHT=350;
-const int NODES=5;
-const int MAXOBJECTS = 4;
+const int WIDTH=395;
+const int HEIGHT=370;
 
-enum GenieAlgorythms {
-    PENDULUM,
-    BUMPINGBALLS,
+struct XpanderPairs {
+	std::pair<float, float> edges[4][2];
+    double weight;
 };
 
-float swarmThickness;
-
-std::pair<double, double> operator +(const std::pair<double, double>& x, const std::pair<double, double>& y) {
-    return std::make_pair(x.first + y.first, x.second + y.second);
-}
-
-struct mass {
+struct Mass : Widget {
     private:
-		std::pair<double,double> position;
-    	int size;
 		NVGcolor massColor;
+        float weight;
 	public:
-    	void draw(NVGcontext *vg);
-    	void setSize(int size);
-    	void setPosition(std::pair<double,double> position);
-		std::pair<double,double> getPosition(void);
+    	void drawLayer(const DrawArgs &args,int) override;
     	void setColor(NVGcolor massColor);
+        void setWeight(float);
+        int history;
+        int elapsed=0;
 };
 
-struct swarm {
-	private:
-		int history;
-		std::vector<mass> masses;
-		void deleteOldestMass();
-    	void addNewestMass(mass);
+struct Joint: Widget {
+	    private:
+		NVGcolor jointColor;
+        float thick;
+		Vec positionBegin,positionEnd;
 	public:
-		swarm();
-    	void draw(NVGcontext *vg,NVGcolor massColor);
-    	void update(mass newMass, int maxHistory);
-};
-
-struct xpanderPairs {
-	std::pair<double, double> edges[MAXOBJECTS][2];
-    int nrOfItems;
-    GenieAlgorythms genieAlgorythm;
-};
-
-struct node {
-	enum NodeType {
-		STATIC,
-		ROTATING,
-	};
-
-	private:
-		NVGcolor nodeColor;
-		int maxHistory;
-		dsp::ClockDivider historyTimer;
-		float thickness;
-		NodeType nodeType;
-	public:
-		node();
-		mass newMass;
-		swarm nodeSwarm;
-		void setColor(NVGcolor color);
-		void setNodeType(NodeType);
-		void setMaxhistory(int maxHistory);
-		void draw(NVGcontext *vg);
-};
-
-
-struct line {
-	private:
-		std::pair<double,double> positionBegin, positionEnd;
-		NVGcontext *vg;
-	public:
-		void setBegin(std::pair<double,double>);
-		void setEnd(std::pair<double,double>);
-		void draw(NVGcontext *);
-};
-
-struct pendulum {
-	public:
-		void draw(NVGcontext *vg,bool drawLines);
-		void setPosition(std::pair<double,double> position);
-		std::pair<double,double> getPosition();
-		void setNrOfNodes(int nrOfNodes);
-		node nodes[NODES];
-		line lines[NODES-1];
-	private:
-		std::pair<double,double> position;
-		int nrOfNodes;
+		Joint();
+    	void drawLayer(const DrawArgs &args,int) override;
+        void setWeight(float);
+		void setBegin(Vec);
+		void setEnd(Vec);
+        int elapsed=0;
 };
 
 struct GenieExpander : Module {
@@ -136,30 +76,25 @@ struct GenieExpander : Module {
 
 	public:
 		GenieExpander();
-		void process(const ProcessArgs &) override;
-		pendulum pendulums[MAXOBJECTS];
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
-		void doPendulum();
-		void doBumpingBalls();
-		GenieAlgorythms genieAlgorythm;
-		mass bumpingBalls[MAXOBJECTS];
-		double size;
-		bool parentConnected;
-		int nrOfPendulums,nrOfBalls;
-		int maxHistory;
-		bool drawLines;
+		void process(const ProcessArgs &) override;
+        void getPendulums();
+		dsp::ClockDivider historyTimer;
+        XpanderPairs* rdMsg;
+        bool drawLines;
+        int maxHistory;
+        float swarmThickness;
+		float X[4],Y[4];
+		float prevX[4],prevY[4];
 	private:
-
 };
 
 struct GenieDisplay : TransparentWidget {
-	GenieDisplay() {
-		xpos = (WIDTH/2)+75;
-		ypos = HEIGHT/2;
-	}
+	GenieDisplay() {};
 	void process();
 	void drawLayer(const DrawArgs &args,int) override;
+	void onDragStart(const DragStartEvent&) override;
 	float xpos, ypos;
     GenieExpander * module;
 };
@@ -169,4 +104,3 @@ struct GenieExpanderModuleWidget : ModuleWidget {
 	void appendContextMenu(Menu *) override;
 	GenieDisplay *display;
 };
-
