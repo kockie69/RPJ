@@ -103,7 +103,11 @@ struct GenieExpander : Module {
 		json_t *dataToJson() override;
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
-        void getPendulums();
+        int getPendulums();
+		int nrOfPendulums;
+		int nrOfNodes;
+		std::pair<float, float> edges[4][2];
+		float weight;
 		bool parentConnected;
 		dsp::ClockDivider historyTimer;
         XpanderPairs* rdMsg;
