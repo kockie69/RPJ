@@ -104,6 +104,7 @@ struct GenieExpander : Module {
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
         void getPendulums();
+		bool parentConnected;
 		dsp::ClockDivider historyTimer;
         XpanderPairs* rdMsg;
         bool drawLines;

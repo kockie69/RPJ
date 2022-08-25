@@ -20,7 +20,6 @@ GenieExpander::GenieExpander() {
 		XY[i] = {WIDTH/2,HEIGHT/2};
 		prevXY[i] = {0,0};
 	}
-
 }
 
 json_t *GenieExpander::dataToJson() {
@@ -53,7 +52,7 @@ GenieDisplay::GenieDisplay() {
 }
 
 void GenieDisplay::step() {
-	if (module->rdMsg) {
+	if (module->parentConnected) {
 		for (int n=0;n < module->rdMsg->nrOfPendulums;n++) {
 			Root *root = new Root();
 			roots[n]=root;
@@ -241,7 +240,7 @@ void GenieExpander::process(const ProcessArgs &args) {
 	swarmThickness = params[PARAM_HISTORYTIMER].getValue();
 	historyTimer.setDivision(swarmThickness);
 
-	bool parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
+	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 	if (parentConnected)
 		getPendulums();
 }

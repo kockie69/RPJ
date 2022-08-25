@@ -174,12 +174,13 @@ struct Genie : Module {
     double len;
     double mass;
     xpanderPairs xpMsg[2];
-    int nrOfPendulums;
+    int nrOfPendulums,menuNrOfPendulums;
     dsp::SchmittTrigger resetTrigger;
     bool uni;
 };
 
 struct GenieModuleWidget : ModuleWidget {
 	GenieModuleWidget(Genie*);
+    void appendContextMenu(Menu *) override;
 };
 

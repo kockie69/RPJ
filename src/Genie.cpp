@@ -11,6 +11,7 @@ Genie::Genie() {
     std::mt19937 generator((std::random_device())());
     std::uniform_real_distribution<> rnd(0, 2 * M_PI);
 	nrOfPendulums=4;
+	menuNrOfPendulums=3;
 	dim.first = 5;
 	dim.second = 5;
     len = std::min(dim.first, dim.second);
@@ -75,6 +76,7 @@ void Genie::doPendulum(const ProcessArgs & args) {
 
 void Genie::process(const ProcessArgs &args) {
 
+	nrOfPendulums=menuNrOfPendulums+1;
 	if (resetTrigger.process(rescale(Genie::params[PARAM_RESET].getValue(), 1.f, 0.1f, 0.f, 1.f))){
 		reset();
     }
@@ -102,6 +104,16 @@ void Genie::process(const ProcessArgs &args) {
 	len = std::min(dim.first, dim.second) * lengthMult;
 
 	doPendulum(args);
+}
+
+
+void GenieModuleWidget::appendContextMenu(Menu *menu) {
+	Genie * module = dynamic_cast<Genie*>(this->module);
+
+	menu->addChild(new MenuSeparator());
+
+	menu->addChild(createIndexPtrSubmenuItem("Number of Pendulums", {"1", "2", "3", "4"}, &module->menuNrOfPendulums));
+
 }
 
 GenieModuleWidget::GenieModuleWidget(Genie* module) {
