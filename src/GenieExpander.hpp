@@ -3,24 +3,48 @@
 
 using namespace rack;
 
-const int WIDTH=395;
+const int WIDTH=400;
 const int HEIGHT=370;
 
 struct XpanderPairs {
 	std::pair<float, float> edges[4][2];
     double weight;
+	int nrOfPendulums;
 };
+
+
+struct Root : SvgWidget {
+    private:
+		NVGcolor massColor;
+	public:
+		Root();
+		void onDragHover(const DragHoverEvent &) override;
+		void drawLayer(const DrawArgs &,int) override;
+		void step() override;
+    	void setColor(NVGcolor massColor);
+		Vec* rootPos;
+        int history;
+        int elapsed;
+		int node;
+		float weight;
+};
+
+
 
 struct Mass : Widget {
     private:
 		NVGcolor massColor;
-        float weight;
 	public:
+		Mass();
     	void drawLayer(const DrawArgs &args,int) override;
+		//void onDragHover(const DragHoverEvent &) override;
+		void onDragEnd(const DragEndEvent &) override;
     	void setColor(NVGcolor massColor);
-        void setWeight(float);
+		void step() override;
         int history;
         int elapsed=0;
+		int node;
+		float weight;
 };
 
 struct Joint: Widget {
@@ -85,22 +109,26 @@ struct GenieExpander : Module {
         bool drawLines;
         int maxHistory;
         float swarmThickness;
-		float X[4],Y[4];
-		float prevX[4],prevY[4];
+		Vec XY[4];
+		Vec prevXY[4];
 	private:
 };
 
-struct GenieDisplay : TransparentWidget {
-	GenieDisplay() {};
+struct GenieDisplay : OpaqueWidget {
+	GenieDisplay();
 	void process();
 	void drawLayer(const DrawArgs &args,int) override;
-	void onDragStart(const DragStartEvent&) override;
+	void onDragHover(const DragHoverEvent&) override;
+	void step() override;
+	void root2Mass(Root*);
 	float xpos, ypos;
-    GenieExpander * module;
+    GenieExpander* module;
+	Root* roots[4];
 };
 
 struct GenieExpanderModuleWidget : ModuleWidget {
 	GenieExpanderModuleWidget(GenieExpander*);
 	void appendContextMenu(Menu *) override;
+	void onDragHover(const DragHoverEvent &) override;
 	GenieDisplay *display;
 };

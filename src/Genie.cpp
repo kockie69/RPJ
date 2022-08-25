@@ -67,6 +67,7 @@ void Genie::doPendulum(const ProcessArgs & args) {
 			for (int i=0; i < 2;i++)
 				wrMsg->edges[n][i] = edges[n][i];
 			wrMsg->Weight = mass;
+			wrMsg->nrOfPendulums = nrOfPendulums;
 			rightExpander.messageFlipRequested = true;
 		}
 	}

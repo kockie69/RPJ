@@ -7,15 +7,20 @@ GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Swarm length");
 	configParam(PARAM_HISTORYTIMER,1.f, 10.f, 1.f, "Swarm thickness");
-	configParam(PARAM_PEND_1_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 1");
-	configParam(PARAM_PEND_1_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 1");
-	configParam(PARAM_PEND_2_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 2");
-	configParam(PARAM_PEND_2_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 2");
-	configParam(PARAM_PEND_3_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 3");
-	configParam(PARAM_PEND_3_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 3");
-	configParam(PARAM_PEND_4_X,-INFINITY, INFINITY,WIDTH/4, "X-pos Pendulum 4");
-	configParam(PARAM_PEND_4_Y,-INFINITY, INFINITY,HEIGHT/4, "Y-pos Pendulum 4");
+	configParam(PARAM_PEND_1_X,-INFINITY, INFINITY,0, "X-pos Pendulum 1");
+	configParam(PARAM_PEND_1_Y,-INFINITY, INFINITY,0, "Y-pos Pendulum 1");
+	configParam(PARAM_PEND_2_X,-INFINITY, INFINITY,0, "X-pos Pendulum 2");
+	configParam(PARAM_PEND_2_Y,-INFINITY, INFINITY,0, "Y-pos Pendulum 2");
+	configParam(PARAM_PEND_3_X,-INFINITY, INFINITY,0, "X-pos Pendulum 3");
+	configParam(PARAM_PEND_3_Y,-INFINITY, INFINITY,0, "Y-pos Pendulum 3");
+	configParam(PARAM_PEND_4_X,-INFINITY, INFINITY,0, "X-pos Pendulum 4");
+	configParam(PARAM_PEND_4_Y,-INFINITY, INFINITY,0, "Y-pos Pendulum 4");
 	rdMsg = new XpanderPairs();
+	for (int i=0;i<4;i++) {
+		XY[i] = {WIDTH/2,HEIGHT/2};
+		prevXY[i] = {0,0};
+	}
+
 }
 
 json_t *GenieExpander::dataToJson() {
@@ -30,53 +35,82 @@ void GenieExpander::dataFromJson(json_t *rootJ) {
 		drawLines = static_cast<bool>(json_boolean_value(nDrawLinesJ));
 }
 
-void GenieDisplay::onDragStart(const DragStartEvent& e) {
-	TransparentWidget::onDragStart(e);
+void GenieDisplay::onDragHover(const DragHoverEvent& e) {
+	OpaqueWidget::onDragHover(e);
+	if (e.isConsumed())
+		return;
+	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+		e.consume(this);
+	}	
 }
+
+
+GenieDisplay::GenieDisplay() {
+	for (int i=0;i<4;i++) {
+		Root* initRoot=new Root();
+		roots[i]=initRoot;
+	}
+}
+
+void GenieDisplay::step() {
+	if (module->rdMsg) {
+		for (int n=0;n < module->rdMsg->nrOfPendulums;n++) {
+			Root *root = new Root();
+			roots[n]=root;
+			root->rootPos=&module->XY[n];
+			Joint *joint1 = new Joint();
+			Joint *joint2 = new Joint();
+			root->setPosition(module->XY[n]);
+			root->setColor(nvgRGB(0xAE, 0x1C, 0x28));
+			root->history = module->params[module->PARAM_HISTORY].getValue();
+			root->node = 0;
+			root->elapsed = 0;
+			root->weight = module->rdMsg->weight;
+			joint1->setPosition({0,0});
+			joint1->setBegin({7+root->getPosition().x,7+root->getPosition().y});
+
+			// Add a root
+			addChild(root);
+			for (int i=0; i < 2;i++) {
+				Mass *newMass = new Mass();
+				newMass->setPosition({(module->XY[n].x)+module->rdMsg->edges[n][i].first*10,(module->XY[n].y)+module->rdMsg->edges[n][i].second*10});
+				// If the node is below the root
+				if (i==0) {
+					newMass->setColor(nvgRGB(0xFF, 0xFF, 0xFF));
+					newMass->node=1;
+					joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+					joint2->setPosition({0,0});
+					joint2->setBegin({newMass->getPosition().x,newMass->getPosition().y});
+					joint1->setWeight(module->rdMsg->weight);
+					addChild(joint1);
+				}
+				// two levels below the root
+				if (i==1) {
+					newMass->setColor(nvgRGB(0x21, 0x46, 0x8B));
+					newMass->node = 2;
+					joint2->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+					joint2->setWeight(module->rdMsg->weight);
+					addChild(joint2);
+				}
+				newMass->history = module->params[module->PARAM_HISTORY].getValue();
+				newMass->weight = module->rdMsg->weight;
+				// Add a node
+				addChild(newMass);
+			}
+		}
+	}
+	OpaqueWidget::step();
+}
+
 
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 
 	if (module)
         if (layer == 1) {
-            if (module->rdMsg) {
-                for (int n=0;n < 4;n++) {
-                    Mass *newMass = new Mass();
-					Joint *joint1 = new Joint();
-					Joint *joint2 = new Joint();
-                    newMass->setPosition({module->X[n],module->Y[n]});
-					newMass->setColor(nvgRGB(0xAE, 0x1C, 0x28));
-                    newMass->history = module->params[module->PARAM_HISTORY].getValue();
-					newMass->setWeight(module->rdMsg->weight);
-                    addChild(newMass);
-					joint1->setBegin({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
-                    for (int i=0; i < 2;i++) {
-                        Mass *newMass = new Mass();
-                        newMass->setPosition({module->X[n]+module->rdMsg->edges[n][i].first*10,module->Y[n]+module->rdMsg->edges[n][i].second*10});
-                        // If the node is below the root
-						if (i==0) {
-                            newMass->setColor(nvgRGB(0xFF, 0xFF, 0xFF));
-							joint1->setEnd({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
-							joint2->setBegin({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
-							joint1->setWeight(module->rdMsg->weight);
-							addChild(joint1);
-						}
-						// two levels below the root
-                        if (i==1) {
-                            newMass->setColor(nvgRGB(0x21, 0x46, 0x8B));
-							joint2->setEnd({newMass->box.pos.x+newMass->getPosition().x,newMass->box.pos.y+newMass->getPosition().y});
-							joint2->setWeight(module->rdMsg->weight);
-							addChild(joint2);
-						}
-						newMass->history = module->params[module->PARAM_HISTORY].getValue();
-                        newMass->setWeight(module->rdMsg->weight);
-                        addChild(newMass);
-                    }
-                }
-            }
-        }
-	// Remove everything outside display
-    nvgScissor(args.vg, RECT_ARGS(args.clipBox));
-	TransparentWidget::drawLayer(args,layer);
+		// Remove everything outside display
+		nvgScissor(args.vg, RECT_ARGS(args.clipBox));
+		OpaqueWidget::drawLayer(args,layer);
+	}
 }
 
 Joint::Joint() {
@@ -115,22 +149,60 @@ void Joint::drawLayer(const DrawArgs &args,int layer) {
 	Widget::drawLayer(args,layer);
 }
 
-void Mass::setWeight(float w) {
-    weight = w;
+Root::Root() {
+	elapsed=0;
+	setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_1.svg")));
+}
+
+void Root::step() {
+	if (elapsed==1)
+		requestDelete();
+	SvgWidget::step();
+}
+
+void Root::setColor(NVGcolor massColor) {
+	this->massColor = massColor;
+}
+
+void Root::drawLayer(const DrawArgs &args,int layer) {
+	if (layer==1) 
+		elapsed++;
+	SvgWidget::drawLayer(args,layer);
+}
+
+void Root::onDragHover(const DragHoverEvent &e) {
+	if (!e.isConsumed()) {
+		if (node==0) {
+			if (e.button == GLFW_MOUSE_BUTTON_LEFT ) {
+				e.consume(this);
+				float x = getPosition().x+e.pos.x+e.mouseDelta.x-7;
+				float y = getPosition().y+e.pos.y+e.mouseDelta.y-7;
+				setPosition({x,y});
+				*(rootPos)=getPosition();
+			}
+		}
+	}
+}
+
+Mass::Mass() {
+}
+
+void Mass::step() {
+	elapsed++;
+	if (elapsed == history)
+		requestDelete();
+	//Widget::step();
 }
 
 void Mass::drawLayer(const DrawArgs &args,int layer) {
-    if (layer==1) {
-        NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-elapsed)*200/history);
-        nvgBeginPath(args.vg);
-        nvgCircle(args.vg, getPosition().x, getPosition().y, weight);
-        nvgFillPaint(args.vg,nvgRadialGradient(args.vg,getPosition().x, getPosition().y, 1, weight, massColorFaded ,massColor));
-        nvgFill(args.vg);
-        nvgClosePath(args.vg);
-        elapsed++;
-        if (elapsed == history)
-            requestDelete();
-    }
+	if (layer==1) {
+		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-elapsed)*200/history);
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, 0,0, weight);
+		nvgFillPaint(args.vg,nvgRadialGradient(args.vg,0,0, 1, weight, massColorFaded ,massColor));
+		nvgFill(args.vg);
+		nvgClosePath(args.vg);
+	}
 	Widget::drawLayer(args,layer);
 }
 
@@ -138,21 +210,30 @@ void Mass::setColor(NVGcolor massColor) {
 	this->massColor = massColor;
 }
 
+void Mass::onDragEnd(const DragEndEvent &e) {
+	if (!e.isConsumed()) {
+		if (node==0) {
+			e.consume(this);
+			setPosition(APP->scene->getMousePos());
+		}
+	}
+}
 
 void GenieExpander::process(const ProcessArgs &args) {
 	
 	for (int i=0;i<4;i++) {
-		float delta1X = params[PARAM_PEND_1_X+(2*i)].getValue() - prevX[i];
-		X[i] += delta1X*(WIDTH/2);
-		X[i] = std::max(X[i],0.f);
-		X[i] = std::min(X[i],float(WIDTH/2));
-		prevX[i] = params[PARAM_PEND_1_X+(2*i)].getValue();
+		
+		float deltaX = params[PARAM_PEND_1_X+(2*i)].getValue() - prevXY[i].x;	
+		XY[i].x += deltaX*(WIDTH/2);
+		XY[i].x = std::max(XY[i].x,0.f);
+		XY[i].x = std::min(XY[i].x,float(WIDTH));
+		prevXY[i].x = params[PARAM_PEND_1_X+(2*i)].getValue();
 
-		float delta1Y = params[PARAM_PEND_1_Y+(2*i)].getValue() - prevY[i];
-		Y[i] += delta1Y*(HEIGHT/2);
-		Y[i] = std::max(Y[i],0.f);
-		Y[i] = std::min(Y[i],float(HEIGHT/2));
-		prevY[i] = params[PARAM_PEND_1_Y+(2*i)].getValue();
+		float deltaY = params[PARAM_PEND_1_Y+(2*i)].getValue() - prevXY[i].y;
+		XY[i].y += deltaY*(HEIGHT/2);
+		XY[i].y = std::max(XY[i].y,0.f);
+		XY[i].y = std::min(XY[i].y,float(HEIGHT));
+		prevXY[i].y = params[PARAM_PEND_1_Y+(2*i)].getValue();
 	}
 
 	maxHistory = params[PARAM_HISTORY].getValue();
@@ -180,8 +261,13 @@ void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	menu->addChild(createBoolPtrMenuItem("Draw Lines between Nodes","", &module->drawLines));
 }
 
-GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
+void GenieExpanderModuleWidget::onDragHover(const DragHoverEvent& e) {
+	ModuleWidget::onDragHover(e);
+	if (!e.isConsumed())
+		e.consume(this);
+}
 
+GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	setModule(module);
 	setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/GenieExpander.svg")));
 
