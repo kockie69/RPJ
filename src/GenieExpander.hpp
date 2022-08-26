@@ -6,45 +6,12 @@ using namespace rack;
 const int WIDTH=400;
 const int HEIGHT=370;
 
+struct Root;
+
 struct XpanderPairs {
 	std::pair<float, float> edges[4][2];
     double weight;
 	int nrOfPendulums;
-};
-
-
-struct Root : SvgWidget {
-    private:
-		NVGcolor massColor;
-	public:
-		Root();
-		void onDragHover(const DragHoverEvent &) override;
-		void drawLayer(const DrawArgs &,int) override;
-		void step() override;
-    	void setColor(NVGcolor massColor);
-		Vec* rootPos;
-        int history;
-        int elapsed;
-		int node;
-		float weight;
-};
-
-
-
-struct Mass : Widget {
-    private:
-		NVGcolor massColor;
-	public:
-		Mass();
-    	void drawLayer(const DrawArgs &args,int) override;
-		//void onDragHover(const DragHoverEvent &) override;
-		void onDragEnd(const DragEndEvent &) override;
-    	void setColor(NVGcolor massColor);
-		void step() override;
-        int history;
-        int elapsed=0;
-		int node;
-		float weight;
 };
 
 struct Joint: Widget {
@@ -53,9 +20,8 @@ struct Joint: Widget {
         float thick;
 		Vec positionBegin,positionEnd;
 	public:
-		Joint();
+		Joint(float);
     	void drawLayer(const DrawArgs &args,int) override;
-        void setWeight(float);
 		void setBegin(Vec);
 		void setEnd(Vec);
         int elapsed=0;
@@ -107,6 +73,7 @@ struct GenieExpander : Module {
 		int nrOfPendulums;
 		int nrOfNodes;
 		std::pair<float, float> edges[4][2];
+		NVGcolor nodeColors[5];
 		float weight;
 		bool parentConnected;
 		dsp::ClockDivider historyTimer;
@@ -116,6 +83,8 @@ struct GenieExpander : Module {
         float swarmThickness;
 		Vec XY[4];
 		Vec prevXY[4];
+		float _sampleR,_sampleG,_sampleB;
+		float colors[4][3];
 	private:
 };
 
@@ -136,4 +105,182 @@ struct GenieExpanderModuleWidget : ModuleWidget {
 	void appendContextMenu(Menu *) override;
 	void onDragHover(const DragHoverEvent &) override;
 	GenieDisplay *display;
+};
+
+struct Mass : Widget {
+    private:
+		NVGcolor massColor;
+	public:
+		Mass(GenieExpander*,int,int);
+    	void drawLayer(const DrawArgs &args,int) override;
+		//void onDragHover(const DragHoverEvent &) override;
+		void onDragEnd(const DragEndEvent &) override;
+    	void setColor(NVGcolor massColor);
+		void step() override;
+        int history;
+        int elapsed;
+		int node; //Is this really needed?
+		float weight;
+};
+
+struct Root : SvgWidget {
+    private:
+		NVGcolor massColor;
+	public:
+		Root(GenieExpander*,int);
+		void onDragHover(const DragHoverEvent &) override;
+		void drawLayer(const DrawArgs &,int) override;
+		void step() override;
+    	void setColor(NVGcolor massColor);
+		Vec* rootPos;
+        int history;
+        int elapsed;
+		int node;
+		float weight;
+};
+
+struct ColorQuantity : Quantity {
+	GenieExpander* _module;
+
+	float getMinValue() override { return 0.0f; }
+	float getMaxValue() override { return 255.0f; }
+	float getDefaultValue() override { return 100.0f; }
+	float getDisplayValue() override { return roundf(getValue()); }
+	void setDisplayValue(float displayValue) override { setValue(displayValue); }
+	std::string getUnit() override { return ""; }
+};
+
+struct ColorQuantityR : ColorQuantity {
+	GenieExpander* _module;
+	int node;
+
+	ColorQuantityR(GenieExpander* m,int n) : _module(m) {node=n;}
+
+	void setValue(float value) override {
+		value = clamp(value, getMinValue(), getMaxValue());
+		if (_module) {
+			_module->colors[node][0] = value;
+		}
+	}
+
+	float getValue() override {
+		if (_module) {
+			return _module->colors[node][0];
+		}
+		return getDefaultValue();
+	}
+
+	std::string getLabel() override { return "Red Color"; }
+};
+
+struct ColorQuantityG : ColorQuantity {
+	GenieExpander* _module;
+	int node;
+
+	ColorQuantityG(GenieExpander* m,int n) : _module(m) {node=n;}
+
+	void setValue(float value) override {
+		value = clamp(value, getMinValue(), getMaxValue());
+		if (_module) {
+			_module->colors[node][1] = value;
+		}
+	}
+
+	float getValue() override {
+		if (_module) {
+			return _module->colors[node][1];
+		}
+		return getDefaultValue();
+	}
+
+	std::string getLabel() override { return "Green Color"; }
+};
+
+struct ColorQuantityB : ColorQuantity {
+	GenieExpander* _module;
+	int node;
+
+	ColorQuantityB(GenieExpander* m,int n) : _module(m) {node=n;}
+
+	void setValue(float value) override {
+		value = clamp(value, getMinValue(), getMaxValue());
+		if (_module) {
+			_module->colors[node][2] = value;
+		}
+	}
+
+	float getValue() override {
+		if (_module) {
+			return _module->colors[node][2];
+		}
+		return getDefaultValue();
+	}
+
+	std::string getLabel() override { return "Blue Color"; }
+};
+
+struct ColorSlider : ui::Slider {
+	int colorPos;
+	NVGcolor sliderColor;
+	int node;
+
+	void draw(const DrawArgs &args) override {
+		ui::Slider::draw(args);
+		nvgBeginPath(args.vg);
+		nvgRect(args.vg,box.pos.x, 0, box.pos.x+box.size.x, box.size.y);
+		switch (colorPos) {
+			case 1:
+				sliderColor = nvgRGBA(int(quantity->getValue()),0, 0, 160);
+				break;
+			case 2:
+				sliderColor = nvgRGBA(0,int(quantity->getValue()), 0, 160);
+				break;
+			case 3:
+				sliderColor = nvgRGBA(0,0,int(quantity->getValue()), 160);
+				break;
+			default:
+				return;
+		}
+		nvgFillColor(args.vg,sliderColor);
+		nvgFill(args.vg);
+		nvgClosePath(args.vg);
+		//ui::Slider::draw(args);
+	}
+
+	virtual ~ColorSlider() {
+		delete quantity;
+	}
+};
+
+struct ColorSliderR : ColorSlider {
+	ColorSliderR(GenieExpander* module,int n) {
+		quantity = new ColorQuantityR(module,n);
+		box.size.x = 200.0f;
+		colorPos=1;
+	}
+};
+
+struct ColorSliderG : ColorSlider {
+	ColorSliderG(GenieExpander* module,int n) {
+		quantity = new ColorQuantityG(module,n);
+		box.size.x = 200.0f;
+		colorPos=2;
+	}
+};
+
+struct ColorSliderB : ColorSlider {
+	ColorSliderB(GenieExpander* module,int n) {
+		quantity = new ColorQuantityB(module,n);
+		box.size.x = 200.0f;
+		colorPos = 3;
+	}
+};
+
+struct colorMenuSlider : MenuItem {
+	GenieExpander* _module;
+	int node;
+
+	colorMenuSlider(GenieExpander*, const char*,int n);
+
+	Menu* createChildMenu() override; 
 };

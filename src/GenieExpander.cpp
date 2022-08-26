@@ -22,6 +22,11 @@ GenieExpander::GenieExpander() {
 		prevXY[i] = {0,0};
 	}
 	weight=5;
+	nodeColors[0]=nvgRGB(0xAE, 0x1C, 0x28);
+	nodeColors[1]=nvgRGB(0xFF, 0xFF, 0xFF);
+	nodeColors[2]=nvgRGB(0x21, 0x46, 0x8B);
+	nodeColors[3]=nvgRGB(0xFF, 0xFF, 0xFF);
+	nodeColors[4]=nvgRGB(0x21, 0x46, 0x8B);
 }
 
 json_t *GenieExpander::dataToJson() {
@@ -47,57 +52,35 @@ void GenieDisplay::onDragHover(const DragHoverEvent& e) {
 
 
 GenieDisplay::GenieDisplay() {
-	for (int i=0;i<4;i++) {
-		Root* initRoot=new Root();
-		roots[i]=initRoot;
-	}
 }
 
 void GenieDisplay::step() {
+	Mass* newMass;
 	for (int n=0;n < module->nrOfPendulums;n++) {
-		Root *root = new Root();
+		Root *root = new Root(module,n);
 		roots[n]=root;
 		root->rootPos=&module->XY[n];
-		Joint *joint1 = new Joint();
-		Joint *joint2 = new Joint();
-		root->setPosition(module->XY[n]);
-		root->setColor(nvgRGB(0xAE, 0x1C, 0x28));
-		root->history = module->params[module->PARAM_HISTORY].getValue();
-		root->node = 0;
-		root->elapsed = 0;
-		root->weight = module->weight;
-		joint1->setPosition({0,0});
+		Joint *joint1 = new Joint(module->weight);
+
 		joint1->setBegin({7+root->getPosition().x,7+root->getPosition().y});
 
 		// Add a root
 		addChild(root);
-		for (int i=0; i < 2;i++) {
-			Mass *newMass = new Mass();
-			Vec tmp={(module->XY[n].x)+module->edges[n][i].first*10,(module->XY[n].y)+module->edges[n][i].second*10};
-			newMass->setPosition({(module->XY[n].x)+module->edges[n][i].first*10,(module->XY[n].y)+module->edges[n][i].second*10});
+
+
+		for (int i=0; i < module->nrOfNodes;i++) {
+			newMass = new Mass(module,n,i);
+			Joint *joint2 = new Joint(module->weight);
 			// If the node is below the root
-			if (i==0) {
-				newMass->setColor(nvgRGB(0xFF, 0xFF, 0xFF));
-				newMass->node=1;
-				joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
-				joint2->setPosition({0,0});
-				joint2->setBegin({newMass->getPosition().x,newMass->getPosition().y});
-				joint1->setWeight(module->weight);
-				addChild(joint1);
-			}
-			// two levels below the root
-			if (i==1) {
-				newMass->setColor(nvgRGB(0x21, 0x46, 0x8B));
-				newMass->node = 2;
-				joint2->setEnd({newMass->getPosition().x,newMass->getPosition().y});
-				joint2->setWeight(module->weight);
-				addChild(joint2);
-			}
-			newMass->history = module->params[module->PARAM_HISTORY].getValue();
-			newMass->weight = module->weight;
-			// Add a node
+			joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+			addChild(joint1);
+
+			joint2->setBegin({newMass->getPosition().x,newMass->getPosition().y});
+			joint1=joint2;
 			addChild(newMass);
 		}
+		joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+		addChild(joint1);
 	}
 	OpaqueWidget::step();
 }
@@ -113,12 +96,10 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 	}
 }
 
-Joint::Joint() {
+Joint::Joint(float w) {
+	setPosition({0,0});
+	thick=w;
 	elapsed=0;
-}
-
-void Joint::setWeight(float t) {
-	thick = t;
 }
 
 void Joint::setEnd(Vec e) {
@@ -149,7 +130,12 @@ void Joint::drawLayer(const DrawArgs &args,int layer) {
 	Widget::drawLayer(args,layer);
 }
 
-Root::Root() {
+Root::Root(GenieExpander *m,int p) {
+	setPosition(m->XY[p]);
+	setColor(m->nodeColors[0]);
+	history = m->params[m->PARAM_HISTORY].getValue();
+	node = 0;
+	weight = m->weight;
 	elapsed=0;
 	setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_1.svg")));
 }
@@ -184,7 +170,13 @@ void Root::onDragHover(const DragHoverEvent &e) {
 	}
 }
 
-Mass::Mass() {
+Mass::Mass(GenieExpander *m,int p,int n) {
+	setPosition({m->XY[p].x+m->edges[p][n].first*10,m->XY[p].y+m->edges[p][n].second*10});
+	elapsed=0;
+	setColor(nvgRGBA(m->colors[n][0],m->colors[n][1],m->colors[n][2],160));
+	history = m->params[m->PARAM_HISTORY].getValue();
+	node=(n+1);
+	weight = m->weight;
 }
 
 void Mass::step() {
@@ -263,15 +255,17 @@ int GenieExpander::getPendulums() {
 	}
 	for (int i=0;i<pendulums;i++) {
 		if (parentConnected) {
-			for (int n=0;n<2;n++)	
+			for (int n=0;n<4;n++)	
 				edges[i][n]=rdMsg->edges[i][n];
 		}
 		else {
+			nrOfNodes=0;
 			for (int n=0;n<4;n++)
-				if (inputs[INPUT_1_X+2*n].isConnected() && inputs[INPUT_1_Y+2*n].isConnected()) 
+				if (inputs[INPUT_1_X+2*n].isConnected() && inputs[INPUT_1_Y+2*n].isConnected()) {
+					nrOfNodes++;
 					edges[i][n]={inputs[INPUT_1_X+2*n].getVoltage()*(n+1),-inputs[INPUT_1_Y+2*n].getVoltage()*(n+1)};
+				}
 				else {
-					nrOfNodes=n;
 					if (n==0)
 						return(0);
 					else
@@ -282,11 +276,31 @@ int GenieExpander::getPendulums() {
 	return(pendulums);
 }
 
+
+colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label, int n) : _module(m) {
+	node = n;
+	this->text = label;
+	this->rightText = "▸";
+}
+
+Menu* colorMenuSlider::createChildMenu() {
+	Menu* menu = new Menu;
+	menu->addChild(new ColorSliderR(_module,node));
+	menu->addChild(new ColorSliderG(_module,node));
+	menu->addChild(new ColorSliderB(_module,node));
+	return menu;
+}
+	
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
 
 	menu->addChild(new MenuSeparator());
 	menu->addChild(createBoolPtrMenuItem("Draw Lines between Nodes","", &module->drawLines));
+	menu->addChild(new MenuSeparator());
+	menu->addChild(new colorMenuSlider(module, "Color Node 1",0));
+	menu->addChild(new colorMenuSlider(module, "Color Node 2",1));
+	menu->addChild(new colorMenuSlider(module, "Color Node 3",2));
+	menu->addChild(new colorMenuSlider(module, "Color Node 4",3));
 }
 
 void GenieExpanderModuleWidget::onDragHover(const DragHoverEvent& e) {
