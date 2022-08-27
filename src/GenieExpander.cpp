@@ -60,7 +60,7 @@ void GenieDisplay::step() {
 		Root *root = new Root(module,n);
 		roots[n]=root;
 		root->rootPos=&module->XY[n];
-		Joint *joint1 = new Joint(module->weight);
+		Joint *joint1 = new Joint(module);
 
 		joint1->setBegin({7+root->getPosition().x,7+root->getPosition().y});
 
@@ -70,7 +70,7 @@ void GenieDisplay::step() {
 
 		for (int i=0; i < module->nrOfNodes;i++) {
 			newMass = new Mass(module,n,i);
-			Joint *joint2 = new Joint(module->weight);
+			Joint *joint2 = new Joint(module);
 			// If the node is below the root
 			joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
 			addChild(joint1);
@@ -96,9 +96,10 @@ void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 	}
 }
 
-Joint::Joint(float w) {
+Joint::Joint(GenieExpander *m) {
+	module=m;
 	setPosition({0,0});
-	thick=w;
+	thick=module->weight;
 	elapsed=0;
 }
 
@@ -113,7 +114,7 @@ void Joint::setBegin(Vec b) {
 void Joint::drawLayer(const DrawArgs &args,int layer) {
 	if (layer == 1) {
 		if (elapsed!=1) {
-			NVGcolor lineColor = nvgRGBA(0xFF, 0x7F, 0x00, 0xA0);
+			NVGcolor lineColor = nvgRGBA(module->jointColor[0], module->jointColor[1],module->jointColor[2], 0xA0);
 			nvgFillColor(args.vg, lineColor);
 			nvgStrokeColor(args.vg, lineColor);
 			nvgStrokeWidth(args.vg, thick);
@@ -290,6 +291,22 @@ Menu* colorMenuSlider::createChildMenu() {
 	menu->addChild(new ColorSliderB(_module,node));
 	return menu;
 }
+
+
+colorMenuSliderLine::colorMenuSliderLine(GenieExpander* m, const char* label) : _module(m) {
+	this->text = label;
+	this->rightText = "▸";
+}
+
+Menu* colorMenuSliderLine::createChildMenu() {
+	Menu* menu = new Menu;
+	menu->addChild(new ColorSliderLineR(_module));
+	menu->addChild(new ColorSliderLineG(_module));
+	menu->addChild(new ColorSliderLineB(_module));
+	return menu;
+}
+
+
 	
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
@@ -301,6 +318,7 @@ void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	menu->addChild(new colorMenuSlider(module, "Color Node 2",1));
 	menu->addChild(new colorMenuSlider(module, "Color Node 3",2));
 	menu->addChild(new colorMenuSlider(module, "Color Node 4",3));
+	menu->addChild(new colorMenuSliderLine(module, "Color Lines"));
 }
 
 void GenieExpanderModuleWidget::onDragHover(const DragHoverEvent& e) {
