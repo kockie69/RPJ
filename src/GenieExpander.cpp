@@ -1,4 +1,5 @@
 #include "RPJ.hpp"
+#include <random>
 #include "ctrl/RPJPorts.hpp"
 #include "ctrl/RPJKnobs.hpp"
 #include "GenieExpander.hpp"
@@ -22,21 +23,80 @@ GenieExpander::GenieExpander() {
 		prevXY[i] = {0,0};
 	}
 	weight=5;
-	nodeColors[0]=nvgRGB(0xAE, 0x1C, 0x28);
-	nodeColors[1]=nvgRGB(0xFF, 0xFF, 0xFF);
-	nodeColors[2]=nvgRGB(0x21, 0x46, 0x8B);
-	nodeColors[3]=nvgRGB(0xFF, 0xFF, 0xFF);
-	nodeColors[4]=nvgRGB(0x21, 0x46, 0x8B);
+
+	std::mt19937 generator((std::random_device())());
+	std::uniform_real_distribution<> rnd(0, 255);
+	for (int i=0;i<4;i++)
+		for (int j=0;j<3;j++) {
+			colors[i][j]=rnd(generator);
+			jointColor[j]=rnd(generator);
+		}
 }
 
 json_t *GenieExpander::dataToJson() {
 	json_t *rootJ=json_object();
+	json_t *cJ = json_array();
+	for (int i=0;i<4;i++)
+		for (int j=0;j<3;j++)
+			json_array_insert_new(cJ, (i*3) + j, json_real(colors[i][j]));
+	json_object_set_new(rootJ, "JSON_COLORS", cJ);
+
+	json_t *jcJ = json_array();
+		for (int i = 0; i < 3; i++)
+			json_array_insert_new(jcJ, i, json_real(jointColor[i]));
+	json_object_set_new(rootJ, "JSON_JOINTCOLOR", jcJ);
+
 	json_object_set_new(rootJ, "JSON_DRAWLINES", json_boolean(static_cast<bool>(drawLines)));
-    return rootJ;
+
+
+	json_t *rootsJ = json_array();
+		for (int i = 0; i < 4; i++) {
+			json_array_insert_new(rootsJ, (2*i), json_real(XY[i].x));
+			json_array_insert_new(rootsJ, (2*i)+1, json_real(XY[i].y));
+		}
+	json_object_set_new(rootJ, "JSON_ROOTS", rootsJ);
+	return rootJ;
 }
 
 void GenieExpander::dataFromJson(json_t *rootJ) {
+
+	json_t *cJ = json_object_get(rootJ, "JSON_COLORS");
+	if (cJ) {
+		for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 3; j++)
+				{
+					json_t *cArray1J = json_array_get(cJ, (i*3) + j);
+					if (cArray1J)
+						colors[i][j] = json_real_value(cArray1J);
+				}	
+		}		
+	}
+
+	json_t *jcJ = json_object_get(rootJ, "JSON_JOINTCOLOR");
+	if (jcJ) {
+		for (int i = 0; i < 3; i++)
+			{
+				json_t *jcArrayJ = json_array_get(jcJ, i);
+				if (jcArrayJ)
+					jointColor[i] = json_real_value(jcArrayJ);
+			}			
+	}
+	
+	json_t *rootsJ = json_object_get(rootJ, "JSON_ROOTS");
+	if (rootsJ) {
+		for (int i = 0; i < 4; i++)
+			{
+				json_t *rootsArrayJ = json_array_get(rootsJ, (2*i));
+				if (rootsArrayJ) 
+					XY[i].x = json_real_value(rootsArrayJ);
+				rootsArrayJ = json_array_get(rootsJ, (2*i)+1);
+				if (rootsArrayJ) 
+					XY[i].y = json_real_value(rootsArrayJ);
+			}			
+	}
+
 	json_t *nDrawLinesJ = json_object_get(rootJ, "JSON_DRAWLINES");
+
 	if (nDrawLinesJ) 
 		drawLines = static_cast<bool>(json_boolean_value(nDrawLinesJ));
 }
@@ -133,7 +193,6 @@ void Joint::drawLayer(const DrawArgs &args,int layer) {
 
 Root::Root(GenieExpander *m,int p) {
 	setPosition(m->XY[p]);
-	setColor(m->nodeColors[0]);
 	history = m->params[m->PARAM_HISTORY].getValue();
 	node = 0;
 	weight = m->weight;
@@ -298,6 +357,76 @@ Menu* colorMenuSlider::createChildMenu() {
 	menu->addChild(new ColorSlider(_module,node,2));
 	
 	return menu;
+}
+
+ColorSlider::ColorSlider(GenieExpander* module,int n,int rgb) {
+	quantity = new ColorQuantity(module,n,rgb);
+	box.size.x = 200.0f;
+	colorPos=rgb+1;
+}
+
+void ColorSlider::draw(const DrawArgs &args) {
+	ui::Slider::draw(args);
+	nvgBeginPath(args.vg);
+	nvgRect(args.vg,box.pos.x, 0, box.pos.x+box.size.x, box.size.y);
+	switch (colorPos) {
+		case 1:
+			sliderColor = nvgRGBA(int(quantity->getValue()),0, 0, 160);
+			break;
+		case 2:
+			sliderColor = nvgRGBA(0,int(quantity->getValue()), 0, 160);
+			break;
+		case 3:
+			sliderColor = nvgRGBA(0,0,int(quantity->getValue()), 160);
+			break;
+		default:
+			return;
+	}
+	nvgFillColor(args.vg,sliderColor);
+	nvgFill(args.vg);
+	nvgClosePath(args.vg);
+}
+
+ColorSlider:: ~ColorSlider() {
+	delete quantity;
+}
+
+ColorQuantity::ColorQuantity(GenieExpander* m,int n, int rgb) : _module(m) {
+	node=n;
+	_rgb=rgb;
+}
+
+void ColorQuantity::setValue(float value) {
+	value = clamp(value, getMinValue(), getMaxValue());
+	if (_module) {
+		if (node>=0)
+			_module->colors[node][_rgb] = value;
+		else
+			_module->jointColor[_rgb] = value;
+	}
+}
+
+float ColorQuantity::getValue() {
+	if (_module) {
+		if (node>=0)	
+			return (node >=0) ? _module->colors[node][_rgb] : _module->jointColor[_rgb];
+		else
+			return _module->jointColor[_rgb];
+	}
+	return getDefaultValue();
+}
+
+std::string ColorQuantity::getLabel() { 
+	switch (_rgb) { 
+		case 0:
+			return "Red Color";
+		case 1:
+			return "Green Color";
+		case 2:
+			return "Blue Color";
+		default:
+			return "Color Undefined"; 
+	}
 }
 	
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {

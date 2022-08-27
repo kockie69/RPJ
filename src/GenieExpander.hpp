@@ -147,41 +147,10 @@ struct ColorQuantity : Quantity {
 	int node;
 	int _rgb;
 
-	ColorQuantity(GenieExpander* m,int n, int rgb) : _module(m) {node=n;_rgb=rgb;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			if (node>=0)
-				_module->colors[node][_rgb] = value;
-			else
-				_module->jointColor[_rgb] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			if (node>=0)	
-				return _module->colors[node][_rgb];
-			else
-				return _module->jointColor[_rgb];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { 
-		switch (_rgb) { 
-			case 0:
-				return "Red Color";
-			case 1:
-				return "Green Color";
-			case 2:
-				return "Blue Color";
-			default:
-				return "Color Undefined"; 
-		}
-	}
-
+	ColorQuantity(GenieExpander* m,int n, int rgb);
+	void setValue(float value) override;
+	float getValue() override;
+	std::string getLabel() override;
 	float getMinValue() override { return 0.0f; }
 	float getMaxValue() override { return 255.0f; }
 	float getDefaultValue() override { return 100.0f; }
@@ -195,38 +164,11 @@ struct ColorSlider : ui::Slider {
 	NVGcolor sliderColor;
 	int node;
 
-	ColorSlider(GenieExpander* module,int n,int rgb) {
-		quantity = new ColorQuantity(module,n,rgb);
-		box.size.x = 200.0f;
-		colorPos=rgb+1;
-	}
+	ColorSlider(GenieExpander* module,int n,int rgb); 
 
-	void draw(const DrawArgs &args) override {
-		ui::Slider::draw(args);
-		nvgBeginPath(args.vg);
-		nvgRect(args.vg,box.pos.x, 0, box.pos.x+box.size.x, box.size.y);
-		switch (colorPos) {
-			case 1:
-				sliderColor = nvgRGBA(int(quantity->getValue()),0, 0, 160);
-				break;
-			case 2:
-				sliderColor = nvgRGBA(0,int(quantity->getValue()), 0, 160);
-				break;
-			case 3:
-				sliderColor = nvgRGBA(0,0,int(quantity->getValue()), 160);
-				break;
-			default:
-				return;
-		}
-		nvgFillColor(args.vg,sliderColor);
-		nvgFill(args.vg);
-		nvgClosePath(args.vg);
-		//ui::Slider::draw(args);
-	}
+	void draw(const DrawArgs &args) override;
 
-	virtual ~ColorSlider() {
-		delete quantity;
-	}
+	virtual ~ColorSlider();
 };
 
 struct colorMenuSlider : MenuItem {
