@@ -284,29 +284,21 @@ colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label, int n) : _
 	this->rightText = "▸";
 }
 
-Menu* colorMenuSlider::createChildMenu() {
-	Menu* menu = new Menu;
-	menu->addChild(new ColorSliderMass(_module,node,0));
-	menu->addChild(new ColorSliderMass(_module,node,1));
-	menu->addChild(new ColorSliderMass(_module,node,2));
-	return menu;
-}
-
-
-colorMenuSliderLine::colorMenuSliderLine(GenieExpander* m, const char* label) : _module(m) {
+colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label) : _module(m) {
+	node = -1;
 	this->text = label;
 	this->rightText = "▸";
 }
 
-Menu* colorMenuSliderLine::createChildMenu() {
+Menu* colorMenuSlider::createChildMenu() {
 	Menu* menu = new Menu;
-	menu->addChild(new ColorSliderLine(_module,0));
-	menu->addChild(new ColorSliderLine(_module,1));
-	menu->addChild(new ColorSliderLine(_module,2));
+
+	menu->addChild(new ColorSlider(_module,node,0));
+	menu->addChild(new ColorSlider(_module,node,1));
+	menu->addChild(new ColorSlider(_module,node,2));
+	
 	return menu;
 }
-
-
 	
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
@@ -318,7 +310,7 @@ void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	menu->addChild(new colorMenuSlider(module, "Color Node 2",1));
 	menu->addChild(new colorMenuSlider(module, "Color Node 3",2));
 	menu->addChild(new colorMenuSlider(module, "Color Node 4",3));
-	menu->addChild(new colorMenuSliderLine(module, "Color Lines"));
+	menu->addChild(new colorMenuSlider(module, "Color Lines"));
 }
 
 void GenieExpanderModuleWidget::onDragHover(const DragHoverEvent& e) {

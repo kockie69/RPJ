@@ -144,6 +144,43 @@ struct Root : SvgWidget {
 
 struct ColorQuantity : Quantity {
 	GenieExpander* _module;
+	int node;
+	int _rgb;
+
+	ColorQuantity(GenieExpander* m,int n, int rgb) : _module(m) {node=n;_rgb=rgb;}
+
+	void setValue(float value) override {
+		value = clamp(value, getMinValue(), getMaxValue());
+		if (_module) {
+			if (node>=0)
+				_module->colors[node][_rgb] = value;
+			else
+				_module->jointColor[_rgb] = value;
+		}
+	}
+
+	float getValue() override {
+		if (_module) {
+			if (node>=0)	
+				return _module->colors[node][_rgb];
+			else
+				return _module->jointColor[_rgb];
+		}
+		return getDefaultValue();
+	}
+
+	std::string getLabel() override { 
+		switch (_rgb) { 
+			case 0:
+				return "Red Color";
+			case 1:
+				return "Green Color";
+			case 2:
+				return "Blue Color";
+			default:
+				return "Color Undefined"; 
+		}
+	}
 
 	float getMinValue() override { return 0.0f; }
 	float getMaxValue() override { return 255.0f; }
@@ -153,80 +190,16 @@ struct ColorQuantity : Quantity {
 	std::string getUnit() override { return ""; }
 };
 
-struct ColorQuantityLine : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-	int _rgb;
-
-	ColorQuantityLine(GenieExpander* m,int rgb) : _module(m) {_rgb=rgb;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->jointColor[_rgb] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->jointColor[_rgb];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { 
-		switch (_rgb) { 
-			case 0:
-				return "Red Color";
-			case 1:
-				return "Green Color";
-			case 2:
-				return "Blue Color";
-			default:
-				return "Color Undefined"; 
-		}
-	}
-};
-
-struct ColorQuantityMass : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-	int _rgb;
-
-	ColorQuantityMass(GenieExpander* m,int n, int rgb) : _module(m) {node=n;_rgb=rgb;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->colors[node][_rgb] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->colors[node][_rgb];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { 
-		switch (_rgb) { 
-			case 0:
-				return "Red Color";
-			case 1:
-				return "Green Color";
-			case 2:
-				return "Blue Color";
-			default:
-				return "Color Undefined"; 
-		}
-	}
-};
-
 struct ColorSlider : ui::Slider {
 	int colorPos;
 	NVGcolor sliderColor;
 	int node;
+
+	ColorSlider(GenieExpander* module,int n,int rgb) {
+		quantity = new ColorQuantity(module,n,rgb);
+		box.size.x = 200.0f;
+		colorPos=rgb+1;
+	}
 
 	void draw(const DrawArgs &args) override {
 		ui::Slider::draw(args);
@@ -256,36 +229,12 @@ struct ColorSlider : ui::Slider {
 	}
 };
 
-struct ColorSliderLine : ColorSlider {
-
-	ColorSliderLine(GenieExpander* module,int rgb) {
-		quantity = new ColorQuantityLine(module,rgb);
-		box.size.x = 200.0f;
-		colorPos=rgb+1;
-	}
-};
-
-struct ColorSliderMass : ColorSlider {
-	ColorSliderMass(GenieExpander* module,int n,int rgb) {
-		quantity = new ColorQuantityMass(module,n,rgb);
-		box.size.x = 200.0f;
-		colorPos=rgb+1;
-	}
-};
-
 struct colorMenuSlider : MenuItem {
 	GenieExpander* _module;
 	int node;
 
 	colorMenuSlider(GenieExpander*, const char*,int n);
-
-	Menu* createChildMenu() override; 
-};
-
-struct colorMenuSliderLine : MenuItem {
-	GenieExpander* _module;
-
-	colorMenuSliderLine(GenieExpander*, const char*);
+	colorMenuSlider(GenieExpander*, const char*);
 
 	Menu* createChildMenu() override; 
 };
