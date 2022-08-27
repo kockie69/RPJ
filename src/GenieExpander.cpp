@@ -286,9 +286,9 @@ colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label, int n) : _
 
 Menu* colorMenuSlider::createChildMenu() {
 	Menu* menu = new Menu;
-	menu->addChild(new ColorSliderR(_module,node));
-	menu->addChild(new ColorSliderG(_module,node));
-	menu->addChild(new ColorSliderB(_module,node));
+	menu->addChild(new ColorSliderMass(_module,node,0));
+	menu->addChild(new ColorSliderMass(_module,node,1));
+	menu->addChild(new ColorSliderMass(_module,node,2));
 	return menu;
 }
 
@@ -300,9 +300,9 @@ colorMenuSliderLine::colorMenuSliderLine(GenieExpander* m, const char* label) : 
 
 Menu* colorMenuSliderLine::createChildMenu() {
 	Menu* menu = new Menu;
-	menu->addChild(new ColorSliderLineR(_module));
-	menu->addChild(new ColorSliderLineG(_module));
-	menu->addChild(new ColorSliderLineB(_module));
+	menu->addChild(new ColorSliderLine(_module,0));
+	menu->addChild(new ColorSliderLine(_module,1));
+	menu->addChild(new ColorSliderLine(_module,2));
 	return menu;
 }
 

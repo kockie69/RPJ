@@ -153,142 +153,74 @@ struct ColorQuantity : Quantity {
 	std::string getUnit() override { return ""; }
 };
 
-struct ColorQuantityLineR : ColorQuantity {
+struct ColorQuantityLine : ColorQuantity {
 	GenieExpander* _module;
 	int node;
+	int _rgb;
 
-	ColorQuantityLineR(GenieExpander* m) : _module(m) {}
+	ColorQuantityLine(GenieExpander* m,int rgb) : _module(m) {_rgb=rgb;}
 
 	void setValue(float value) override {
 		value = clamp(value, getMinValue(), getMaxValue());
 		if (_module) {
-			_module->jointColor[0] = value;
+			_module->jointColor[_rgb] = value;
 		}
 	}
 
 	float getValue() override {
 		if (_module) {
-			return _module->jointColor[0];
+			return _module->jointColor[_rgb];
 		}
 		return getDefaultValue();
 	}
 
-	std::string getLabel() override { return "Red Color"; }
+	std::string getLabel() override { 
+		switch (_rgb) { 
+			case 0:
+				return "Red Color";
+			case 1:
+				return "Green Color";
+			case 2:
+				return "Blue Color";
+			default:
+				return "Color Undefined"; 
+		}
+	}
 };
 
-struct ColorQuantityLineG : ColorQuantity {
+struct ColorQuantityMass : ColorQuantity {
 	GenieExpander* _module;
 	int node;
+	int _rgb;
 
-	ColorQuantityLineG(GenieExpander* m) : _module(m) {}
+	ColorQuantityMass(GenieExpander* m,int n, int rgb) : _module(m) {node=n;_rgb=rgb;}
 
 	void setValue(float value) override {
 		value = clamp(value, getMinValue(), getMaxValue());
 		if (_module) {
-			_module->jointColor[1] = value;
+			_module->colors[node][_rgb] = value;
 		}
 	}
 
 	float getValue() override {
 		if (_module) {
-			return _module->jointColor[1];
+			return _module->colors[node][_rgb];
 		}
 		return getDefaultValue();
 	}
 
-	std::string getLabel() override { return "Red Color"; }
-};
-
-struct ColorQuantityLineB : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-
-	ColorQuantityLineB(GenieExpander* m) : _module(m) {}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->jointColor[2] = value;
+	std::string getLabel() override { 
+		switch (_rgb) { 
+			case 0:
+				return "Red Color";
+			case 1:
+				return "Green Color";
+			case 2:
+				return "Blue Color";
+			default:
+				return "Color Undefined"; 
 		}
 	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->jointColor[2];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { return "Red Color"; }
-};
-
-struct ColorQuantityR : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-
-	ColorQuantityR(GenieExpander* m,int n) : _module(m) {node=n;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->colors[node][0] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->colors[node][0];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { return "Red Color"; }
-};
-
-struct ColorQuantityG : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-
-	ColorQuantityG(GenieExpander* m,int n) : _module(m) {node=n;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->colors[node][1] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->colors[node][1];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { return "Green Color"; }
-};
-
-struct ColorQuantityB : ColorQuantity {
-	GenieExpander* _module;
-	int node;
-
-	ColorQuantityB(GenieExpander* m,int n) : _module(m) {node=n;}
-
-	void setValue(float value) override {
-		value = clamp(value, getMinValue(), getMaxValue());
-		if (_module) {
-			_module->colors[node][2] = value;
-		}
-	}
-
-	float getValue() override {
-		if (_module) {
-			return _module->colors[node][2];
-		}
-		return getDefaultValue();
-	}
-
-	std::string getLabel() override { return "Blue Color"; }
 };
 
 struct ColorSlider : ui::Slider {
@@ -324,52 +256,20 @@ struct ColorSlider : ui::Slider {
 	}
 };
 
-struct ColorSliderLineR : ColorSlider {
-	ColorSliderLineR(GenieExpander* module) {
-		quantity = new ColorQuantityLineR(module);
+struct ColorSliderLine : ColorSlider {
+
+	ColorSliderLine(GenieExpander* module,int rgb) {
+		quantity = new ColorQuantityLine(module,rgb);
 		box.size.x = 200.0f;
-		colorPos=1;
+		colorPos=rgb+1;
 	}
 };
 
-struct ColorSliderLineG : ColorSlider {
-	ColorSliderLineG(GenieExpander* module) {
-		quantity = new ColorQuantityLineG(module);
+struct ColorSliderMass : ColorSlider {
+	ColorSliderMass(GenieExpander* module,int n,int rgb) {
+		quantity = new ColorQuantityMass(module,n,rgb);
 		box.size.x = 200.0f;
-		colorPos=1;
-	}
-};
-
-struct ColorSliderLineB : ColorSlider {
-	ColorSliderLineB(GenieExpander* module) {
-		quantity = new ColorQuantityLineB(module);
-		box.size.x = 200.0f;
-		colorPos=1;
-	}
-};
-
-
-struct ColorSliderR : ColorSlider {
-	ColorSliderR(GenieExpander* module,int n) {
-		quantity = new ColorQuantityR(module,n);
-		box.size.x = 200.0f;
-		colorPos=1;
-	}
-};
-
-struct ColorSliderG : ColorSlider {
-	ColorSliderG(GenieExpander* module,int n) {
-		quantity = new ColorQuantityG(module,n);
-		box.size.x = 200.0f;
-		colorPos=2;
-	}
-};
-
-struct ColorSliderB : ColorSlider {
-	ColorSliderB(GenieExpander* module,int n) {
-		quantity = new ColorQuantityB(module,n);
-		box.size.x = 200.0f;
-		colorPos = 3;
+		colorPos=rgb+1;
 	}
 };
 
