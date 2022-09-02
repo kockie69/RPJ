@@ -7,7 +7,7 @@
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	configParam(PARAM_HISTORY, 1.f, 100.f,10.f, "Swarm length");
-	configParam(PARAM_HISTORYTIMER,1.f, 10.f, 1.f, "Swarm thickness");
+	configParam(PARAM_HISTORYTIMER,5.f, 1.f, 1.f, "Swarm thickness");
 	configParam(PARAM_PEND_1_X,-INFINITY, INFINITY,0, "X-pos Pendulum 1");
 	configParam(PARAM_PEND_1_Y,-INFINITY, INFINITY,0, "Y-pos Pendulum 1");
 	configParam(PARAM_PEND_2_X,-INFINITY, INFINITY,0, "X-pos Pendulum 2");
@@ -23,7 +23,7 @@ GenieExpander::GenieExpander() {
 		prevXY[i] = {0,0};
 	}
 	weight=5;
-
+	nrOfPendulums=4;
 	std::mt19937 generator((std::random_device())());
 	std::uniform_real_distribution<> rnd(0, 255);
 	for (int i=0;i<4;i++)
@@ -115,32 +115,38 @@ GenieDisplay::GenieDisplay() {
 }
 
 void GenieDisplay::step() {
-	Mass* newMass;
-	for (int n=0;n < module->nrOfPendulums;n++) {
-		Root *root = new Root(module,n);
-		roots[n]=root;
-		root->rootPos=&module->XY[n];
-		Joint *joint1 = new Joint(module);
+	bool timer;
+	if (module) {
+		Mass* newMass;
+		for (int n=0;n < module->nrOfPendulums;n++) {
+			Root *root = new Root(module,n);
+			roots[n]=root;
+			root->rootPos=&module->XY[n];
+			Joint *joint1 = new Joint(module);
 
-		joint1->setBegin({7+root->getPosition().x,7+root->getPosition().y});
+			joint1->setBegin({7+root->getPosition().x,7+root->getPosition().y});
 
-		// Add a root
-		addChild(root);
+			// Add a root
+			addChild(root);
 
+			if (n==0)
+				timer = module->historyTimer.process();
+			if (timer) {
+				for (int i=0; i < module->nrOfNodes;i++) {
+					newMass = new Mass(module,n,i);
+					Joint *joint2 = new Joint(module);
+					// If the node is below the root
+					joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+					addChild(joint1);
 
-		for (int i=0; i < module->nrOfNodes;i++) {
-			newMass = new Mass(module,n,i);
-			Joint *joint2 = new Joint(module);
-			// If the node is below the root
-			joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
-			addChild(joint1);
-
-			joint2->setBegin({newMass->getPosition().x,newMass->getPosition().y});
-			joint1=joint2;
-			addChild(newMass);
+					joint2->setBegin({newMass->getPosition().x,newMass->getPosition().y});
+					joint1=joint2;
+					addChild(newMass);
+				}
+				joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
+				addChild(joint1);
+			}
 		}
-		joint1->setEnd({newMass->getPosition().x,newMass->getPosition().y});
-		addChild(joint1);
 	}
 	OpaqueWidget::step();
 }
@@ -173,20 +179,25 @@ void Joint::setBegin(Vec b) {
 
 void Joint::drawLayer(const DrawArgs &args,int layer) {
 	if (layer == 1) {
-		if (elapsed!=1) {
-			NVGcolor lineColor = nvgRGBA(module->jointColor[0], module->jointColor[1],module->jointColor[2], 0xA0);
-			nvgFillColor(args.vg, lineColor);
-			nvgStrokeColor(args.vg, lineColor);
-			nvgStrokeWidth(args.vg, thick);
-			nvgBeginPath(args.vg);
-			nvgMoveTo(args.vg,positionBegin.x,positionBegin.y);
-			nvgLineTo(args.vg,positionEnd.x,positionEnd.y);
-			nvgStroke(args.vg);
-			nvgClosePath(args.vg);
-			elapsed++;
+		if (module) {
+			if (module->drawLines) {
+				if (elapsed!=1) {
+					NVGcolor lineColor = nvgRGB(module->jointColor[0], module->jointColor[1],module->jointColor[2]);
+					nvgFillColor(args.vg, lineColor);
+					nvgStrokeColor(args.vg, lineColor);
+					nvgStrokeWidth(args.vg, thick);
+					nvgLineCap(args.vg, NVG_ROUND);
+					nvgBeginPath(args.vg);
+					nvgMoveTo(args.vg,positionBegin.x,positionBegin.y);
+					nvgLineTo(args.vg,positionEnd.x,positionEnd.y);
+					nvgStroke(args.vg);
+					nvgClosePath(args.vg);
+					elapsed++;
+				}
+				else
+					requestDelete();
+			}
 		}
-		else
-			requestDelete();
 	}
 	Widget::drawLayer(args,layer);
 }
@@ -233,7 +244,7 @@ void Root::onDragHover(const DragHoverEvent &e) {
 Mass::Mass(GenieExpander *m,int p,int n) {
 	setPosition({m->XY[p].x+m->edges[p][n].first*10,m->XY[p].y+m->edges[p][n].second*10});
 	elapsed=0;
-	setColor(nvgRGBA(m->colors[n][0],m->colors[n][1],m->colors[n][2],160));
+	setColor(nvgRGB(m->colors[n][0],m->colors[n][1],m->colors[n][2]));
 	history = m->params[m->PARAM_HISTORY].getValue();
 	node=(n+1);
 	weight = m->weight;
@@ -247,11 +258,16 @@ void Mass::step() {
 }
 
 void Mass::drawLayer(const DrawArgs &args,int layer) {
+	NVGcolor transColor;
 	if (layer==1) {
-		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-elapsed)*200/history);
+		NVGcolor massColorFaded = nvgTransRGBA(massColor, (history-elapsed)*255/history);
+		if (elapsed==1)
+			transColor = nvgLerpRGBA(nvgRGB(0xFF, 0xFF, 0xFF), massColor, 0.75);
+		else
+			transColor = nvgLerpRGBA(nvgRGB(0x00, 0x00, 0x00), massColor, 0.25);
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, 0,0, weight);
-		nvgFillPaint(args.vg,nvgRadialGradient(args.vg,0,0, 1, weight, massColorFaded ,massColor));
+		nvgFillPaint(args.vg,nvgRadialGradient(args.vg,0,0, 1, weight, transColor ,massColorFaded));
 		nvgFill(args.vg);
 		nvgClosePath(args.vg);
 	}
