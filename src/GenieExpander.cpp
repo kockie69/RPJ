@@ -26,7 +26,7 @@ GenieExpander::GenieExpander() {
 	nrOfPendulums=4;
 	std::mt19937 generator((std::random_device())());
 	std::uniform_real_distribution<> rnd(0, 255);
-	for (int i=0;i<4;i++)
+	for (int i=0;i<=4;i++)
 		for (int j=0;j<3;j++) {
 			colors[i][j]=rnd(generator);
 			jointColor[j]=rnd(generator);
@@ -154,8 +154,7 @@ void GenieDisplay::step() {
 
 void GenieDisplay::drawLayer(const DrawArgs &args,int layer) {
 
-	if (module)
-        if (layer == 1) {
+    if (layer == 1) {
 		// Remove everything outside display
 		nvgScissor(args.vg, RECT_ARGS(args.clipBox));
 		OpaqueWidget::drawLayer(args,layer);
@@ -208,8 +207,10 @@ Root::Root(GenieExpander *m,int p) {
 	node = 0;
 	weight = m->weight;
 	elapsed=0;
+	setColor(nvgRGB(m->colors[0][0],m->colors[0][1],m->colors[0][2]));
 	setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_1.svg")));
 }
+
 
 void Root::step() {
 	if (elapsed==1)
@@ -222,8 +223,15 @@ void Root::setColor(NVGcolor massColor) {
 }
 
 void Root::drawLayer(const DrawArgs &args,int layer) {
-	if (layer==1) 
+	if (layer==1) {
+		NVGcolor transColor = nvgLerpRGBA(nvgRGB(0xFF, 0xFF, 0xFF), massColor, 0.75);
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, 7,7, weight);
+		nvgFillPaint(args.vg,nvgRadialGradient(args.vg,0,0, 1, weight, transColor ,massColor));
+		nvgFill(args.vg);
+		nvgClosePath(args.vg);
 		elapsed++;
+		}
 	SvgWidget::drawLayer(args,layer);
 }
 
@@ -244,7 +252,7 @@ void Root::onDragHover(const DragHoverEvent &e) {
 Mass::Mass(GenieExpander *m,int p,int n) {
 	setPosition({m->XY[p].x+m->edges[p][n].first*10,m->XY[p].y+m->edges[p][n].second*10});
 	elapsed=0;
-	setColor(nvgRGB(m->colors[n][0],m->colors[n][1],m->colors[n][2]));
+	setColor(nvgRGB(m->colors[n+1][0],m->colors[n+1][1],m->colors[n+1][2]));
 	history = m->params[m->PARAM_HISTORY].getValue();
 	node=(n+1);
 	weight = m->weight;
@@ -451,10 +459,11 @@ void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	menu->addChild(new MenuSeparator());
 	menu->addChild(createBoolPtrMenuItem("Draw Lines between Nodes","", &module->drawLines));
 	menu->addChild(new MenuSeparator());
-	menu->addChild(new colorMenuSlider(module, "Color Node 1",0));
-	menu->addChild(new colorMenuSlider(module, "Color Node 2",1));
-	menu->addChild(new colorMenuSlider(module, "Color Node 3",2));
-	menu->addChild(new colorMenuSlider(module, "Color Node 4",3));
+	menu->addChild(new colorMenuSlider(module, "Color Root",0));
+	menu->addChild(new colorMenuSlider(module, "Color Node 1",1));
+	menu->addChild(new colorMenuSlider(module, "Color Node 2",2));
+	menu->addChild(new colorMenuSlider(module, "Color Node 3",3));
+	menu->addChild(new colorMenuSlider(module, "Color Node 4",4));
 	menu->addChild(new colorMenuSlider(module, "Color Lines"));
 }
 
@@ -480,7 +489,8 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
         display->module = module;
         addChild(display);	
     }
-		// Next do the Jacks
+	
+	// Next do the Jacks
 	const float jackX1 = 14.5;
 	const float jackX2 = 51;		
 
