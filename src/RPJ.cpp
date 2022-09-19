@@ -20,4 +20,6 @@ void init(Plugin *p) {
 	p->addModel(modelDrillingHoles);
 	p->addModel(modelTuxOn);
     p->addModel(modelPigeonPlink);
+    p->addModel(modelGenie);
+    p->addModel(modelGenieExpander);
 }
