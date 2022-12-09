@@ -2,7 +2,7 @@ name: Build VCV Rack Plugin Development
 on: [workflow_dispatch,push,pull_request]
 
 env:
-  rack-sdk-version: 2.1
+  rack-sdk-version: 2.2.1
 
 defaults:
   run:
@@ -24,13 +24,13 @@ jobs:
                 sudo apt-get update
                 sudo apt-get install libglu1-mesa-dev 
             - os: macos-latest
-              name: Mac
+              name: Mac-x
               arch: mac-x64
               compiler: cc
               install-dependencies: |
                 brew install mesa
             - os: macos-latest
-              name: Mac
+              name: Mac-arm
               arch: mac-arm64
               compiler: cc
               install-dependencies: |
@@ -48,7 +48,7 @@ jobs:
       - name: Get Rack-SDK
         run: |
           pushd $HOME
-          curl -o RackSDK.zip https://vcvrack.com/downloads/Rack-SDK-2.${{ env.rack-sdk-version }}-${{ matrix.arch }}.zip
+          curl -o RackSDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-${{ matrix.arch }}.zip
           unzip RackSDK.zip
       - name: Patch makefiles, use 7zip on Windows
         if: runner.os == 'windows'
@@ -61,7 +61,7 @@ jobs:
           gitrev=`git rev-parse --short HEAD`
           pluginversion=`jq -r '.version' plugin.json`
           echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
-          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
+          cat <<< `jq --arg VERSION "$pluginversion" '.version=$VERSION' plugin.json` > plugin.json
       - name: Build plugin
         env:
           RACK_DIR: Rack-SDK
