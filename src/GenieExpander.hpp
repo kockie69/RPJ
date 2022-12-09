@@ -10,7 +10,7 @@ struct Root;
 struct GenieExpander;
 
 struct XpanderPairs {
-	std::pair<float, float> edges[4][2];
+	std::pair<float, float> edges[5][4];
     double weight;
 	int nrOfPendulums;
 };
@@ -74,7 +74,7 @@ struct GenieExpander : Module {
         int getPendulums();
 		int nrOfPendulums;
 		int nrOfNodes;
-		std::pair<float, float> edges[4][2];
+		std::pair<float, float> edges[4][4];
 		NVGcolor nodeColors[5];
 		float weight;
 		bool parentConnected;
@@ -86,8 +86,8 @@ struct GenieExpander : Module {
 		Vec XY[4];
 		Vec prevXY[4];
 		float _sampleR,_sampleG,_sampleB;
-		float colors[4][3];
-		float jointColor[3];
+		float colors[5][3];
+		float jointColor[4];
 	private:
 };
 
