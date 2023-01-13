@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genie sync/trigger
 - Genie length knobs and cv's
 
+## [2.2.3] - 2023-01-13
+- Fixed out of bounds issue for Genie
+- File selection in Tuxon on Linux fixed
+- Changelog moved to v2 branch
+- SDK 2.2.2
+- Includes arm build
+
+## [2.2.2] - 2022-08-10
+- Fixed begin and end positioning
+- Improved zoom functionality
+
 ## [2.1.2] - 2022-06-16
 - Fixed speed bug in TuxOn
 - Updated documentation for TuxOn

@@ -192,11 +192,15 @@ float TuxOn::stepSize() {
 }
 
 void TuxOn::selectAndLoadFile(void) {	
-	static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
+static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
 	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
 	
 	if (fileName=="") {
-		char* pathC  = osdialog_file(OSDIALOG_OPEN, "", "", filters);
+#ifndef ARCH_LIN	
+		char* pathC  = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filters);
+#else
+		char* pathC  = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+#endif
 		if (!pathC) {
         	// Fail silently
     		return;
