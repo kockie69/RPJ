@@ -83,7 +83,7 @@ struct SqTrimpot24 : Trimpot {
 
 class SqPortBase : public app::SvgPort {
 private:
-    ui::Tooltip* tooltip = NULL;
+//    ui::Tooltip* tooltip = NULL;
     std::string toolTipString;
 };
 

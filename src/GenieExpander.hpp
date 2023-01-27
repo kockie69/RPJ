@@ -17,7 +17,7 @@ struct XpanderPairs {
 
 struct Joint: Widget {
 	    private:
-		NVGcolor jointColor;
+//		NVGcolor jointColor;
         float thick;
 		Vec positionBegin,positionEnd;
 		GenieExpander* module;

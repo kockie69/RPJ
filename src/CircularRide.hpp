@@ -78,7 +78,7 @@ struct DetectAlgorithmQuantity : public rack::engine::ParamQuantity {
     	std::string getDisplayValueString() override;
 
 	private:
-		int value;
+//		int value;
 		std::string v;
 };
 

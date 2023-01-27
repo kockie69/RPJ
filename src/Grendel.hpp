@@ -120,7 +120,7 @@ struct RPJLFO : Module {
 		float freqParam;
 		float_4 pitch, pitch0, cvInput, v;
 		ParamQuantity* parameter[4];
-		ModeValues modeValues;
+//		ModeValues modeValues;
 		ModeValuePair mvp;
 		ModeValues mv;
 };
@@ -149,6 +149,6 @@ struct FreqQuantity : public rack::engine::ParamQuantity {
 	public:
     	std::string getDisplayValueString() override;
 	private:
-		int value;
+//		int value;
 		std::string v;
 };

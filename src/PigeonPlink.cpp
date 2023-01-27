@@ -643,11 +643,11 @@ const float knobX3 = knobX2 + knobDeltaX;
 const float knobX4 = knobX3 + knobDeltaX;
 
 const float knobY1 = 55;
-const float knobDeltaY = 70;
+//const float knobDeltaY = 70;
 const float knobY2 = 145;
 const float knobY3 = 245;
-const float trimY = 276;
-const float trimX = 52;
+//const float trimY = 276;
+//const float trimX = 52;
 //const float labelAboveKnob = 20;
 
 void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<IComposite> icomp) {
@@ -727,8 +727,8 @@ void PigeonPlinkWidget::addKnobs(PigeonPlinkModule *module, std::shared_ptr<ICom
     // third row
 }
 
-const float switchRow = 164;
-const float buttonXShift = 3;
+//const float switchRow = 164;
+//const float buttonXShift = 3;
 
 const float jacksX1 = 11;
 const float jacksDeltaX = 53;
@@ -737,7 +737,7 @@ const float jacksX3 = jacksX2 + jacksDeltaX;
 const float jacksX4 = jacksX3 + jacksDeltaX;
 
 const float jacksY0 = 62;
-const float jacksY1 = 120;
+//const float jacksY1 = 120;
 const float jacksY2 = 174;
 const float jacksY3 = 276;
 const float jacksY4 = 327;

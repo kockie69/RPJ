@@ -166,9 +166,9 @@ protected:
 			rack::simd::float_4 alpha = 2.0*M_PI*fc / sampleRate;
 			rack::simd::float_4 p_Re = -alpha / (2.0*Q);
 			rack::simd::float_4 zeta = 1.0 / (2.0 * Q);
-			rack::simd::float_4 p_Im = alpha*pow((1.0 - (zeta*zeta)), 0.5);
+			rack::simd::float_4 p_Im = alpha*pow((1.0 - (zeta*zeta)), (rack::simd::float_4)0.5);
 			double c_Re = 0.0;
-			rack::simd::float_4 c_Im = alpha / (2.0*pow((1.0 - (zeta*zeta)), 0.5));
+			rack::simd::float_4 c_Im = alpha / (2.0*pow((1.0 - (zeta*zeta)), (rack::simd::float_4)0.5f));
 
 			rack::simd::float_4 eP_re = rack::simd::exp(p_Re);
 			coeffArray[a0] = c_Re;
@@ -598,7 +598,7 @@ protected:
 			resonance_dB = rack::simd::ifelse(Q > 0.707,20.0*log10(peak),0);
 
 			// --- intermediate vars
-			rack::simd::float_4 resonance = (cos(theta_c) + (sin(theta_c) * sqrt(pow(10.0, (resonance_dB / 10.0)) - 1))) / ((pow(10.0, (resonance_dB / 20.0)) * sin(theta_c)) + 1);
+			rack::simd::float_4 resonance = (cos(theta_c) + (sin(theta_c) * sqrt(pow((rack::simd::float_4)10.0, (resonance_dB / 10.0)) - 1))) / ((pow(10.0, (resonance_dB / 20.0)) * sin(theta_c)) + 1);
 			rack::simd::float_4 g = pow(10.0, (-resonance_dB / 40.0));
 
 			// --- kMMALPF2B disables the GR with increase in Q

@@ -19,7 +19,7 @@ inline T peakGainFor_Q(T Q)
 	//if (Q <= 0.707) return 1.0;
 	//return (Q*Q) / (pow((Q*Q - 0.25), 0.5));
 
-	return rack::simd::ifelse(Q <= 0.707,1.0,(Q*Q) / (pow((Q*Q - 0.25), 0.5)));
+	return rack::simd::ifelse(Q <= 0.707,1.0,(Q*Q) / (pow((Q*Q - 0.25), (rack::simd::float_4)0.5)));
 
 }
 
