@@ -170,7 +170,6 @@ void TuxOn::setDisplay(bool isZoom) {
 
 float TuxOn::getBegin() {
 	if (zoomParameters.size()) { 
-		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
 		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * beginRatio;
 	}
 	else return 0;
@@ -178,7 +177,6 @@ float TuxOn::getBegin() {
 
 float TuxOn::getEnd() {
 	if (zoomParameters.size()) {
-		float x = zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
 		return zoomParameters[zoom].begin + zoomParameters[zoom].totalPCMFrameCount * endRatio;
 	}
 	else return 0;
@@ -186,17 +184,16 @@ float TuxOn::getEnd() {
 
 float TuxOn::stepSize() {
 	if (zoomParameters.size())
-		//return abs((zoomParameters[zoom].begin-zoomParameters[zoom].end)/pow(2,zoom));
 		return 1;
 	else return 0;
 }
 
 void TuxOn::selectAndLoadFile(void) {	
 static const char SMF_FILTERS[] = "Standard WAV file (.wav):wav;Standard FLAC file (.flac):flac;Standard MP3 file (.mp3):mp3";
-	osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
 	
 	if (fileName=="") {
-#ifndef ARCH_LIN	
+#ifndef ARCH_LIN
+		osdialog_filters* filters = osdialog_filters_parse(SMF_FILTERS);
 		char* pathC  = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filters);
 #else
 		char* pathC  = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);

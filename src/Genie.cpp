@@ -17,7 +17,7 @@ Genie::Genie() {
     len = std::min(dim.first, dim.second);
 	uni = false;
 
-	for (int n=0;n<4;n++) {
+	for (int n=0;n<nrOfPendulums;n++) {
     	st[n] = {{rnd(generator), rnd(generator)}, {0, 0}};
     	ss[n] = {{1, 1}, {len, len}};
 	}
@@ -60,8 +60,8 @@ void Genie::doPendulum(const ProcessArgs & args) {
 
 		outputs[OUTPUT_1_X+2*n].setVoltage((edges[n][0].first)+5*uni);
 		outputs[OUTPUT_1_Y+2*n].setVoltage((edges[n][0].second)+5*uni);
-		outputs[OUTPUT_1_EDGE+2*n].setVoltage((st[n].theta.first/18.0f));
-				
+		outputs[OUTPUT_1_EDGE+n].setVoltage((st[n].theta.first/18.0f));
+			
 		bool expanderPresent = (rightExpander.module && rightExpander.module->model == modelGenieExpander);
 		if (expanderPresent) {
 			xpanderPairs* wrMsg = (xpanderPairs*)rightExpander.producerMessage;

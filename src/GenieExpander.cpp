@@ -117,7 +117,7 @@ GenieDisplay::GenieDisplay() {
 void GenieDisplay::step() {
 	bool timer;
 	if (module) {
-		Mass* newMass;
+		Mass *newMass = new Mass(module,0,0);
 		for (int n=0;n < module->nrOfPendulums;n++) {
 			Root *root = new Root(module,n);
 			roots[n]=root;
@@ -322,14 +322,21 @@ void GenieExpander::process(const ProcessArgs &args) {
 }
 
 int GenieExpander::getPendulums() {
-	int pendulums;
+	int pendulums=0;
 	parentConnected = leftExpander.module && leftExpander.module->model == modelGenie;
 
 	if (parentConnected) {
-	    rdMsg = (XpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
-		pendulums = rdMsg->nrOfPendulums;
-		weight = rdMsg->weight;
-		nrOfNodes = 2;
+		if (rdMsg!=NULL) {
+	    	rdMsg = (XpanderPairs*)leftExpander.module->rightExpander.consumerMessage;
+			pendulums = rdMsg->nrOfPendulums;
+			if (pendulums<=4) {
+				weight = rdMsg->weight;
+				nrOfNodes = 2;
+			}
+			else {
+				pendulums =0;
+			}
+		}
 	}
 	else {
 		// There is no genie source connected, maybe some other source

@@ -9,7 +9,7 @@ const int HEIGHT=250;
 struct xpanderPairs {
 	std::pair<float, float> edges[5][4];
     double Weight;
-    int nrOfPendulums;
+    int nrOfPendulums=4;
 };
 
 namespace dp {
