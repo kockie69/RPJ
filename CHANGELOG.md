@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Disable editing tooltips of Mode knob in Grendel
 
+## [2.2.2] - 2023-11-11
+- Changes to support latest toolchain builds
+
 ## [2.2.1] - 2022-08-10
 - Fixed begin and end positioning
 - Improved zoom functionality
