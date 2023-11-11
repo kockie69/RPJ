@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genie sync/trigger
 - Genie length knobs and cv's
 
+## [2.2.4] - 2023-11-11
+- Changes for toolchain build
+
 ## [2.2.3] - 2023-01-13
 - Fixed out of bounds issue for Genie
 - File selection in Tuxon on Linux fixed
