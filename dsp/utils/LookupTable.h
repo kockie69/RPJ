@@ -7,10 +7,10 @@
 #include <assert.h>
 #include <cmath>
 #include <memory>
-#if ARCH_ARM64
-#include "arm_intrinsics_sub.h"
-#else
+#if __x86_64__
 #include <emmintrin.h>
+#else
+#include "arm_intrinsics_sub.h"
 #endif
 #include <functional>
 

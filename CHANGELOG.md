@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genie sync/trigger
 - Genie length knobs and cv's
 
+## [2.2.5] - 2025-10-26
+- Changes for arm64 build
+  
 ## [2.2.4] - 2023-11-11
 - Changes for toolchain build
 
