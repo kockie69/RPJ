@@ -3,6 +3,7 @@
 #include "ctrl/RPJPorts.hpp"
 #include "ctrl/RPJKnobs.hpp"
 #include "GenieExpander.hpp"
+#include <osdialog.h>
 
 GenieExpander::GenieExpander() {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -99,6 +100,41 @@ void GenieExpander::dataFromJson(json_t *rootJ) {
 
 	if (nDrawLinesJ) 
 		drawLines = static_cast<bool>(json_boolean_value(nDrawLinesJ));
+}
+bool GenieExpander::getColors(int level) {
+		
+	osdialog_color c;
+	if (level!=-1) {
+		c = {
+			uint8_t(colors[level][0]),
+			uint8_t(colors[level][1]),
+			uint8_t(colors[level][2]),
+			uint8_t(255)
+		};
+	}
+	else {
+		c = {
+			uint8_t(jointColor[0]),
+			uint8_t(jointColor[1]),
+			uint8_t(jointColor[2]),
+			uint8_t(255)
+		};		
+	}
+
+	if (!osdialog_color_picker(&c, false))
+		return false;
+	
+	if (level!=-1) {
+		colors[level][0] = c.r;
+		colors[level][1] = c.g;
+		colors[level][2] = c.b;
+	}
+	else {
+		jointColor[0] = c.r;
+		jointColor[1] = c.g;
+		jointColor[2] = c.b;
+	}
+	return true;
 }
 
 void GenieDisplay::onDragHover(const DragHoverEvent& e) {
@@ -366,99 +402,6 @@ int GenieExpander::getPendulums() {
 	}
 	return(pendulums);
 }
-
-
-colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label, int n) : _module(m) {
-	node = n;
-	this->text = label;
-	this->rightText = "▸";
-}
-
-colorMenuSlider::colorMenuSlider(GenieExpander* m, const char* label) : _module(m) {
-	node = -1;
-	this->text = label;
-	this->rightText = "▸";
-}
-
-Menu* colorMenuSlider::createChildMenu() {
-	Menu* menu = new Menu;
-
-	menu->addChild(new ColorSlider(_module,node,0));
-	menu->addChild(new ColorSlider(_module,node,1));
-	menu->addChild(new ColorSlider(_module,node,2));
-	
-	return menu;
-}
-
-ColorSlider::ColorSlider(GenieExpander* module,int n,int rgb) {
-	quantity = new ColorQuantity(module,n,rgb);
-	box.size.x = 200.0f;
-	colorPos=rgb+1;
-}
-
-void ColorSlider::draw(const DrawArgs &args) {
-	ui::Slider::draw(args);
-	nvgBeginPath(args.vg);
-	nvgRect(args.vg,box.pos.x, 0, box.pos.x+box.size.x, box.size.y);
-	switch (colorPos) {
-		case 1:
-			sliderColor = nvgRGBA(int(quantity->getValue()),0, 0, 160);
-			break;
-		case 2:
-			sliderColor = nvgRGBA(0,int(quantity->getValue()), 0, 160);
-			break;
-		case 3:
-			sliderColor = nvgRGBA(0,0,int(quantity->getValue()), 160);
-			break;
-		default:
-			return;
-	}
-	nvgFillColor(args.vg,sliderColor);
-	nvgFill(args.vg);
-	nvgClosePath(args.vg);
-}
-
-ColorSlider:: ~ColorSlider() {
-	delete quantity;
-}
-
-ColorQuantity::ColorQuantity(GenieExpander* m,int n, int rgb) : _module(m) {
-	node=n;
-	_rgb=rgb;
-}
-
-void ColorQuantity::setValue(float value) {
-	value = clamp(value, getMinValue(), getMaxValue());
-	if (_module) {
-		if (node>=0)
-			_module->colors[node][_rgb] = value;
-		else
-			_module->jointColor[_rgb] = value;
-	}
-}
-
-float ColorQuantity::getValue() {
-	if (_module) {
-		if (node>=0)	
-			return (node >=0) ? _module->colors[node][_rgb] : _module->jointColor[_rgb];
-		else
-			return _module->jointColor[_rgb];
-	}
-	return getDefaultValue();
-}
-
-std::string ColorQuantity::getLabel() { 
-	switch (_rgb) { 
-		case 0:
-			return "Red Color";
-		case 1:
-			return "Green Color";
-		case 2:
-			return "Blue Color";
-		default:
-			return "Color Undefined"; 
-	}
-}
 	
 void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	GenieExpander * module = dynamic_cast<GenieExpander*>(this->module);
@@ -466,12 +409,13 @@ void GenieExpanderModuleWidget::appendContextMenu(Menu *menu) {
 	menu->addChild(new MenuSeparator());
 	menu->addChild(createBoolPtrMenuItem("Draw Lines between Nodes","", &module->drawLines));
 	menu->addChild(new MenuSeparator());
-	menu->addChild(new colorMenuSlider(module, "Color Root",0));
-	menu->addChild(new colorMenuSlider(module, "Color Node 1",1));
-	menu->addChild(new colorMenuSlider(module, "Color Node 2",2));
-	menu->addChild(new colorMenuSlider(module, "Color Node 3",3));
-	menu->addChild(new colorMenuSlider(module, "Color Node 4",4));
-	menu->addChild(new colorMenuSlider(module, "Color Lines"));
+
+	menu->addChild(createMenuItem("Color Root", "", [=]() {module->getColors(0);}));
+	menu->addChild(createMenuItem("Color Node 1","", [=]() {module->getColors(1);}));
+	menu->addChild(createMenuItem("Color Node 2","", [=]() {module->getColors(2);}));
+	menu->addChild(createMenuItem("Color Node 3","", [=]() {module->getColors(3);}));
+	menu->addChild(createMenuItem("Color Node 4","", [=]() {module->getColors(4);}));
+	menu->addChild(createMenuItem("Color Lines","", [=]() {module->getColors(-1);}));
 }
 
 void GenieExpanderModuleWidget::onDragHover(const DragHoverEvent& e) {
@@ -485,8 +429,6 @@ GenieExpanderModuleWidget::GenieExpanderModuleWidget(GenieExpander* module) {
 	setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/GenieExpander.svg")));
 
 	addChild(createWidget<ScrewSilver>(Vec(0, 0)));
-	//addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15,0)));
-	//addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
 	addChild(createWidget<ScrewSilver>(Vec(0, 365)));
 
 	if (module) {
