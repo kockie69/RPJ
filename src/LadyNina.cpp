@@ -51,18 +51,18 @@ void LadyNina::processChannel(int c,Input& in, Output& lpfout, Output& hpfout, O
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 	
 	LPFaudioFilter[c/4].setParameters(LPFafp);
-	lpfout.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	lpfout.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);
 
 
 	HPFaudioFilter[c/4].setParameters(HPFafp);
-	hpfout.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	hpfout.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);
 
 
 	BPFaudioFilter[c/4].setParameters(BPFafp);
-	bpfout.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	bpfout.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);
 
 	BSFaudioFilter[c/4].setParameters(BSFafp);
-	bsfout.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	bsfout.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);
 }
 
 void LadyNina::process(const ProcessArgs &args) {

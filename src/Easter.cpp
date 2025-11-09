@@ -45,7 +45,7 @@ void Easter::onSampleRateChange() {
 void Easter::processChannel(int c,Input& in, Output& out) {
 		
 	audioFilter[c/4].setParameters(afp);
-	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(in.getPolyVoltage(c)),-5.f,5.f),c);
+	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(in.getPolyVoltage(c)),-10.f,10.f),c);
 }
 
 void Easter::process(const ProcessArgs &args) {

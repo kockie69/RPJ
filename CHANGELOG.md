@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genie sync/trigger
 - Genie length knobs and cv's
 
+## [2.2.6 2025-11-9]
+- Lot of modules clamp to -10,10
+- GenieExpander color choice rebuilt
+
 ## [2.2.5] - 2025-10-26
 - Changes for arm64 build
   

@@ -72,6 +72,7 @@ struct GenieExpander : Module {
 		void dataFromJson(json_t *) override;
 		void process(const ProcessArgs &) override;
         int getPendulums();
+		bool getColors(int);
 		int nrOfPendulums;
 		int nrOfNodes;
 		std::pair<float, float> edges[4][4];
@@ -86,8 +87,8 @@ struct GenieExpander : Module {
 		Vec XY[4];
 		Vec prevXY[4];
 		float _sampleR,_sampleG,_sampleB;
-		float colors[5][3];
-		float jointColor[4];
+		NVGcolor colors[5];
+		NVGcolor jointColor;
 	private:
 };
 
@@ -140,43 +141,4 @@ struct Root : SvgWidget {
         int elapsed;
 		int node;
 		float weight;
-};
-
-struct ColorQuantity : Quantity {
-	GenieExpander* _module;
-	int node;
-	int _rgb;
-
-	ColorQuantity(GenieExpander* m,int n, int rgb);
-	void setValue(float value) override;
-	float getValue() override;
-	std::string getLabel() override;
-	float getMinValue() override { return 0.0f; }
-	float getMaxValue() override { return 255.0f; }
-	float getDefaultValue() override { return 100.0f; }
-	float getDisplayValue() override { return roundf(getValue()); }
-	void setDisplayValue(float displayValue) override { setValue(displayValue); }
-	std::string getUnit() override { return ""; }
-};
-
-struct ColorSlider : ui::Slider {
-	int colorPos;
-	NVGcolor sliderColor;
-	int node;
-
-	ColorSlider(GenieExpander* module,int n,int rgb); 
-
-	void draw(const DrawArgs &args) override;
-
-	virtual ~ColorSlider();
-};
-
-struct colorMenuSlider : MenuItem {
-	GenieExpander* _module;
-	int node;
-
-	colorMenuSlider(GenieExpander*, const char*,int n);
-	colorMenuSlider(GenieExpander*, const char*);
-
-	Menu* createChildMenu() override; 
 };

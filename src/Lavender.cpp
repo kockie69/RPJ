@@ -16,7 +16,7 @@ Lavender::Lavender() {
 	configParam(PARAM_CVDRIVE, -1.f, 1.0f, 0.0f, "Drive CV", "%", 0, 100);
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry", "%", 0.f, 100.f);
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet", "%", 0.f, 100.f);
-	configParam(PARAM_DRIVE, 0.f, 1.0f, 0.3f, "Drive", "%", 0, 100, 100);
+	configParam(PARAM_DRIVE, 0.f, 2.0f, 0.3f, "Drive", "%", 0, 100, 100);
 	configBypass(INPUT_MAIN, OUTPUT_LPF);
 	configBypass(INPUT_MAIN, OUTPUT_HPF);
 	configBypass(INPUT_MAIN, OUTPUT_BPF);
@@ -57,19 +57,19 @@ void Lavender::processChannel(int c,Input& in, Output& lpfOut, Output& hpfOut, O
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 	if (lpfOut.isConnected()) {
 		LPFaudioFilter[c/4].setParameters(LPFafp);
-		lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v)*LPFafp.drive,-5.f,5.f),c);
+		lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v)*LPFafp.drive,-10.f,10.f),c);
 	}
 	if (hpfOut.isConnected()) {
 		HPFaudioFilter[c/4].setParameters(HPFafp);
-		hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v)*HPFafp.drive,-5.f,5.f),c);
+		hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v)*HPFafp.drive,-10.f,10.f),c);
 	}
 	if (bpfOut.isConnected()) {
 		BPFaudioFilter[c/4].setParameters(BPFafp);
-		bpfOut.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v)*BPFafp.drive,-5.f,5.f),c);
+		bpfOut.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v)*BPFafp.drive,-10.f,10.f),c);
 	}
 	if (bsfOut.isConnected()) {
 		BSFaudioFilter[c/4].setParameters(BSFafp);
-		bsfOut.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v)*BSFafp.drive,-5.f,5.f),c);
+		bsfOut.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v)*BSFafp.drive,-10.f,10.f),c);
 	}
 }
 
@@ -110,7 +110,7 @@ void Lavender::process(const ProcessArgs &args) {
 
 			if (inputs[INPUT_CVDRIVE].isConnected())
 				cvdrive = inputs[INPUT_CVDRIVE].getPolyVoltageSimd<rack::simd::float_4>(c) / 10.0f;
-			LPFafp.drive = HPFafp.drive = BPFafp.drive = BSFafp.drive = clamp((params[PARAM_CVDRIVE].getValue() * cvdrive) + params[PARAM_DRIVE].getValue(),0.f,1.f);
+			LPFafp.drive = HPFafp.drive = BPFafp.drive = BSFafp.drive = clamp((params[PARAM_CVDRIVE].getValue() * cvdrive) + params[PARAM_DRIVE].getValue(),0.f,2.f);
 
 			processChannel(c, inputs[INPUT_MAIN],outputs[OUTPUT_LPF],outputs[OUTPUT_HPF],outputs[OUTPUT_BPF],outputs[OUTPUT_BSF]);
 		}

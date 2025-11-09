@@ -37,7 +37,7 @@ void Essence::processChannel(int c,Input& in, Output& out) {
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 
 	audioFilter[c/4].setParameters(afp);
-	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(v),-5.f,5.f),c);
+	out.setVoltageSimd(simd::clamp(audioFilter[c/4].processAudioSample(v),-10.f,10.f),c);
 }
 
 void Essence::process(const ProcessArgs &args) {

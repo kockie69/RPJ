@@ -5,6 +5,10 @@ The Web is a Polyphonic second order Butterworth Low-pass, High-pass, Band-pass 
 
 Butterworth BPFs and BSFs have an adjustable bandwidth that is related to Q. The frequency  responses are essentially identical to the general 2nd order BPFs and BSFs. 
 
+The second-order Butterworth filter is particularly useful in music production and audio processing when a smooth transition between different frequency ranges is desired. It can be used to achieve a more balanced and natural sound.
+
+This filter is particularly effective when the frequency range of interest is wide and the desired roll-off rate is gradual. It is also beneficial when the audio signal is relatively low in amplitude, as it can help to maintain the integrity of the signal while reducing noise and other unwanted frequencies. 
+
 ## Controls
 **Cutoff** knob controls the corner frequency of the filters.
 

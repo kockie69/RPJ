@@ -27,24 +27,37 @@ GenieExpander::GenieExpander() {
 	nrOfPendulums=4;
 	std::mt19937 generator((std::random_device())());
 	std::uniform_real_distribution<> rnd(0, 255);
-	for (int i=0;i<=4;i++)
-		for (int j=0;j<3;j++) {
-			colors[i][j]=rnd(generator);
-			jointColor[j]=rnd(generator);
-		}
+	for (int i=0;i<=4;i++) {
+		
+		colors[i].r=rnd(generator);
+		jointColor.r=rnd(generator);
+
+		colors[i].g=rnd(generator);
+		jointColor.g=rnd(generator);
+
+		colors[i].b=rnd(generator);
+		jointColor.b=rnd(generator);
+	}
 }
 
 json_t *GenieExpander::dataToJson() {
 	json_t *rootJ=json_object();
 	json_t *cJ = json_array();
-	for (int i=0;i<4;i++)
-		for (int j=0;j<3;j++)
-			json_array_insert_new(cJ, (i*3) + j, json_real(colors[i][j]));
+	for (int i=0;i<5;i++) {
+
+		json_array_insert_new(cJ, (i*3) + 0, json_real(colors[i].r));
+		json_array_insert_new(cJ, (i*3) + 1, json_real(colors[i].g));
+		json_array_insert_new(cJ, (i*3) + 2, json_real(colors[i].b));
+	}
+
 	json_object_set_new(rootJ, "JSON_COLORS", cJ);
 
 	json_t *jcJ = json_array();
-		for (int i = 0; i < 3; i++)
-			json_array_insert_new(jcJ, i, json_real(jointColor[i]));
+	
+	json_array_insert_new(jcJ, 0, json_real(jointColor.r));
+	json_array_insert_new(jcJ, 1, json_real(jointColor.g));
+	json_array_insert_new(jcJ, 2, json_real(jointColor.b));
+	
 	json_object_set_new(rootJ, "JSON_JOINTCOLOR", jcJ);
 
 	json_object_set_new(rootJ, "JSON_DRAWLINES", json_boolean(static_cast<bool>(drawLines)));
@@ -63,24 +76,20 @@ void GenieExpander::dataFromJson(json_t *rootJ) {
 
 	json_t *cJ = json_object_get(rootJ, "JSON_COLORS");
 	if (cJ) {
-		for (int i = 0; i < 4; i++) {
-				for (int j = 0; j < 3; j++)
-				{
-					json_t *cArray1J = json_array_get(cJ, (i*3) + j);
-					if (cArray1J)
-						colors[i][j] = json_real_value(cArray1J);
-				}	
-		}		
-	}
-
+		for (int i = 0; i < 5; i++) {
+			colors[i].r = json_real_value(json_array_get(cJ, (i*3)));
+			colors[i].g = json_real_value(json_array_get(cJ, (i*3)+1));
+			colors[i].b = json_real_value(json_array_get(cJ, (i*3)+2));
+		}
+	}	
+	
 	json_t *jcJ = json_object_get(rootJ, "JSON_JOINTCOLOR");
 	if (jcJ) {
-		for (int i = 0; i < 3; i++)
-			{
-				json_t *jcArrayJ = json_array_get(jcJ, i);
-				if (jcArrayJ)
-					jointColor[i] = json_real_value(jcArrayJ);
-			}			
+		for (int i = 0; i < 3; i++) {
+			jointColor.r = json_real_value(json_array_get(jcJ,0));
+			jointColor.g = json_real_value(json_array_get(jcJ,1));
+			jointColor.b = json_real_value(json_array_get(jcJ,2));
+		}			
 	}
 	
 	json_t *rootsJ = json_object_get(rootJ, "JSON_ROOTS");
@@ -106,17 +115,17 @@ bool GenieExpander::getColors(int level) {
 	osdialog_color c;
 	if (level!=-1) {
 		c = {
-			uint8_t(colors[level][0]),
-			uint8_t(colors[level][1]),
-			uint8_t(colors[level][2]),
+			uint8_t(colors[level].r),
+			uint8_t(colors[level].g),
+			uint8_t(colors[level].b),
 			uint8_t(255)
 		};
 	}
 	else {
 		c = {
-			uint8_t(jointColor[0]),
-			uint8_t(jointColor[1]),
-			uint8_t(jointColor[2]),
+			uint8_t(jointColor.r),
+			uint8_t(jointColor.g),
+			uint8_t(jointColor.b),
 			uint8_t(255)
 		};		
 	}
@@ -125,14 +134,14 @@ bool GenieExpander::getColors(int level) {
 		return false;
 	
 	if (level!=-1) {
-		colors[level][0] = c.r;
-		colors[level][1] = c.g;
-		colors[level][2] = c.b;
+		colors[level].r = c.r;
+		colors[level].g = c.g;
+		colors[level].b = c.b;
 	}
 	else {
-		jointColor[0] = c.r;
-		jointColor[1] = c.g;
-		jointColor[2] = c.b;
+		jointColor.r = c.r;
+		jointColor.g = c.g;
+		jointColor.b = c.b;
 	}
 	return true;
 }
@@ -217,7 +226,7 @@ void Joint::drawLayer(const DrawArgs &args,int layer) {
 		if (module) {
 			if (module->drawLines) {
 				if (elapsed!=1) {
-					NVGcolor lineColor = nvgRGB(module->jointColor[0], module->jointColor[1],module->jointColor[2]);
+					NVGcolor lineColor = nvgRGB(module->jointColor.r, module->jointColor.g,module->jointColor.b);
 					nvgFillColor(args.vg, lineColor);
 					nvgStrokeColor(args.vg, lineColor);
 					nvgStrokeWidth(args.vg, thick);
@@ -243,7 +252,7 @@ Root::Root(GenieExpander *m,int p) {
 	node = 0;
 	weight = m->weight;
 	elapsed=0;
-	setColor(nvgRGB(m->colors[0][0],m->colors[0][1],m->colors[0][2]));
+	setColor(nvgRGB(m->colors[0].r,m->colors[0].g,m->colors[0].b));
 	setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/buttons/ButtonLarge_1.svg")));
 }
 
@@ -288,7 +297,7 @@ void Root::onDragHover(const DragHoverEvent &e) {
 Mass::Mass(GenieExpander *m,int p,int n) {
 	setPosition({m->XY[p].x+m->edges[p][n].first*10,m->XY[p].y+m->edges[p][n].second*10});
 	elapsed=0;
-	setColor(nvgRGB(m->colors[n+1][0],m->colors[n+1][1],m->colors[n+1][2]));
+	setColor(nvgRGB(m->colors[n+1].r,m->colors[n+1].g,m->colors[n+1].b));
 	history = m->params[m->PARAM_HISTORY].getValue();
 	node=(n+1);
 	weight = m->weight;

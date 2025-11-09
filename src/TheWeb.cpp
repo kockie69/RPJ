@@ -10,7 +10,7 @@ TheWeb::TheWeb() {
 	configParam(PARAM_FC, minFreq, maxFreq, defaultFreq, "fc"," Hz", std::pow(2, 10.f), dsp::FREQ_C4 / std::pow(2, 5.f));
 	configParam(PARAM_CVFC, 0.f, 1.0f, 0.0f, "CV FC");
 	configParam(PARAM_CVFC, -1.f, 1.0f, 0.0f, "Cutoff frequency CV", "%", 0.f, 100.f);
-	configParam(PARAM_Q, 0.707f, 20.0f, 0.707f, "Q");
+	configParam(PARAM_Q, 0.0f, 20.0f, 0.0f, "Q");
 	configParam(PARAM_CVQ, -1.f, 1.0f, 0.0f, "CV Q");
 	configParam(PARAM_DRY, 0.f, 1.0f, 0.0f, "Dry", "%", 0.f, 100.f);
 	configParam(PARAM_WET, 0.f, 1.0f, 1.0f, "Wet", "%", 0.f, 100.f);
@@ -54,16 +54,16 @@ void TheWeb::processChannel(int c,Input& in, Output& lpfOut, Output& hpfOut, Out
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 
 	LPFaudioFilter[c/4].setParameters(LPFafp);
-	lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);	
+	lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);	
 
 	HPFaudioFilter[c/4].setParameters(HPFafp);
-	hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);	
+	hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);	
 
 	BPFaudioFilter[c/4].setParameters(BPFafp);
-	bpfOut.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);	
+	bpfOut.setVoltageSimd(simd::clamp(BPFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);	
 
 	BSFaudioFilter[c/4].setParameters(BSFafp);
-	bsfOut.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v),-5.f,5.f),c);	
+	bsfOut.setVoltageSimd(simd::clamp(BSFaudioFilter[c/4].processAudioSample(v),-10.f,10.f),c);	
 
 }
 
@@ -97,6 +97,7 @@ void TheWeb::process(const ProcessArgs &args) {
 			cutoff = clamp(cutoff, 20.f, args.sampleRate * 0.46f);
 			LPFafp.fc = HPFafp.fc = BPFafp.fc = BSFafp.fc = cutoff;
 			
+			//LPFafp.Q = HPFafp.Q = 0.707f;
 			LPFafp.Q = HPFafp.Q = BPFafp.Q = BSFafp.Q = clamp((params[PARAM_CVQ].getValue() * cvq * 20.f) + params[PARAM_Q].getValue(),0.707f, 20.0f);
 
 			LPFafp.dry = HPFafp.dry = BPFafp.dry = BSFafp.dry = params[PARAM_DRY].getValue();

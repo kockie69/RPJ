@@ -48,22 +48,22 @@ void Montreal::processChannel(int c, Input& in, Output& lpfOut, Output& hpfOut, 
 
 	if (lpfOut.isConnected()) {
 		wdfIdealRLCLPF[c/4].setParameters(wdfp);
-		lpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCLPF[c/4].processAudioSample(v),-5.f,5.f),c);
+		lpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCLPF[c/4].processAudioSample(v),-10.f,10.f),c);
 	}
 
 	if (hpfOut.isConnected()) {
 		wdfIdealRLCHPF[c/4].setParameters(wdfp);
-		hpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCHPF[c/4].processAudioSample(v),-5.f,5.f),c);
+		hpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCHPF[c/4].processAudioSample(v),-10.f,10.f),c);
 	}
 
 	if (bpfOut.isConnected()) {
 		wdfIdealRLCBPF[c/4].setParameters(wdfp);
-		bpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBPF[c/4].processAudioSample(v),-5.f,5.f),c);
+		bpfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBPF[c/4].processAudioSample(v),-10.f,10.f),c);
 	}
 
 	if (bsfOut.isConnected()) {
 		wdfIdealRLCBSF[c/4].setParameters(wdfp);
-		bsfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBSF[c/4].processAudioSample(v),-5.f,5.f),c);
+		bsfOut.setVoltageSimd(simd::clamp(wdfIdealRLCBSF[c/4].processAudioSample(v),-10.f,10.f),c);
 	}
 }
 

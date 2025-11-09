@@ -42,11 +42,11 @@ void Gazpacho::processChannel(int c,Input& in, Output& lpfOut, Output& hpfOut) {
 	simd::float_4 v = in.getPolyVoltageSimd<simd::float_4>(c);
 	if (lpfOut.isConnected()) {
 		LPFaudioFilter[c/4].setParameters(LPFafp);
-		lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v)*LPFafp.drive,-5.f,5.f),c);;	
+		lpfOut.setVoltageSimd(simd::clamp(LPFaudioFilter[c/4].processAudioSample(v)*LPFafp.drive,-10.f,10.f),c);;	
 	}
 	if (hpfOut.isConnected()) {
 		HPFaudioFilter[c/4].setParameters(HPFafp);
-		hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v)*HPFafp.drive,-5.f,5.f),c);;	
+		hpfOut.setVoltageSimd(simd::clamp(HPFaudioFilter[c/4].processAudioSample(v)*HPFafp.drive,-10.f,10.f),c);;	
 	}
 }
 
